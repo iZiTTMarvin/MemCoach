@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* ── Tailwind theme tokens mapped to CSS variables ── */
+@theme {
+  --color-bg: var(--bg);
+  --color-card: var(--bg-card);
+  --color-hover: var(--bg-hover);
+  --color-input: var(--bg-input);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-dim: var(--text-dim);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-teal: var(--teal);
+  --color-green: var(--green);
+  --color-red: var(--red);
+  --color-orange: var(--orange);
+  --radius-box: 12px;
+
+  --font-family-display: "Sora", sans-serif;
+
+  --animate-fade-in: fade-in 0.4s ease both;
+  --animate-slide-up: slide-up 0.5s ease both;
+  --animate-pulse-dot: pulse-dot 1.4s infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.12); }
+  50% { box-shadow: 0 0 32px rgba(245, 158, 11, 0.25); }
+}
+
+/* ── CSS variable definitions (dark default) ── */
+:root {
+  --bg: #09090B;
+  --bg-card: #18181B;
+  --bg-hover: #27272A;
+  --bg-input: #1F1F23;
+  --border: #3F3F46;
+  --text: #FAFAF9;
+  --text-dim: #A1A1AA;
+  --accent: #F59E0B;
+  --accent-light: #FBBF24;
+  --teal: #14B8A6;
+  --green: #22C55E;
+  --red: #EF4444;
+  --orange: #FB923C;
+}
+
+[data-theme="light"] {
+  --bg: #FAFAF9;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F4F4F5;
+  --bg-input: #F4F4F5;
+  --border: #E4E4E7;
+  --text: #18181B;
+  --text-dim: #71717A;
+  --accent: #D97706;
+  --accent-light: #F59E0B;
+  --teal: #0D9488;
+  --green: #16A34A;
+  --red: #DC2626;
+  --orange: #EA580C;
+}
+
+/* ── Base resets ── */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Noto Sans SC", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+a {
+  color: var(--teal);
+  text-decoration: none;
+}
+
+/* ── Markdown in chat bubbles ── */
+.md-content p { margin: 0 0 8px; }
+.md-content p:last-child { margin-bottom: 0; }
+.md-content strong { color: var(--text); font-weight: 600; }
+.md-content em { color: var(--teal); }
+.md-content code {
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+.md-content pre {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  overflow-x: auto;
+}
+@media (max-width: 768px) {
+  .md-content pre { padding: 8px 12px; }
+  .md-content code { font-size: 12px; }
+}
+.md-content pre code {
+  background: none;
+  padding: 0;
+}
+.md-content ul, .md-content ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+.md-content li { margin: 2px 0; }
+.md-content h1, .md-content h2, .md-content h3 {
+  margin: 12px 0 6px;
+  font-weight: 600;
+}
+.md-content h1 { font-size: 18px; }
+.md-content h2 { font-size: 16px; }
+.md-content h3 { font-size: 15px; }
+.md-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  margin: 8px 0;
+  color: var(--text-dim);
+}
+.md-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}

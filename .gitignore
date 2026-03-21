@@ -1,0 +1,30 @@
+# Secrets
+.env
+1.txt
+# Python
+__pycache__/
+*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+demo_imges/
+
+# User data (personal, not for sharing)
+data/users/
+data/resume/*
+data/user_profile/*
+data/user_profile/insights/*
+data/knowledge/**/*.md
+data/high_freq/*
+data/topics.json
+!data/resume/.gitkeep
+!data/user_profile/.gitkeep
+!data/high_freq/.gitkeep
+data/interviews.db
+
+# Generated / cache
+data/.index_cache/
+data/models/
+.DS_Store
+llm.md
