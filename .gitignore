@@ -29,4 +29,7 @@ data/models/
 .DS_Store
 llm.md
 
+.windsurf/
 AGENTS.md
+.claude/
+.codex/
