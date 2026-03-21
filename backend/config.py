@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # Auth
     jwt_secret: str = "change-me-in-production"
-    default_email: str = "admin@techspar.local"
+    default_email: str = "admin@memcoach.local"
     default_password: str = "admin123"
     default_name: str = "Admin"
     allow_registration: bool = False

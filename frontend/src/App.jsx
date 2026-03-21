@@ -43,9 +43,15 @@ function AuthPage() {
 
 function AppShell({ children }) {
   return (
-    <div className="flex flex-col md:flex-row h-screen">
+    <div className="flex flex-col md:flex-row h-screen relative overflow-hidden bg-bg text-text">
+      {/* Background decorations for deep space effect */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+      
       <Sidebar />
-      <main className="flex-1 overflow-y-auto flex flex-col">{children}</main>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col z-10">
+        {children}
+      </main>
     </div>
   );
 }

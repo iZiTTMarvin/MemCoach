@@ -74,7 +74,7 @@ export default function Login() {
 
         {/* Logo & title */}
         <div className="flex items-center gap-3 mb-8">
-          <img src="/logo.png" alt="TechSpar" className="w-10 h-10 rounded-xl" />
+          <img src="/logo.png" alt="MemCoach" className="w-10 h-10 rounded-xl" />
           <div>
             <h1 className="text-xl font-display font-bold text-text">
               {isRegister ? "创建账号" : "欢迎回来"}

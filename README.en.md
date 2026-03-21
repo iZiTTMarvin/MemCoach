@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="images/logo.png" alt="TechSpar" width="360" />
+  <img src="images/logo.png" alt="MemCoach" width="360" />
 </p>
 
 <p align="center">
@@ -16,11 +16,11 @@
 
 Traditional interview tools are stateless — every session starts from scratch with no knowledge of your weak spots or growth trajectory.
 
-TechSpar builds a **persistent candidate profile system**. After each session, it automatically extracts weaknesses, evaluates mastery levels, and records thinking patterns to form a continuously evolving personal profile. The next time it generates questions, the AI interviewer targets your weak spots based on your profile — the more you practice, the better it knows you, and training efficiency grows exponentially.
+MemCoach builds a **persistent candidate profile system**. After each session, it automatically extracts weaknesses, evaluates mastery levels, and records thinking patterns to form a continuously evolving personal profile. The next time it generates questions, the AI interviewer targets your weak spots based on your profile — the more you practice, the better it knows you, and training efficiency grows exponentially.
 
-## Why TechSpar
+## Why MemCoach
 
-| Traditional Tools | TechSpar |
+| Traditional Tools | MemCoach |
 |---|---|
 | Stateless, starts from zero every time | Long-term memory, tracks growth over time |
 | Fixed question bank, random selection | Profile-based, precisely targets weak spots |
@@ -111,7 +111,7 @@ Hamburger menu navigation, adaptive card stacking, collapsible sidebar, and more
 
 ### Three-Layer Information Fusion for Question Generation
 
-TechSpar doesn't randomly pick questions — it fuses three layers of information to make every question count:
+MemCoach doesn't randomly pick questions — it fuses three layers of information to make every question count:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -236,7 +236,7 @@ Open `http://localhost:5173` to start training (or `http://localhost` if using D
 ## Project Structure
 
 ```
-TechSpar/
+MemCoach/
 ├── backend/
 │   ├── main.py              # FastAPI entry, API routes
 │   ├── memory.py            # Profile management (Mem0-style)

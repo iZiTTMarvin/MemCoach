@@ -1,42 +1,58 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { getProfile } from "../api/interview";
 
-const AuthContext = createContext(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (token) {
-      fetch("/api/profile", { headers: { Authorization: `Bearer ${token}` } })
-        .then((res) => {
-          if (res.ok) {
-            const stored = localStorage.getItem("user");
-            if (stored) setUser(JSON.parse(stored));
-          } else {
-            logout();
-          }
-        })
-        .catch(() => logout())
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  function login(tokenStr, userData) {
-    localStorage.setItem("token", tokenStr);
-    localStorage.setItem("user", JSON.stringify(userData));
-    setToken(tokenStr);
-    setUser(userData);
-  }
 
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setToken(null);
     setUser(null);
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+    if (token) {
+      getProfile()
+        .then((data) => {
+          if (!isMounted) return;
+          if (data) {
+            setUser(data);
+            localStorage.setItem("user", JSON.stringify(data));
+          } else {
+            const stored = localStorage.getItem("user");
+            if (stored) setUser(JSON.parse(stored));
+            else logout();
+          }
+        })
+        .catch(() => {
+          if (isMounted) logout();
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
+    } else {
+      // Use setTimeout to avoid synchronous setState warning
+      setTimeout(() => {
+        if (isMounted) setLoading(false);
+      }, 0);
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
+
+  function login(newToken, userData) {
+    localStorage.setItem("token", newToken);
+    if (userData) localStorage.setItem("user", JSON.stringify(userData));
+    setToken(newToken);
+    setUser(userData || null);
   }
 
   return (
@@ -46,6 +62,5 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuth = () => useContext(AuthContext);

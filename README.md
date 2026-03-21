@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/logo.png" alt="TechSpar" width="320" />
+<img src="images/logo.png" alt="MemCoach" width="320" />
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
@@ -30,15 +30,15 @@
 
 ## Demo
 
-Try TechSpar online: **[https://aari.top/](https://aari.top/)**
+Try MemCoach online: **[https://aari.top/](https://aari.top/)**
 
 | Email | Password |
 |-------|----------|
-| admin@techspar.local | admin123 |
+| admin@memcoach.local | admin123 |
 
 ## Overview
 
-传统面试工具是无状态的——每次练习都从零开始。TechSpar 构建了**持久化的候选人画像系统**：每次训练后自动提取薄弱点、评估掌握度、记录思维模式。下一次出题时，AI 面试官基于画像精准命中短板。
+传统面试工具是无状态的——每次练习都从零开始。MemCoach 构建了**持久化的候选人画像系统**：每次训练后自动提取薄弱点、评估掌握度、记录思维模式。下一次出题时，AI 面试官基于画像精准命中短板。
 
 <p align="center">
   <img src="images/landing.png" alt="Landing Page" width="800" />
@@ -94,7 +94,7 @@ QINIU_DOMAIN=
 
 # 认证
 JWT_SECRET=change-me-in-production
-DEFAULT_EMAIL=admin@techspar.local
+DEFAULT_EMAIL=admin@memcoach.local
 DEFAULT_PASSWORD=admin123
 DEFAULT_NAME=Admin
 ALLOW_REGISTRATION=false
@@ -132,7 +132,7 @@ python -m backend.migrate
 ## Project Structure
 
 ```
-TechSpar/
+MemCoach/
 ├── backend/
 │   ├── main.py                 # FastAPI, 40+ API routes
 │   ├── auth.py                 # JWT auth, user management

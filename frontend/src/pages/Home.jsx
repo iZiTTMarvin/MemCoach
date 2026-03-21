@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, ChevronRight, Mic } from "lucide-react";
+import { FileText, ChevronRight, Mic, ShieldCheck, Zap, Terminal, Activity, Database, Crosshair } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from "framer-motion";
 import TopicCard from "../components/TopicCard";
 import { getTopics, startInterview, getResumeStatus, uploadResume, getProfile } from "../api/interview";
 
@@ -53,176 +55,292 @@ export default function Home() {
 
   const canStart = (mode === "resume" && resumeFile) || (mode === "topic_drill" && selectedTopic);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100 } }
+  };
+
   return (
-    <div className="flex-1 flex flex-col items-center px-4 pt-8 pb-10 md:px-6 md:pt-15">
-      {/* Hero */}
-      <div className="text-center mb-10 md:mb-12 relative">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[500px] h-[250px] bg-gradient-to-b from-accent/10 via-accent/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <h1 className="text-3xl md:text-[44px] font-display font-bold mb-3 bg-gradient-to-r from-accent-light via-accent to-orange bg-clip-text text-transparent relative">
-          TechSpar
-        </h1>
-        <p className="text-base text-dim max-w-[500px] relative">
-          越练越懂你的 AI 面试教练——追踪你的成长轨迹，精准命中薄弱点
-        </p>
-      </div>
-
-      {/* Mode cards */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-10 md:mb-12 w-full md:w-auto md:justify-center">
-        <div
-          className={`w-full md:w-80 px-6 py-7 rounded-2xl cursor-pointer transition-all text-left border-2 animate-fade-in
-            ${mode === "resume" ? "border-accent bg-hover shadow-[0_0_24px_rgba(245,158,11,0.1)]" : "border-border bg-card hover:border-accent/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.08)]"}`}
-          onClick={() => { setMode("resume"); setSelectedTopic(null); }}
-        >
-          <div className="inline-block px-2.5 py-1 rounded-md text-xs font-medium mb-3 bg-accent/15 text-accent-light">
-            全流程模拟
+    <div className="flex-1 w-full min-h-full p-6 md:p-10 relative z-10 font-mono flex flex-col gap-8 text-text selection:bg-primary/30">
+      
+      {/* Header Area */}
+      <motion.div variants={itemVariants} initial="hidden" animate="visible" className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-primary/20 pb-6">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-xs tracking-widest mb-3">
+            <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+            控制台已就绪
           </div>
-          <div className="text-xl font-semibold mb-2">简历模拟面试</div>
-          <div className="text-sm text-dim leading-relaxed">
-            AI 读取你的简历，模拟真实面试官。从自我介绍到项目深挖，完整走一遍面试流程。
+          <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-300 to-accent">
+            训练矩阵
+          </h1>
+        </div>
+        <div className="text-right flex flex-col md:items-end">
+          <div className="text-xs text-dim mb-1">系统状态</div>
+          <div className="flex items-center gap-3 text-sm">
+             <span className="flex items-center gap-1.5"><Activity size={14} className="text-primary"/> 极佳</span>
+             <span className="flex items-center gap-1.5 border-l border-primary/30 pl-3"><Database size={14} className="text-accent"/> 已同步</span>
           </div>
         </div>
+      </motion.div>
 
-        <div
-          className={`w-full md:w-80 px-6 py-7 rounded-2xl cursor-pointer transition-all text-left border-2 animate-fade-in [animation-delay:0.1s]
-            ${mode === "topic_drill" ? "border-green bg-hover shadow-[0_0_24px_rgba(34,197,94,0.1)]" : "border-border bg-card hover:border-green/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.08)]"}`}
-          onClick={() => setMode("topic_drill")}
+      <div className="flex flex-col lg:flex-row gap-8">
+        
+        {/* Main Interface */}
+        <motion.div 
+          className="flex-1 flex flex-col gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <div className="inline-block px-2.5 py-1 rounded-md text-xs font-medium mb-3 bg-green/15 text-green">
-            针对强化
-          </div>
-          <div className="text-xl font-semibold mb-2">专项强化训练</div>
-          <div className="text-sm text-dim leading-relaxed">
-            选一个领域集中刷题，AI 根据你的回答动态调整难度，精准定位薄弱点。
-          </div>
-        </div>
-
-        <div
-          className="w-full md:w-80 px-6 py-7 rounded-2xl cursor-pointer transition-all text-left border-2 animate-fade-in [animation-delay:0.2s] border-border bg-card hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.08)]"
-          onClick={() => navigate("/recording")}
-        >
-          <div className="inline-block px-2.5 py-1 rounded-md text-xs font-medium mb-3 bg-blue-500/15 text-blue-400">
-            录音分析
-          </div>
-          <div className="text-xl font-semibold mb-2">录音复盘</div>
-          <div className="text-sm text-dim leading-relaxed">
-            上传面试录音或粘贴文字，AI 自动转写分析，帮你复盘每一场真实面试。
-          </div>
-        </div>
-      </div>
-
-      {/* Quick stats */}
-      {profile?.stats?.total_sessions > 0 && !mode && (() => {
-        const s = profile.stats;
-        const lastEntry = (s.score_history || []).slice(-1)[0];
-        const mastery = profile.topic_mastery || {};
-        const topTopics = Object.entries(mastery)
-          .sort((a, b) => (b[1].score || 0) - (a[1].score || 0))
-          .slice(0, 3);
-        return (
-          <div className="w-full max-w-[700px] mb-10 bg-card border border-border rounded-xl px-5 py-5 md:px-6">
-            <div className="flex justify-between items-center mb-3.5">
-              <span className="text-[15px] font-semibold">训练概览</span>
-              <span
-                className="text-[13px] text-accent-light cursor-pointer"
-                onClick={() => navigate("/profile")}
-              >
-                查看画像 <ChevronRight size={14} className="inline align-middle" />
-              </span>
+          {/* Mode Selection */}
+          <motion.div variants={itemVariants} className="bg-card border border-primary/20 p-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+              <Crosshair size={100} />
             </div>
-            <div className="flex flex-wrap gap-4 md:gap-6">
-              <div className="text-center min-w-[60px]">
-                <div className="text-2xl font-bold text-accent-light">{s.total_sessions}</div>
-                <div className="text-[11px] text-dim mt-0.5">总练习</div>
-              </div>
-              <div className="text-center min-w-[60px]">
-                <div className="text-2xl font-bold text-green">{s.avg_score || "-"}</div>
-                <div className="text-[11px] text-dim mt-0.5">综合平均</div>
-              </div>
-              {topTopics.length > 0 && (
-                <div className="flex-1 min-w-[120px]">
-                  <div className="text-[11px] text-dim mb-1.5">领域掌握</div>
-                  {topTopics.map(([t, d]) => (
-                    <div key={t} className="flex items-center gap-2 mb-1">
-                      <span className="text-xs w-[70px] text-text">{t}</span>
-                      <div className="flex-1 h-1 rounded-sm bg-border overflow-hidden">
-                        <div className="h-full rounded-sm bg-accent-light" style={{ width: `${d.score || 0}%` }} />
+            
+            <h2 className="text-lg font-display font-semibold mb-5 flex items-center gap-2 text-text">
+              <Zap className="text-accent" size={18} />
+              选择战斗序列
+            </h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+              {/* Resume Mode */}
+              <button
+                className={`p-4 text-left transition-all duration-300 border relative overflow-hidden flex items-start gap-4
+                  ${mode === "resume" 
+                    ? "border-primary bg-primary/10 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]" 
+                    : "border-border/50 bg-bg-subtle hover:bg-card hover:border-primary/50"}`}
+                onClick={() => { setMode("resume"); setSelectedTopic(null); }}
+              >
+                <div className={`p-2 shrink-0 ${mode === "resume" ? "bg-primary/20 text-primary" : "bg-bg text-dim"}`}>
+                  <FileText size={20} />
+                </div>
+                <div>
+                  <h3 className={`text-base font-bold mb-1 font-display tracking-wide ${mode === "resume" ? "text-primary" : "text-text"}`}>简历模拟面试</h3>
+                  <p className="text-xs text-dim leading-relaxed font-sans">基于上传的 PDF 简历进行全频段扫描与连环追问。</p>
+                </div>
+                {/* Corner accent */}
+                {mode === "resume" && <div className="absolute top-0 right-0 w-3 h-3 bg-primary" />}
+              </button>
+
+              {/* Topic Drill Mode */}
+              <button
+                className={`p-4 text-left transition-all duration-300 border relative overflow-hidden flex items-start gap-4
+                  ${mode === "topic_drill" 
+                    ? "border-accent bg-accent/10 shadow-[inset_0_0_20px_rgba(217,249,157,0.1)]" 
+                    : "border-border/50 bg-bg-subtle hover:bg-card hover:border-accent/50"}`}
+                onClick={() => setMode("topic_drill")}
+              >
+                <div className={`p-2 shrink-0 ${mode === "topic_drill" ? "bg-accent/20 text-accent" : "bg-bg text-dim"}`}>
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h3 className={`text-base font-bold mb-1 font-display tracking-wide ${mode === "topic_drill" ? "text-accent" : "text-text"}`}>专项强化训练</h3>
+                  <p className="text-xs text-dim leading-relaxed font-sans">针对特定领域进行高强度抗压测试与盲区扫荡。</p>
+                </div>
+                {/* Corner accent */}
+                {mode === "topic_drill" && <div className="absolute top-0 right-0 w-3 h-3 bg-accent" />}
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Configuration Area */}
+          <AnimatePresence mode="wait">
+            {mode === "resume" && (
+              <motion.div
+                key="resume-area"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-bg-subtle border border-primary/20 p-6 relative overflow-hidden"
+              >
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-transparent" />
+                <h3 className="text-xs font-bold text-primary mb-4 tracking-widest uppercase">配置数据源</h3>
+                {resumeFile ? (
+                  <div className="flex items-center justify-between p-4 bg-card border border-primary/30">
+                    <div className="flex items-center gap-3">
+                      <Terminal size={18} className="text-primary" />
+                      <div>
+                        <div className="font-semibold text-text text-sm">{resumeFile.filename}</div>
+                        <div className="text-xs text-dim">状态: 解析就绪 // {(resumeFile.size / 1024).toFixed(0)} KB</div>
                       </div>
-                      <span className="text-[11px] text-dim w-7">{d.score || 0}</span>
                     </div>
+                    <label className="px-4 py-2 bg-primary/10 text-primary border border-primary/30 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/20 transition-colors">
+                      {uploading ? "正在覆写..." : "重新上传"}
+                      <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
+                    </label>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-8 border border-dashed border-primary/40 bg-card/30 cursor-pointer hover:bg-primary/5 transition-all group">
+                    <FileText size={28} className="text-dim group-hover:text-primary transition-colors mb-3" />
+                    <span className="font-bold text-text text-sm mb-1">{uploading ? "正在上传至核心节点..." : "点击或拖拽上传 PDF 简历"}</span>
+                    <span className="text-xs text-dim">最大负载体积: 10MB</span>
+                    <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
+                  </label>
+                )}
+              </motion.div>
+            )}
+
+            {mode === "topic_drill" && (
+              <motion.div
+                key="topic-area"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-bg-subtle border border-accent/20 p-6 relative overflow-hidden"
+              >
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-accent to-transparent" />
+                <h3 className="text-xs font-bold text-accent mb-4 tracking-widest uppercase">选择目标领域</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Object.entries(topics).map(([key, info]) => (
+                    <TopicCard
+                      key={key}
+                      topicKey={key}
+                      name={info.name || key}
+                      icon={info.icon}
+                      selected={selectedTopic === key}
+                      onClick={() => setSelectedTopic(key)}
+                    />
                   ))}
                 </div>
-              )}
-              {lastEntry && (
-                <div className="text-center min-w-[80px]">
-                  <div className={`text-2xl font-bold ${lastEntry.avg_score >= 6 ? "text-green" : "text-orange"}`}>
-                    {lastEntry.avg_score}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Action Button */}
+          <AnimatePresence>
+            {mode && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-2"
+              >
+                <button
+                  disabled={!canStart || loading}
+                  onClick={handleStart}
+                  className={`relative w-full py-4 font-display font-black text-lg tracking-widest uppercase overflow-hidden group
+                    ${(!canStart || loading) 
+                      ? "bg-bg-subtle text-dim cursor-not-allowed border border-border/50" 
+                      : "bg-primary text-bg shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] border border-transparent"}`}
+                >
+                  {/* Glitch/Shimmer effect */}
+                  {canStart && !loading && (
+                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] bg-no-repeat bg-[position:-100%_0,0_0] group-hover:transition-[background-position_0s_ease] group-hover:bg-[position:200%_0,0_0] group-hover:duration-[1000ms]" />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-bg border-t-transparent rounded-full animate-spin" />
+                        正在建立神经链接...
+                      </>
+                    ) : (
+                      <>
+                        <Terminal size={20} />
+                        执行开始序列
+                      </>
+                    )}
+                  </span>
+                  {/* Decorative cutouts */}
+                  <div className="absolute top-0 left-0 w-2 h-2 bg-bg" />
+                  <div className="absolute bottom-0 right-0 w-2 h-2 bg-bg" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Side Panel: Intel / Stats */}
+        <motion.div 
+          className="w-full lg:w-[320px] xl:w-[380px] shrink-0 flex flex-col gap-6"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          {/* Stats Widget */}
+          <div className="bg-card border border-primary/20 p-5 relative">
+            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+            
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-display font-semibold text-sm tracking-widest text-primary uppercase">
+                战斗情报
+              </h3>
+              <button 
+                onClick={() => navigate("/profile")}
+                className="text-xs text-dim hover:text-primary transition-colors flex items-center gap-1"
+              >
+                查看完整日志 <ChevronRight size={12} />
+              </button>
+            </div>
+
+            {profile?.stats?.total_sessions > 0 ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-bg-subtle border border-border p-3">
+                    <div className="text-[10px] text-dim mb-1">总演练次数</div>
+                    <div className="text-2xl font-bold text-text">
+                      {profile.stats.total_sessions}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-dim mt-0.5">上次得分</div>
+                  <div className="bg-bg-subtle border border-border p-3">
+                    <div className="text-[10px] text-dim mb-1">综合战力评级</div>
+                    <div className="text-2xl font-bold text-accent">
+                      {profile.stats.avg_score || "-"}
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
 
-      {/* Resume upload */}
-      {mode === "resume" && (
-        <div className="w-full max-w-[700px] mb-8">
-          {resumeFile ? (
-            <div className="flex items-center justify-between px-4 py-4 md:px-5 bg-card border border-border rounded-xl">
-              <div className="flex items-center gap-2.5 text-sm text-text">
-                <FileText size={18} className="text-dim shrink-0" />
-                <span className="font-medium">{resumeFile.filename}</span>
-                <span className="text-xs text-dim">
-                  ({(resumeFile.size / 1024).toFixed(0)} KB)
-                </span>
+                {profile.topic_mastery && Object.keys(profile.topic_mastery).length > 0 && (
+                  <div>
+                    <div className="text-[10px] text-dim mb-3">领域掌握度映射</div>
+                    <div className="space-y-3">
+                      {Object.entries(profile.topic_mastery)
+                        .sort((a, b) => (b[1].score || 0) - (a[1].score || 0))
+                        .slice(0, 3)
+                        .map(([t, d], idx) => (
+                          <div key={t} className="relative">
+                            <div className="flex justify-between text-xs mb-1 font-sans">
+                              <span className="text-text">{t}</span>
+                              <span className="text-primary font-mono">{d.score || 0}</span>
+                            </div>
+                            <div className="h-1 w-full bg-bg border border-border overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${d.score || 0}%` }}
+                                transition={{ duration: 1, delay: 0.5 + (idx * 0.1) }}
+                                className="h-full bg-primary"
+                              />
+                            </div>
+                          </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <label className={`px-4 py-2 rounded-lg bg-accent/12 text-accent-light text-[13px] font-medium cursor-pointer transition-opacity ${uploading ? "opacity-40" : ""}`}>
-                {uploading ? "上传中..." : "重新上传"}
-                <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
-              </label>
-            </div>
-          ) : (
-            <label className={`flex flex-col items-center gap-2 px-5 py-7 bg-card border-2 border-dashed border-border rounded-xl cursor-pointer transition-colors text-sm text-dim hover:border-accent/50 ${uploading ? "opacity-50" : ""}`}>
-              <FileText size={28} className="text-dim" />
-              <span>{uploading ? "正在上传..." : "点击上传简历（PDF）"}</span>
-              <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
-            </label>
-          )}
-        </div>
-      )}
-
-      {/* Topic selection */}
-      {mode === "topic_drill" && (
-        <div className="w-full max-w-[700px]">
-          <div className="text-lg font-semibold mb-4 text-left">选择训练领域</div>
-          <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3 mb-8">
-            {Object.entries(topics).map(([key, info]) => (
-              <TopicCard
-                key={key}
-                topicKey={key}
-                name={info.name || key}
-                icon={info.icon}
-                selected={selectedTopic === key}
-                onClick={() => setSelectedTopic(key)}
-              />
-            ))}
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 opacity-50">
+                 <Database size={24} className="mb-3 text-dim" />
+                 <p className="text-xs text-dim text-center">暂无数据记录<br/>请完成首次演练以激活看板</p>
+              </div>
+            )}
           </div>
-        </div>
-      )}
 
-      {/* Start button */}
-      {mode && (
-        <div className="w-full max-w-[700px]">
-          <button
-            className={`w-full py-3.5 rounded-box bg-gradient-to-r from-accent to-orange text-white text-base font-semibold transition-all ${!canStart || loading ? "opacity-40 cursor-not-allowed" : "hover:shadow-[0_0_24px_rgba(245,158,11,0.2)]"}`}
-            disabled={!canStart || loading}
-            onClick={handleStart}
-          >
-            {loading ? "正在初始化面试..." : "开始面试"}
-          </button>
-        </div>
-      )}
+          {/* Quick Tool */}
+          <div className="bg-bg-subtle border border-border/50 hover:border-teal-400/50 transition-colors p-1 group cursor-pointer" onClick={() => navigate("/recording")}>
+            <div className="border border-border/50 border-dashed p-4 flex items-center justify-between text-sm group-hover:bg-teal-400/5 transition-colors">
+              <span className="font-semibold text-text group-hover:text-teal-400 transition-colors flex items-center gap-2">
+                <Mic size={16} /> 外部录音转录与复盘
+              </span>
+              <ChevronRight size={16} className="text-dim group-hover:text-teal-400 group-hover:translate-x-1 transition-all" />
+            </div>
+          </div>
+          
+        </motion.div>
+      </div>
     </div>
   );
 }

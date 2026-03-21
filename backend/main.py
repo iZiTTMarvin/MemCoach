@@ -30,7 +30,7 @@ from backend.auth import (
     create_user, authenticate_user, create_token, get_current_user,
 )
 
-app = FastAPI(title="TechSpar", version="0.2.0")
+app = FastAPI(title="MemCoach", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -93,7 +93,7 @@ def login(req: LoginRequest):
 
 @router.get("/")
 def root():
-    return {"service": "TechSpar", "version": "0.2.0"}
+    return {"service": "MemCoach", "version": "0.2.0"}
 
 
 # ── Resume ──

@@ -10,8 +10,8 @@ from backend.config import settings
 from backend.auth import init_users_table, _hash_password
 
 DEFAULT_USER_ID = "default0"
-DEFAULT_EMAIL = "default@techspar.local"
-DEFAULT_PASSWORD = "techspar123"
+DEFAULT_EMAIL = "default@memcoach.local"
+DEFAULT_PASSWORD = "memcoach123"
 
 DB_PATH = settings.db_path
 DATA_DIR = settings.base_dir / "data"
@@ -137,7 +137,7 @@ def migrate_files():
 
 
 def main():
-    print("=== TechSpar Migration: Single-user -> Multi-user ===\n")
+    print("=== MemCoach Migration: Single-user -> Multi-user ===\n")
 
     print("[1/3] Creating default user...")
     create_default_user()
