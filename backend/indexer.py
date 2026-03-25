@@ -112,19 +112,36 @@ def build_topic_index(topic: str, user_id: str, force_rebuild: bool = False) -> 
 
 
 def query_resume(question: str, user_id: str, top_k: int = 3) -> str:
-    """Query the resume index."""
+    """检索简历内容（纯向量检索，不调用 LLM）。
+
+    参数:
+        question: 检索查询文本
+        user_id: 用户 ID
+        top_k: 返回的最相似片段数量
+    返回:
+        拼接后的简历文本片段
+    """
     index = build_resume_index(user_id)
-    engine = index.as_query_engine(similarity_top_k=top_k)
-    response = engine.query(question)
-    return str(response)
+    retriever = index.as_retriever(similarity_top_k=top_k)
+    nodes = retriever.retrieve(question)
+    return "\n\n".join(node.get_content() for node in nodes)
 
 
 def query_topic(topic: str, question: str, user_id: str, top_k: int = 5) -> str:
-    """Query a topic knowledge base."""
+    """检索领域知识库内容（纯向量检索，不调用 LLM）。
+
+    参数:
+        topic: 领域标识
+        question: 检索查询文本
+        user_id: 用户 ID
+        top_k: 返回的最相似片段数量
+    返回:
+        拼接后的知识文本片段
+    """
     index = build_topic_index(topic, user_id)
-    engine = index.as_query_engine(similarity_top_k=top_k)
-    response = engine.query(question)
-    return str(response)
+    retriever = index.as_retriever(similarity_top_k=top_k)
+    nodes = retriever.retrieve(question)
+    return "\n\n".join(node.get_content() for node in nodes)
 
 
 def retrieve_topic_context(topic: str, question: str, user_id: str, top_k: int = 5) -> list[str]:

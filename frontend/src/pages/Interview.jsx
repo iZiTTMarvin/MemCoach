@@ -154,7 +154,7 @@ export default function Interview() {
   // ── Drill card mode ──
   if (isDrill) {
     return (
-      <div className="flex-1 flex flex-col h-full font-mono text-text bg-bg selection:bg-primary/30 relative">
+      <div className="flex-1 min-h-0 flex flex-col font-mono text-text bg-bg selection:bg-primary/30 relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#10b98110_0%,transparent_70%)] pointer-events-none" />
 
         {/* Top bar */}
@@ -345,7 +345,7 @@ export default function Interview() {
 
   // ── Chat mode (resume interview) ──
   return (
-    <div className="flex-1 flex flex-col h-full font-mono text-text bg-bg selection:bg-primary/30 relative">
+    <div className="flex-1 min-h-0 flex flex-col font-mono text-text bg-bg selection:bg-primary/30 relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#10b9810a_0%,transparent_80%)] pointer-events-none" />
 
       {/* Header Bar */}

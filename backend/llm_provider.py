@@ -1,3 +1,5 @@
+import os
+
 from langchain_openai import ChatOpenAI
 from llama_index.llms.openai_like import OpenAILike
 
@@ -18,9 +20,16 @@ def get_langchain_llm():
 
 
 def get_llama_llm():
-    """LlamaIndex LLM (singleton)."""
+    """LlamaIndex LLM (单例)。
+
+    注意: 某些版本的 llama-index OpenAILike 不会正确将构造参数中的 api_key
+    传递给底层 OpenAI 客户端，因此需要同步设置 OPENAI_API_KEY 环境变量作为兜底。
+    """
     global _llama_llm_instance
     if _llama_llm_instance is None:
+        # 兜底：确保环境变量中也有 API Key，防止 OpenAILike 内部回退读取环境变量时找不到
+        if settings.api_key and not os.environ.get("OPENAI_API_KEY"):
+            os.environ["OPENAI_API_KEY"] = settings.api_key
         _llama_llm_instance = OpenAILike(
             model=settings.model,
             api_key=settings.api_key,
