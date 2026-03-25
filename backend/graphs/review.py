@@ -14,7 +14,7 @@ def generate_review(
     topic: str | None = None,
     eval_history: list[dict] | None = None,
 ) -> str:
-    """Generate a structured review report from interview transcript."""
+    """从面试记录生成结构化复盘报告"""
 
     # Build transcript from messages
     transcript_lines = []

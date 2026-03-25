@@ -32,7 +32,7 @@ def _get_conn() -> sqlite3.Connection:
 
 
 def init_memory_table():
-    """Create memory_vectors table. Called once at startup."""
+    """创建 memory_vectors 表，启动时调用一次"""
     conn = _get_conn()
     conn.execute("""
         CREATE TABLE IF NOT EXISTS memory_vectors (
@@ -60,10 +60,10 @@ def init_memory_table():
     logger.info("memory_vectors table ready.")
 
 
-# ── Embedding helpers ──
+# ── Embedding 辅助函数 ──
 
 def _embed(text: str) -> np.ndarray:
-    """Embed text using singleton bge-m3. Returns float32 array (1024,)."""
+    """使用单例 bge-m3 将文本嵌入，返回 float32 数组 (1024,)"""
     embed_model = get_embedding()
     vec = embed_model.get_text_embedding(text)
     return np.array(vec, dtype=np.float32)
@@ -78,7 +78,7 @@ def _deserialize(blob: bytes) -> np.ndarray:
 
 
 def _cosine_similarity(query_vec: np.ndarray, matrix: np.ndarray) -> np.ndarray:
-    """Vectorized cosine similarity. query_vec: (D,), matrix: (N, D) → (N,)."""
+    """向量化余弦相似度。query_vec: (D,), matrix: (N, D) → (N,)"""
     query_norm = np.linalg.norm(query_vec)
     if query_norm < 1e-10:
         return np.zeros(matrix.shape[0])
@@ -88,7 +88,7 @@ def _cosine_similarity(query_vec: np.ndarray, matrix: np.ndarray) -> np.ndarray:
 
 
 def _time_decay(created_at: str) -> float:
-    """Exponential time decay. Returns multiplier in [0.5, 1.0] range."""
+    """指数时间衰减，返回 [0.5, 1.0] 范围内的乘数"""
     try:
         age = (datetime.now() - datetime.fromisoformat(created_at)).total_seconds() / 86400
     except (ValueError, TypeError):
@@ -98,7 +98,7 @@ def _time_decay(created_at: str) -> float:
     return TIME_DECAY_WEIGHT * decay + (1 - TIME_DECAY_WEIGHT)
 
 
-# ── Write ──
+# ── 写入 ──
 
 def index_session_memory(
     session_id: str | None,
@@ -109,7 +109,7 @@ def index_session_memory(
     strong_points: list[dict] | None = None,
     insight_text: str = "",
 ):
-    """Embed and store memory chunks for a completed session."""
+    """为已完成的会话嵌入并存储记忆块"""
     conn = _get_conn()
     chunks = []
 
@@ -148,7 +148,7 @@ def index_session_memory(
     logger.info(f"Indexed {len(chunks)} memory chunks for session {session_id or 'unknown'}.")
 
 
-# ── Read ──
+# ── 读取 ──
 
 def search_memory(
     query: str,
@@ -157,7 +157,7 @@ def search_memory(
     topic: str | None = None,
     top_k: int = 5,
 ) -> list[dict]:
-    """Semantic search with time decay. Returns [{content, chunk_type, topic, score, created_at}]."""
+    """带时间衰减的语义搜索，返回 [{content, chunk_type, topic, score, created_at}]"""
     conn = _get_conn()
 
     # Build filter query
@@ -212,8 +212,8 @@ def find_similar_weak_point(
     user_id: str,
     threshold: float = SIMILARITY_THRESHOLD,
 ) -> int | None:
-    """Find index of most similar existing weak point via embedding similarity.
-    Returns index into existing_points, or None if no match above threshold."""
+    """通过嵌入相似度找到最相似的现有薄弱点索引
+    返回 existing_points 中的索引，若无匹配则返回 None"""
     if not existing_points:
         return None
 
@@ -268,10 +268,10 @@ def find_similar_weak_point(
     return None
 
 
-# ── Maintenance ──
+# ── 维护 ──
 
 def rebuild_index_from_profile(user_id: str):
-    """Rebuild weak_point vectors from current profile.json."""
+    """从当前 profile.json 重建 weak_point 向量"""
     from backend.memory import _load_profile
 
     conn = _get_conn()

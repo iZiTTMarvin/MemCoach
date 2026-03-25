@@ -1,4 +1,5 @@
 """FastAPI 入口 — 面试模拟系统 API."""
+# 核心依赖: FastAPI, LangChain, LangGraph, LlamaIndex, bge-m3 embeddings
 import uuid
 from datetime import datetime
 
@@ -41,15 +42,15 @@ app.add_middleware(
 
 router = APIRouter(prefix="/api")
 
-# In-memory graph instances keyed by session_id (resume mode only)
+# 内存中的图实例（简历模式）
 _graphs: dict[str, dict] = {}
-# Drill session data (questions stored for evaluation at end)
+# 专项训练会话数据
 _drill_sessions: dict[str, dict] = {}
 
 
 @app.on_event("startup")
 def preload_models():
-    """Pre-load bge-m3 embedding model + init vector memory on startup."""
+    """启动时预加载 bge-m3 embedding model + 初始化向量存储"""
     from backend.llm_provider import get_embedding, get_llama_llm
     from backend.indexer import _init_llama_settings
     from backend.vector_memory import init_memory_table
@@ -67,16 +68,17 @@ def preload_models():
     logger.info("Database tables initialized.")
 
 
-# ── Auth endpoints (no authentication required) ──
+# ── 认证端点（无需认证）──
 
 @router.get("/auth/config")
 def auth_config():
-    """Public endpoint — tells the frontend whether registration is enabled."""
+    """获取注册是否开放的配置"""
     return {"allow_registration": settings.allow_registration}
 
 
 @router.post("/auth/register")
 def register(req: RegisterRequest):
+    """用户注册"""
     user = create_user(req.email, req.password, req.name)
     token = create_token(user["id"])
     return {"token": token, "user": user}
@@ -84,6 +86,7 @@ def register(req: RegisterRequest):
 
 @router.post("/auth/login")
 def login(req: LoginRequest):
+    """用户登录"""
     user = authenticate_user(req.email, req.password)
     if not user:
         raise HTTPException(401, "Invalid email or password")
@@ -96,11 +99,11 @@ def root():
     return {"service": "MemCoach", "version": "0.2.0"}
 
 
-# ── Resume ──
+# ── 简历管理 ──
 
 @router.get("/resume/status")
 def resume_status(user_id: str = Depends(get_current_user)):
-    """Check if a resume file exists."""
+    """检查简历是否存在"""
     resume_dir = settings.user_resume_path(user_id)
     if not resume_dir.exists():
         return {"has_resume": False}
@@ -113,7 +116,7 @@ def resume_status(user_id: str = Depends(get_current_user)):
 
 @router.post("/resume/upload")
 async def upload_resume(file: UploadFile = File(...), user_id: str = Depends(get_current_user)):
-    """Upload a resume PDF. Replaces any existing resume."""
+    """上传简历 PDF，替换现有简历"""
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Only PDF files are supported.")
 
@@ -140,11 +143,11 @@ async def upload_resume(file: UploadFile = File(...), user_id: str = Depends(get
     return {"ok": True, "filename": file.filename, "size": len(content)}
 
 
-# ── Speech-to-text ──
+# ── 语音转文本 ──
 
 @router.post("/transcribe")
 async def transcribe(file: UploadFile = File(...), user_id: str = Depends(get_current_user)):
-    """Transcribe short audio clip to text via DashScope ASR."""
+    """通过 DashScope ASR 将短音频转写为文本"""
     audio_bytes = await file.read()
     if not audio_bytes:
         raise HTTPException(400, "Empty audio file.")
@@ -158,7 +161,7 @@ async def transcribe(file: UploadFile = File(...), user_id: str = Depends(get_cu
         raise HTTPException(500, f"Transcription failed: {e}")
 
 
-# ── Recording review endpoints ──
+# ── 录音复盘端点 ──
 
 @router.post("/recording/transcribe")
 async def recording_transcribe(
@@ -166,7 +169,7 @@ async def recording_transcribe(
     mode: str = Form("dual"),
     user_id: str = Depends(get_current_user),
 ):
-    """Transcribe recording audio via DashScope ASR."""
+    """转写录音音频"""
     audio_bytes = await file.read()
     if not audio_bytes:
         raise HTTPException(400, "Empty audio file.")
@@ -183,7 +186,7 @@ async def recording_transcribe(
 
 @router.post("/recording/analyze")
 async def recording_analyze(req: RecordingAnalyzeRequest, user_id: str = Depends(get_current_user)):
-    """Analyze a recording transcript — dual mode extracts Q&A, solo mode does holistic eval."""
+    """分析录音转写文本：dual 模式提取问答对，solo 模式做整体评估"""
     session_id = str(uuid.uuid4())
 
     if req.recording_mode == "dual":
@@ -193,7 +196,7 @@ async def recording_analyze(req: RecordingAnalyzeRequest, user_id: str = Depends
 
 
 async def _analyze_dual(req: RecordingAnalyzeRequest, session_id: str, user_id: str):
-    """Dual mode: structure transcript into Q&A → evaluate → update profile."""
+    """双轨模式：将录音结构化为问答对 → 评估 → 更新画像"""
     from backend.graphs.topic_drill import _parse_json_response
     from backend.llm_provider import get_langchain_llm
     from backend.prompts.recording import RECORDING_STRUCTURE_PROMPT, RECORDING_DUAL_EVAL_PROMPT
@@ -286,7 +289,7 @@ async def _analyze_dual(req: RecordingAnalyzeRequest, session_id: str, user_id: 
 
 
 async def _analyze_solo(req: RecordingAnalyzeRequest, session_id: str, user_id: str):
-    """Solo mode: holistic evaluation of candidate's technical expression."""
+    """独奏模式：整体评估候选人的技术表达能力"""
     from backend.graphs.topic_drill import _parse_json_response
     from backend.llm_provider import get_langchain_llm
     from backend.prompts.recording import RECORDING_SOLO_EVAL_PROMPT
@@ -337,7 +340,7 @@ async def _analyze_solo(req: RecordingAnalyzeRequest, session_id: str, user_id: 
 
 
 async def _update_recording_profile(overall: dict, scores: list, total_items: int, user_id: str):
-    """Update profile from recording analysis — no single topic, points carry their own topic."""
+    """从录音分析更新画像，无单一话题标签，薄弱点自带话题"""
     valid = []
     for s in scores:
         try:
@@ -362,7 +365,7 @@ async def _update_recording_profile(overall: dict, scores: list, total_items: in
 
 
 def _format_solo_review(topics_covered: list, overall: dict) -> str:
-    """Format solo mode evaluation into a readable review."""
+    """格式化独奏模式评估为可读报告"""
     lines = [f"## 整体评价\n\n{overall.get('summary', '')}\n\n**平均分: {overall.get('avg_score', '-')}/10**\n"]
 
     if topics_covered:
@@ -393,17 +396,17 @@ def _format_solo_review(topics_covered: list, overall: dict) -> str:
     return "\n".join(lines)
 
 
-# ── Topics ──
+# ── 话题管理 ──
 
 @router.get("/topics")
 def get_topics(user_id: str = Depends(get_current_user)):
-    """List available drill topics (with name and icon)."""
+    """获取可用的训练话题列表"""
     return load_topics(user_id)
 
 
 @router.post("/topics")
 def create_topic(body: dict, user_id: str = Depends(get_current_user)):
-    """Add a new topic."""
+    """创建新话题"""
     key = body.get("key", "").strip()
     name = body.get("name", "").strip()
     icon = body.get("icon", "📝").strip()
@@ -430,7 +433,7 @@ def create_topic(body: dict, user_id: str = Depends(get_current_user)):
 
 @router.delete("/topics/{key}")
 def delete_topic(key: str, user_id: str = Depends(get_current_user)):
-    """Remove a topic."""
+    """删除话题"""
     topics = load_topics(user_id)
     if key not in topics:
         raise HTTPException(404, f"Topic '{key}' not found")
@@ -444,31 +447,31 @@ def delete_topic(key: str, user_id: str = Depends(get_current_user)):
     return {"ok": True}
 
 
-# ── Profile ──
+# ── 用户画像 ──
 
 @router.get("/profile")
 def get_user_profile(user_id: str = Depends(get_current_user)):
-    """Get the user's accumulated interview profile."""
+    """获取用户累积的面试画像"""
     return get_profile(user_id)
 
 
 @router.get("/profile/due-reviews")
 def get_due_reviews_endpoint(topic: str = None, user_id: str = Depends(get_current_user)):
-    """Get weak points due for spaced repetition review."""
+    """获取需要间隔重复复习的薄弱点"""
     from backend.spaced_repetition import get_due_reviews as _get_due
     return _get_due(user_id, topic)
 
 
 @router.get("/profile/topic/{topic}/history")
 def get_topic_history(topic: str, user_id: str = Depends(get_current_user)):
-    """Get session history for a specific topic."""
+    """获取指定话题的会话历史"""
     sessions = list_sessions_by_topic(topic, user_id=user_id)
     return sessions
 
 
 @router.post("/profile/topic/{topic}/retrospective")
 async def generate_retrospective(topic: str, user_id: str = Depends(get_current_user)):
-    """Generate a comprehensive retrospective for a topic based on all past sessions."""
+    """基于所有历史会话生成话题综合回顾报告"""
     from backend.prompts.interviewer import TOPIC_RETROSPECTIVE_PROMPT
     from backend.memory import _load_profile, _save_profile
     from backend.llm_provider import get_langchain_llm
@@ -540,11 +543,11 @@ async def generate_retrospective(topic: str, user_id: str = Depends(get_current_
     }
 
 
-# ── Interview ──
+# ── 面试会话 ──
 
 @router.post("/interview/start")
 async def start_interview(req: StartInterviewRequest, user_id: str = Depends(get_current_user)):
-    """Start a new interview session."""
+    """启动新的面试会话"""
     session_id = str(uuid.uuid4())[:8]
 
     if req.mode == InterviewMode.TOPIC_DRILL:
@@ -598,7 +601,7 @@ async def start_interview(req: StartInterviewRequest, user_id: str = Depends(get
 
 @router.post("/interview/chat")
 async def chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
-    """Send user answer, get next interviewer response (resume mode only)."""
+    """发送用户回答，获取下一轮面试官响应（仅简历模式）"""
     if req.session_id not in _graphs:
         raise HTTPException(404, "Session not found. It may have expired (in-memory only).")
 
@@ -641,7 +644,7 @@ async def chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
 @router.post("/interview/end/{session_id}")
 async def end_interview(session_id: str, body: EndDrillRequest = None,
                         user_id: str = Depends(get_current_user)):
-    """End interview → evaluate → generate review → update profile."""
+    """结束面试 → 评估 → 生成报告 → 更新画像"""
 
     # ── Drill mode: batch evaluate ──
     if session_id in _drill_sessions:
@@ -753,7 +756,7 @@ async def end_interview(session_id: str, body: EndDrillRequest = None,
 
 
 def _format_drill_review(questions, answers, scores, overall) -> str:
-    """Format drill evaluation into a readable review string."""
+    """将专项训练评估格式化为可读报告"""
     answer_map = {a["question_id"]: a["answer"] for a in answers}
     score_map = {s["question_id"]: s for s in scores}
 
@@ -805,7 +808,7 @@ def _format_drill_review(questions, answers, scores, overall) -> str:
 
 async def _update_drill_profile(topic: str, overall: dict, scores: list,
                                 total_questions: int, user_id: str):
-    """Update profile from drill evaluation — Mem0-style LLM update."""
+    """从专项训练评估更新画像（Mem0 风格）"""
     # Compute mastery score (0-100) from per-question scores + difficulty
     valid = []
     for s in scores:
@@ -839,11 +842,11 @@ async def _update_drill_profile(topic: str, overall: dict, scores: list,
     )
 
 
-# ── Knowledge management endpoints ──
+# ── 知识管理端点 ──
 
 @router.get("/knowledge/{topic}/core")
 async def get_core_knowledge(topic: str, user_id: str = Depends(get_current_user)):
-    """List core knowledge files for a topic."""
+    """获取话题的核心知识文件列表"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -859,7 +862,7 @@ async def get_core_knowledge(topic: str, user_id: str = Depends(get_current_user
 @router.put("/knowledge/{topic}/core/{filename}")
 async def update_core_knowledge(topic: str, filename: str, body: dict,
                                 user_id: str = Depends(get_current_user)):
-    """Update a core knowledge file."""
+    """更新核心知识文件"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -876,7 +879,7 @@ async def update_core_knowledge(topic: str, filename: str, body: dict,
 @router.delete("/knowledge/{topic}/core/{filename}")
 async def delete_core_knowledge(topic: str, filename: str,
                                 user_id: str = Depends(get_current_user)):
-    """Delete a core knowledge file."""
+    """删除核心知识文件"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -892,7 +895,7 @@ async def delete_core_knowledge(topic: str, filename: str,
 @router.post("/knowledge/{topic}/core")
 async def create_core_knowledge(topic: str, body: dict,
                                 user_id: str = Depends(get_current_user)):
-    """Create a new core knowledge file."""
+    """创建新的核心知识文件"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -911,7 +914,7 @@ async def create_core_knowledge(topic: str, body: dict,
 
 @router.post("/knowledge/{topic}/generate")
 async def generate_core_knowledge(topic: str, user_id: str = Depends(get_current_user)):
-    """Use LLM to generate foundational knowledge content for a topic."""
+    """使用 LLM 生成话题的基础知识内容"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -948,7 +951,7 @@ async def generate_core_knowledge(topic: str, user_id: str = Depends(get_current
 
 @router.get("/knowledge/{topic}/high_freq")
 async def get_high_freq(topic: str, user_id: str = Depends(get_current_user)):
-    """Get high-frequency question bank for a topic."""
+    """获取话题的高频题库"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -960,7 +963,7 @@ async def get_high_freq(topic: str, user_id: str = Depends(get_current_user)):
 
 @router.put("/knowledge/{topic}/high_freq")
 async def update_high_freq(topic: str, body: dict, user_id: str = Depends(get_current_user)):
-    """Update high-frequency question bank for a topic."""
+    """更新话题的高频题库"""
     topics = load_topics(user_id)
     if topic not in topics:
         raise HTTPException(400, f"Unknown topic: {topic}")
@@ -971,19 +974,19 @@ async def update_high_freq(topic: str, body: dict, user_id: str = Depends(get_cu
     return {"ok": True}
 
 
-# ── Graph ──
+# ── 知识图谱 ──
 
 @router.get("/graph/{topic}")
 def get_topic_graph(topic: str, user_id: str = Depends(get_current_user)):
-    """Build question relationship graph for a topic."""
+    """构建话题的题目关系图"""
     return build_graph(topic, user_id)
 
 
-# ── Reference answer ──
+# ── 参考答案 ──
 
 @router.post("/interview/reference-answer")
 async def generate_reference_answer(body: dict, user_id: str = Depends(get_current_user)):
-    """Generate a reference answer for a specific question using LLM + knowledge base."""
+    """使用 LLM + 知识库生成题目参考回答"""
     topic = body.get("topic", "").strip()
     question = body.get("question", "").strip()
     if not topic or not question:
@@ -1011,11 +1014,11 @@ async def generate_reference_answer(body: dict, user_id: str = Depends(get_curre
     return {"reference_answer": resp.content.strip()}
 
 
-# ── History ──
+# ── 历史记录 ──
 
 @router.get("/interview/review/{session_id}")
 async def get_review(session_id: str, user_id: str = Depends(get_current_user)):
-    """Get review for a completed session."""
+    """获取已完成会话的评估报告"""
     session = get_session(session_id, user_id=user_id)
     if not session:
         raise HTTPException(404, "Session not found.")
@@ -1032,13 +1035,13 @@ async def get_history(
     topic: str = None,
     user_id: str = Depends(get_current_user),
 ):
-    """List past interview sessions with filtering and pagination."""
+    """获取历史面试会话列表（支持过滤和分页）"""
     return list_sessions(user_id=user_id, limit=limit, offset=offset, mode=mode, topic=topic)
 
 
 @router.delete("/interview/session/{session_id}")
 async def delete_session_endpoint(session_id: str, user_id: str = Depends(get_current_user)):
-    """Delete a session record."""
+    """删除会话记录"""
     deleted = delete_session(session_id, user_id=user_id)
     if not deleted:
         raise HTTPException(404, "Session not found.")
@@ -1047,7 +1050,7 @@ async def delete_session_endpoint(session_id: str, user_id: str = Depends(get_cu
 
 @router.get("/interview/topics")
 async def get_interview_topics(user_id: str = Depends(get_current_user)):
-    """List distinct topics from completed sessions (for filter dropdown)."""
+    """获取已完成会话中的不同话题（用于过滤下拉框）"""
     return list_distinct_topics(user_id=user_id)
 
 

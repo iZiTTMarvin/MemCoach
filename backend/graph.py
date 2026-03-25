@@ -14,6 +14,7 @@ SIMILARITY_THRESHOLD = 0.65
 
 
 def _get_conn() -> sqlite3.Connection:
+    """获取数据库连接，确保目录存在"""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
@@ -21,6 +22,7 @@ def _get_conn() -> sqlite3.Connection:
 
 
 def _init_question_embeddings_table(conn: sqlite3.Connection):
+    """初始化题目向量表，包含 user_id 字段迁移"""
     conn.execute("""
         CREATE TABLE IF NOT EXISTS question_embeddings (
             question_hash TEXT PRIMARY KEY,
@@ -31,7 +33,7 @@ def _init_question_embeddings_table(conn: sqlite3.Connection):
             created_at    TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    # Migrate: add user_id if missing
+    # 迁移：为旧表添加 user_id 列
     try:
         conn.execute("SELECT user_id FROM question_embeddings LIMIT 1")
     except sqlite3.OperationalError:
@@ -40,11 +42,12 @@ def _init_question_embeddings_table(conn: sqlite3.Connection):
 
 
 def _hash_question(text: str) -> str:
+    """计算题目文本的 MD5 哈希"""
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 
 def _extract_questions(conn: sqlite3.Connection, topic: str, user_id: str) -> list[dict]:
-    """Extract all questions with scores from completed drill sessions for a topic."""
+    """从已完成的历史 drill 会话中提取带分数的题目，按题目文本去重"""
     rows = conn.execute(
         "SELECT session_id, questions, scores, created_at FROM sessions "
         "WHERE topic = ? AND user_id = ? AND mode = 'topic_drill' AND review IS NOT NULL "
@@ -52,7 +55,7 @@ def _extract_questions(conn: sqlite3.Connection, topic: str, user_id: str) -> li
         (topic, user_id),
     ).fetchall()
 
-    # question_text → latest record (dedup by keeping last occurrence)
+    # question_text → 最新记录（去重，保留最后出现）
     seen: dict[str, dict] = {}
     for row in rows:
         questions = json.loads(row["questions"] or "[]")
@@ -66,7 +69,7 @@ def _extract_questions(conn: sqlite3.Connection, topic: str, user_id: str) -> li
             qid = q.get("id")
             sc = score_map.get(qid, {})
             score_val = sc.get("score")
-            # Only include questions that were actually answered and scored
+            # 仅包含有实际分数的已答题目
             if not isinstance(score_val, (int, float)):
                 continue
 
@@ -87,12 +90,12 @@ def _get_or_compute_embeddings(
     questions: list[dict],
     topic: str,
 ) -> np.ndarray:
-    """Return (N, 1024) embedding matrix. Uses cache table, computes missing."""
+    """返回 (N, 1024) 向量矩阵，优先使用缓存，缺失则批量计算"""
     _init_question_embeddings_table(conn)
 
     hashes = [_hash_question(q["question"]) for q in questions]
 
-    # Load cached
+    # 加载缓存
     cached: dict[str, np.ndarray] = {}
     if hashes:
         placeholders = ",".join("?" for _ in hashes)
@@ -103,7 +106,7 @@ def _get_or_compute_embeddings(
         for r in rows:
             cached[r["question_hash"]] = _deserialize(r["embedding"])
 
-    # Find missing
+    # 查找缺失的向量
     to_embed = []
     to_embed_idx = []
     for i, (h, q) in enumerate(zip(hashes, questions)):
@@ -111,7 +114,7 @@ def _get_or_compute_embeddings(
             to_embed.append(q["question"])
             to_embed_idx.append(i)
 
-    # Batch embed missing
+    # 批量计算缺失向量
     if to_embed:
         from backend.llm_provider import get_embedding
         embed_model = get_embedding()
@@ -128,15 +131,16 @@ def _get_or_compute_embeddings(
             )
         conn.commit()
 
-    # Build matrix in order
+    # 按顺序构建矩阵
     matrix = np.stack([cached[h] for h in hashes])
     return matrix
 
 
 def build_graph(topic: str, user_id: str) -> dict:
-    """Build question relationship graph for a topic.
+    """构建题目关联图谱，返回 {nodes, links}
 
-    Returns {"nodes": [...], "links": [...]}
+    - nodes: 题目节点（含 id、question、score、focus_area、difficulty、date）
+    - links: 相似度超过阈值的题目对（source、target、similarity）
     """
     conn = _get_conn()
     questions = _extract_questions(conn, topic, user_id)

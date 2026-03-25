@@ -18,7 +18,7 @@ from backend.llm_provider import get_langchain_llm
 
 logger = logging.getLogger("uvicorn")
 
-# ── Profile Schema ──
+# ── 画像 Schema ──
 
 DEFAULT_PROFILE = {
     "name": "",
@@ -120,7 +120,7 @@ EXTRACT_PROMPT = """你是一个面试教练的分析引擎。根据面试对话
 """
 
 
-# ── Per-user path helpers ──
+# ── 用户路径辅助函数 ──
 
 def _profile_path(user_id: str) -> Path:
     return settings.user_profile_dir(user_id) / "profile.json"
@@ -148,7 +148,7 @@ def _save_profile(profile: dict, user_id: str):
 
 
 def _save_insight(mode: str, topic: str, summary: str, raw_extraction: dict, user_id: str):
-    """Append daily insight file (OpenClaw-style daily log)."""
+    """追加每日洞察日志（OpenClaw 风格）"""
     ins_dir = _insights_dir(user_id)
     ins_dir.mkdir(parents=True, exist_ok=True)
     today = datetime.now().strftime("%Y-%m-%d")
@@ -178,7 +178,7 @@ def get_profile(user_id: str) -> dict:
 
 
 def get_topic_context_for_drill(topic: str, user_id: str) -> dict:
-    """Get personalized context for drill question generation."""
+    """获取专项训练题目生成的个性化上下文"""
     profile = _load_profile(user_id)
 
     mastery = profile.get("topic_mastery", {}).get(topic, {})
@@ -233,7 +233,7 @@ def update_profile_realtime(
     score_entry: dict | None = None,
     weak_point: str | None = None,
 ):
-    """Lightweight per-answer profile update — no LLM call, just save the data."""
+    """轻量级单题画像更新（无 LLM 调用，直接保存数据）"""
     profile = _load_profile(user_id)
     now = datetime.now().isoformat()
 
@@ -278,7 +278,7 @@ def update_profile_realtime(
 
 
 def get_profile_summary(user_id: str) -> str:
-    """Generate a concise summary for injection into interviewer prompts."""
+    """生成简洁摘要用于注入面试官提示词"""
     profile = _load_profile(user_id)
 
     parts = []
@@ -316,7 +316,7 @@ def get_profile_summary(user_id: str) -> str:
 
 
 def get_profile_summary_for_drill(user_id: str) -> str:
-    """Concise summary for drill question generation — only cross-topic info."""
+    """专项训练题目生成的摘要（仅跨话题信息）"""
     profile = _load_profile(user_id)
     parts = []
 
@@ -335,10 +335,10 @@ def get_profile_summary_for_drill(user_id: str) -> str:
     return "\n".join(parts) if parts else "新用户，暂无历史数据"
 
 
-# ── Mem0-style LLM profile update ──
+# ── Mem0 风格 LLM 画像更新 ──
 
 def _parse_json_safe(content: str) -> dict | list:
-    """Parse JSON from LLM response, handling markdown code blocks."""
+    """从 LLM 响应中解析 JSON，处理 markdown 代码块"""
     content = content.strip()
     try:
         return json.loads(content)
@@ -361,7 +361,7 @@ def _parse_json_safe(content: str) -> dict | list:
 
 
 def _apply_memory_ops(profile: dict, ops: dict, topic: str | None, now: str):
-    """Execute LLM-decided ADD/UPDATE/NOOP/IMPROVE operations on profile."""
+    """执行 LLM 决定的 ADD/UPDATE/NOOP/IMPROVE 操作"""
     weak_points = profile.setdefault("weak_points", [])
 
     for op in ops.get("weak_point_ops", []):
@@ -400,7 +400,7 @@ def _apply_memory_ops(profile: dict, ops: dict, topic: str | None, now: str):
 
 def _deterministic_update(profile: dict, new_weak: list, new_strong: list,
                           topic: str | None, now: str, user_id: str):
-    """Fallback: vector cosine dedup when LLM parse fails."""
+    """兜底策略：LLM 解析失败时用向量余弦去重"""
     from backend.vector_memory import find_similar_weak_point
 
     for wp in new_weak:
@@ -435,7 +435,7 @@ def _deterministic_update(profile: dict, new_weak: list, new_strong: list,
 
 def _update_mastery(profile: dict, topic: str | None, mastery_data: dict, now: str,
                     session_weight: float = 0.7):
-    """Update topic mastery (0-100 scale). session_weight controls merge ratio."""
+    """更新话题掌握度（0-100 分制），session_weight 控制合并比例"""
     if not mastery_data:
         return
     # {score, notes} → single topic; {topic_key: {score, notes}} → multi-topic
@@ -463,7 +463,7 @@ def _update_mastery(profile: dict, topic: str | None, mastery_data: dict, now: s
 
 
 def _update_communication(profile: dict, comm: dict):
-    """Append communication observations."""
+    """追加沟通观察记录"""
     if not comm:
         return
     if comm.get("style_update"):
@@ -479,7 +479,7 @@ def _update_communication(profile: dict, comm: dict):
 
 
 def _update_thinking_patterns(profile: dict, patterns: dict):
-    """Append thinking pattern observations."""
+    """追加思维模式观察记录"""
     if not patterns:
         return
     tp = profile.setdefault("thinking_patterns", {"strengths": [], "gaps": []})
@@ -495,7 +495,7 @@ def _update_stats(
     profile: dict, mode: str, topic: str | None, avg_score: float | None,
     now: str, answer_count: int = 0, dimension_scores: dict | None = None,
 ):
-    """Update session statistics with per-mode averages."""
+    """更新会话统计（按模式计算均值）"""
     stats = profile.setdefault("stats", {})
     stats["total_sessions"] = stats.get("total_sessions", 0) + 1
     if mode == "resume":
@@ -543,7 +543,7 @@ async def llm_update_profile(
     session_weight: float = 0.7,
     dimension_scores: dict | None = None,
 ):
-    """Mem0-style profile update: LLM decides ADD/UPDATE/NOOP for each fact."""
+    """Mem0 风格画像更新：LLM 决定每个事实的 ADD/UPDATE/NOOP"""
     from backend.prompts.interviewer import PROFILE_UPDATE_PROMPT
 
     profile = _load_profile(user_id)
@@ -629,7 +629,7 @@ async def update_profile_after_interview(
     user_id: str,
     scores: list[dict] | None = None,
 ) -> dict:
-    """Mem0-style two-stage pipeline: Extract → Update."""
+    """Mem0 风格两阶段流水线：提取 → 更新"""
     profile = _load_profile(user_id)
     llm = get_langchain_llm()
 

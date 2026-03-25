@@ -11,12 +11,12 @@ from backend.prompts.interviewer import DRILL_QUESTION_GEN_PROMPT, DRILL_BATCH_E
 
 
 def _get_topic_display(user_id: str) -> dict[str, str]:
-    """Dynamic {key: display_name} from topics.json."""
+    """从 topics.json 动态获取 {key: display_name}"""
     return {k: v["name"] for k, v in load_topics(user_id).items()}
 
 
 def _parse_json_response(content: str) -> dict | list:
-    """Extract JSON from LLM response, handling various formats."""
+    """从 LLM 响应中提取 JSON，处理各种格式"""
     import re
     content = content.strip()
 
@@ -47,7 +47,7 @@ def _parse_json_response(content: str) -> dict | list:
 
 
 def _load_high_freq(topic: str, user_id: str) -> str:
-    """Load high-frequency question bank for a topic."""
+    """加载话题的高频题库"""
     filepath = settings.user_high_freq_path(user_id) / f"{topic}.md"
     if filepath.exists():
         return filepath.read_text(encoding="utf-8").strip()
@@ -55,7 +55,7 @@ def _load_high_freq(topic: str, user_id: str) -> str:
 
 
 def generate_drill_questions(topic: str, user_id: str) -> list[dict]:
-    """Generate 10 personalized questions for a topic. 1 LLM call."""
+    """为话题生成 10 道个性化题目，1 次 LLM 调用"""
     from backend.spaced_repetition import get_due_reviews, init_sr_for_existing_points
 
     # Ensure existing weak points have SR state
@@ -143,7 +143,7 @@ def generate_drill_questions(topic: str, user_id: str) -> list[dict]:
 
 def evaluate_drill_answers(topic: str, questions: list[dict], answers: list[dict],
                            user_id: str) -> dict:
-    """Batch evaluate all answers. 1 LLM call."""
+    """批量评估所有回答，1 次 LLM 调用"""
     topic_display = _get_topic_display(user_id)
     topic_name = topic_display.get(topic, topic)
     answer_map = {a["question_id"]: a["answer"] for a in answers}

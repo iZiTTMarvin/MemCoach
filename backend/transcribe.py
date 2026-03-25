@@ -21,7 +21,7 @@ _DASHSCOPE_QUERY = "https://dashscope.aliyuncs.com/api/v1/tasks/"
 
 
 def _upload_to_qiniu(local_path: str, suffix: str) -> str:
-    """Upload file to Qiniu OSS, return public URL."""
+    """上传文件到七牛云 OSS，返回公网 URL"""
     q = QiniuAuth(settings.qiniu_access_key, settings.qiniu_secret_key)
     key = f"audio/{uuid.uuid4().hex}{suffix}"
     token = q.upload_token(settings.qiniu_bucket, key, 3600)
@@ -36,7 +36,7 @@ def _upload_to_qiniu(local_path: str, suffix: str) -> str:
 
 
 def transcribe_audio(audio_bytes: bytes, suffix: str = ".webm") -> str:
-    """Transcribe audio: upload to Qiniu → DashScope filetrans REST API."""
+    """转写音频：上传到七牛云 → DashScope filetrans REST API"""
     if not settings.dashscope_api_key:
         raise RuntimeError("DASHSCOPE_API_KEY not configured")
 
@@ -88,7 +88,7 @@ def transcribe_audio(audio_bytes: bytes, suffix: str = ".webm") -> str:
 
 
 def _extract_text(output: dict) -> str:
-    """Fetch transcription result and extract text."""
+    """获取转写结果并提取文本"""
     # file_url 模式: result.transcription_url（单数）
     result = output.get("result", {})
     url = result.get("transcription_url")

@@ -10,7 +10,7 @@ _llama_llm_instance = None
 
 
 def get_langchain_llm():
-    """LangChain ChatModel for LangGraph nodes (via OpenAI-compatible proxy)."""
+    """获取 LangChain ChatModel，用于 LangGraph 节点（通过 OpenAI 兼容代理）。"""
     return ChatOpenAI(
         model=settings.model,
         api_key=settings.api_key,
@@ -41,7 +41,7 @@ def get_llama_llm():
 
 
 def get_embedding():
-    """Embedding model (singleton). API mode if embedding_api_base is set, else local HuggingFace."""
+    """获取 Embedding 模型（单例）。有 embedding_api_base 则用 API 模式，否则用本地 HuggingFace。"""
     global _embedding_instance
     if _embedding_instance is None:
         if settings.embedding_api_base:

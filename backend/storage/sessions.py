@@ -70,7 +70,7 @@ def append_message(session_id: str, role: str, content: str, *, user_id: str):
 
 
 def save_drill_answers(session_id: str, answers: list[dict], *, user_id: str):
-    """Save drill answers into transcript as Q&A pairs."""
+    """将专项训练答案保存为 Q&A 对到 transcript"""
     conn = _get_conn()
     row = conn.execute(
         "SELECT questions FROM sessions WHERE session_id = ? AND user_id = ?",
@@ -131,7 +131,7 @@ def get_session(session_id: str, *, user_id: str) -> dict | None:
 
 
 def list_sessions_by_topic(topic: str, *, user_id: str, limit: int = 50) -> list[dict]:
-    """Get all sessions for a topic with reviews and scores."""
+    """获取话题的所有会话（含评估和分数）"""
     conn = _get_conn()
     rows = conn.execute(
         "SELECT session_id, mode, topic, review, scores, created_at FROM sessions "

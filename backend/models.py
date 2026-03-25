@@ -1,4 +1,4 @@
-"""Data models — LangGraph states (TypedDict) + API models (Pydantic)."""
+"""数据模型 — LangGraph 状态 (TypedDict) + API 模型 (Pydantic)"""
 from __future__ import annotations
 
 from enum import Enum
@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from langgraph.graph import add_messages
 
 
-# ── Enums ──
+# ── 枚举类型 ──
 
 class InterviewMode(str, Enum):
     RESUME = "resume"
@@ -24,7 +24,7 @@ class InterviewPhase(str, Enum):
     END = "end"
 
 
-# ── LangGraph States (TypedDict for max compatibility) ──
+# ── LangGraph 状态（TypedDict 保持最大兼容性）──
 
 class ResumeInterviewState(TypedDict, total=False):
     messages: Annotated[list, add_messages]
@@ -50,7 +50,7 @@ class TopicDrillState(TypedDict, total=False):
     is_finished: bool
 
 
-# ── API Models (Pydantic) ──
+# ── API 模型（Pydantic）──
 
 class StartInterviewRequest(BaseModel):
     mode: InterviewMode
@@ -73,7 +73,7 @@ class RecordingAnalyzeRequest(BaseModel):
     position: str | None = None
 
 
-# ── Auth Models ──
+# ── 认证模型 ──
 
 class RegisterRequest(BaseModel):
     email: str

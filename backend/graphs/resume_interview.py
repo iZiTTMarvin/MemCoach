@@ -24,16 +24,16 @@ PHASE_ORDER = [
     InterviewPhase.REVERSE_QA.value,
 ]
 
-# Hard ceiling per phase to prevent infinite loops
+# 每个阶段的硬上限，防止无限循环
 HARD_MAX_PER_PHASE = 10
 
 _EVAL_PATTERN = re.compile(r"<!--EVAL:(.*?)-->", re.DOTALL)
 
 
 def _parse_inline_eval(content: str) -> tuple[str, dict | None]:
-    """Extract and strip hidden eval JSON from interviewer response.
+    """从面试官回复中提取并移除隐藏的评估 JSON
 
-    Returns (clean_content, eval_dict_or_None).
+    返回 (clean_content, eval_dict_or_None)
     """
     m = _EVAL_PATTERN.search(content)
     if not m:
@@ -49,9 +49,9 @@ def _parse_inline_eval(content: str) -> tuple[str, dict | None]:
 
 
 def _make_init_interview(user_id: str):
-    """Create init_interview node bound to a specific user."""
+    """创建绑定到特定用户的 init_interview 节点"""
     def init_interview(state: ResumeInterviewState) -> dict:
-        """Load resume context and prepare the opening."""
+        """加载简历上下文并准备开场"""
         resume_ctx = query_resume("列出候选人的所有项目经历、技能和教育背景", user_id)
 
         system_prompt = RESUME_INTERVIEWER_SYSTEM.format(
@@ -80,9 +80,9 @@ def _make_init_interview(user_id: str):
 
 
 def _make_interviewer_ask(user_id: str):
-    """Create interviewer_ask node bound to a specific user."""
+    """创建绑定到特定用户的 interviewer_ask 节点"""
     def interviewer_ask(state: ResumeInterviewState) -> dict:
-        """Generate next question based on current phase and conversation."""
+        """根据当前阶段和对话生成下一个问题"""
         asked = state.get("questions_asked", [])
         asked_str = "\n".join(f"- {q}" for q in asked) if asked else "无"
 
@@ -123,7 +123,7 @@ def _make_interviewer_ask(user_id: str):
 
 
 def route_after_answer(state: ResumeInterviewState) -> str:
-    """After user answers: keep asking, advance phase, or end."""
+    """用户回答后：继续提问、进入下一阶段或结束"""
     if state.get("is_finished"):
         return "end"
 
@@ -159,7 +159,7 @@ def route_after_answer(state: ResumeInterviewState) -> str:
 
 
 def advance_phase(state: ResumeInterviewState) -> dict:
-    """Move to the next interview phase."""
+    """进入下一个面试阶段"""
     current_phase = state.get("phase", "greeting")
 
     try:
@@ -178,12 +178,12 @@ def advance_phase(state: ResumeInterviewState) -> dict:
 
 
 def wait_for_answer(state: ResumeInterviewState) -> dict:
-    """Graph pauses here for user input."""
+    """图在此处暂停等待用户输入"""
     return {}
 
 
 def compile_resume_interview(user_id: str):
-    """Build and compile the resume interview graph."""
+    """构建并编译简历面试图"""
     graph = StateGraph(ResumeInterviewState)
 
     graph.add_node("init", _make_init_interview(user_id))

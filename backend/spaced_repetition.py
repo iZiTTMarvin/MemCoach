@@ -11,14 +11,14 @@ from backend.memory import _load_profile, _save_profile
 
 
 def sm2_update(sr_state: dict, score_0_10: float) -> dict:
-    """SM-2 algorithm update.
+    """SM-2 算法更新
 
     Args:
-        sr_state: Current spaced repetition state {interval_days, ease_factor, repetitions, ...}
-        score_0_10: Score on 0-10 scale (mapped to SM-2 quality 0-5)
+        sr_state: 当前间隔重复状态 {interval_days, ease_factor, repetitions, ...}
+        score_0_10: 0-10 分制分数（映射到 SM-2 quality 0-5）
 
     Returns:
-        Updated SR state dict
+        更新后的 SR 状态字典
     """
     # Map 0-10 to SM-2 quality 0-5
     quality = min(5, int(score_0_10 / 2))
@@ -50,9 +50,9 @@ def sm2_update(sr_state: dict, score_0_10: float) -> dict:
 
 
 def get_due_reviews(user_id: str, topic: str = None) -> list[dict]:
-    """Get weak points that are due for review.
+    """获取需要复习的薄弱点
 
-    Returns list of weak_point dicts sorted by ease_factor (hardest first).
+    返回按 ease_factor 排序的薄弱点列表（最难的最先复习）
     """
     profile = _load_profile(user_id)
     today = date.today().isoformat()
@@ -74,9 +74,9 @@ def get_due_reviews(user_id: str, topic: str = None) -> list[dict]:
 
 
 def update_weak_point_sr(topic: str, point_text: str, score: float, user_id: str):
-    """Update spaced repetition state for a specific weak point after evaluation.
+    """评估后更新特定薄弱点的间隔重复状态
 
-    Matches by topic + point text substring.
+    按 topic + point 文本子串匹配
     """
     profile = _load_profile(user_id)
 
@@ -96,7 +96,7 @@ def update_weak_point_sr(topic: str, point_text: str, score: float, user_id: str
 
 
 def init_sr_for_existing_points(user_id: str):
-    """Initialize SR state for existing weak points that don't have it yet."""
+    """为尚未有 SR 状态的现有薄弱点初始化"""
     profile = _load_profile(user_id)
     changed = False
 

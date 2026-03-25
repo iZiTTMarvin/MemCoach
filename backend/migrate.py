@@ -1,6 +1,6 @@
-"""One-time migration: add user_id to all tables + move files to per-user dirs.
+"""一次性迁移脚本：为所有表添加 user_id 字段 + 将文件迁移到用户目录
 
-Usage: python -m backend.migrate
+用法: python -m backend.migrate
 """
 import shutil
 import sqlite3
@@ -24,7 +24,7 @@ def _col_exists(conn: sqlite3.Connection, table: str, col: str) -> bool:
 
 
 def migrate_database():
-    """Add user_id column to sessions, memory_vectors, question_embeddings."""
+    """为 sessions, memory_vectors, question_embeddings 表添加 user_id 列"""
     if not DB_PATH.exists():
         print(f"Database not found at {DB_PATH}, skipping DB migration.")
         return
@@ -62,7 +62,7 @@ def migrate_database():
 
 
 def create_default_user():
-    """Create the default user account for existing data."""
+    """为现有数据创建默认用户账号"""
     init_users_table()
 
     conn = sqlite3.connect(str(DB_PATH))
@@ -84,7 +84,7 @@ def create_default_user():
 
 
 def _move_dir(src: Path, dst: Path):
-    """Move directory contents, skipping if dst already has content."""
+    """移动目录内容，若目标已有内容则跳过"""
     if not src.exists():
         return
     if dst.exists() and any(dst.iterdir()):
@@ -112,7 +112,7 @@ def _move_file(src: Path, dst: Path):
 
 
 def migrate_files():
-    """Copy existing data files into the default user's directory."""
+    """将现有数据文件复制到默认用户目录"""
     print("Migrating files to per-user directory...")
 
     # user_profile/ -> users/default0/profile/
