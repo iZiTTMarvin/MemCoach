@@ -6,6 +6,7 @@ from datetime import datetime
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import HumanMessage, AIMessage
+from langgraph.types import Command
 
 from backend.models import (
     StartInterviewRequest, ChatRequest, EndDrillRequest,
@@ -612,10 +613,7 @@ async def chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
     graph = entry["graph"]
     config = entry["config"]
 
-    result = graph.invoke(
-        {"messages": [HumanMessage(content=req.message)]},
-        config,
-    )
+    result = graph.invoke(Command(resume=req.message), config)
 
     append_message(req.session_id, "user", req.message, user_id=user_id)
 

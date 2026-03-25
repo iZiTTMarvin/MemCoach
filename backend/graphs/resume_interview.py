@@ -6,6 +6,7 @@ import re
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.types import interrupt
 
 from backend.models import ResumeInterviewState, InterviewPhase
 from backend.config import settings
@@ -71,8 +72,8 @@ def _make_init_interview(user_id: str):
             "messages": [response],
             "resume_context": resume_ctx,
             "phase": InterviewPhase.GREETING.value,
-            "questions_asked": [],
-            "phase_question_count": 0,
+            "questions_asked": [response.content[:100]] if getattr(response, "content", "") else [],
+            "phase_question_count": 1,
             "is_finished": False,
             "eval_history": [],
         }
@@ -179,7 +180,10 @@ def advance_phase(state: ResumeInterviewState) -> dict:
 
 def wait_for_answer(state: ResumeInterviewState) -> dict:
     """图在此处暂停等待用户输入"""
-    return {}
+    user_text = interrupt("等待候选人输入")
+    if user_text is None:
+        return {}
+    return {"messages": [HumanMessage(content=str(user_text))]}
 
 
 def compile_resume_interview(user_id: str):
@@ -204,5 +208,4 @@ def compile_resume_interview(user_id: str):
 
     return graph.compile(
         checkpointer=MemorySaver(),
-        interrupt_before=["wait"],
     )

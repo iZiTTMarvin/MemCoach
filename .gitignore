@@ -30,6 +30,5 @@ data/models/
 llm.md
 
 .windsurf/
-AGENTS.md
 .claude/
 .codex/
