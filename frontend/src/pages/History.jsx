@@ -75,12 +75,12 @@ export default function History() {
 
   return (
     <div className="flex-1 p-6 md:p-10 lg:p-14 w-full relative z-10 text-text font-mono selection:bg-primary/30">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         
         {/* Title row */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-primary/20 pb-6 mb-8 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-[10px] tracking-widest mb-2 uppercase">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-xs tracking-widest mb-2 uppercase">
               <Clock size={12} /> 归档数据
             </div>
             <h1 className="text-3xl md:text-5xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim">
@@ -88,15 +88,15 @@ export default function History() {
             </h1>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-dim mb-1 tracking-widest">总记录数</div>
-            <div className="text-lg font-bold text-primary">{total}</div>
+            <div className="text-xs text-dim mb-1 tracking-widest">总记录数</div>
+            <div className="text-xl font-bold text-primary">{total}</div>
           </div>
         </div>
 
         {/* Filter bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8 bg-bg-subtle/80 backdrop-blur-sm border border-border/50 p-4">
-          <div className="flex items-center gap-2 text-xs text-dim tracking-widest uppercase">
-            <Filter size={14} /> 筛选维度:
+          <div className="flex items-center gap-2 text-sm text-dim tracking-widest uppercase">
+            <Filter size={16} /> 筛选维度:
           </div>
           
           <div className="flex items-center gap-2 flex-wrap flex-1">
@@ -108,7 +108,7 @@ export default function History() {
             ].map((m) => (
               <button
                 key={m.key}
-                className={`px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase border transition-all cursor-pointer
+                className={`px-4 py-2 text-xs font-bold tracking-widest uppercase border transition-all cursor-pointer
                   ${modeFilter === m.key ? "bg-primary/20 text-primary border-primary" : "bg-transparent text-dim border-border/50 hover:border-primary/50 hover:text-text"}`}
                 onClick={() => handleModeChange(m.key)}
               >
@@ -118,9 +118,9 @@ export default function History() {
 
             {modeFilter !== "resume" && topics.length > 0 && (
               <>
-                <div className="hidden sm:block w-px h-5 bg-border mx-2" />
+                <div className="hidden sm:block w-px h-6 bg-border mx-2" />
                 <select
-                  className="px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase bg-card text-primary border border-border/50 outline-none cursor-pointer focus:border-primary transition-colors"
+                  className="px-4 py-2 text-xs font-bold tracking-widest uppercase bg-card text-primary border border-border/50 outline-none cursor-pointer focus:border-primary transition-colors"
                   value={topicFilter}
                   onChange={(e) => setTopicFilter(e.target.value)}
                 >
@@ -156,41 +156,41 @@ export default function History() {
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover:bg-primary/50 transition-colors" />
                   
                   <div className="flex items-center gap-4 mb-3 sm:mb-0">
-                    <span className={`px-2 py-0.5 border text-[10px] font-bold tracking-widest uppercase bg-transparent ${badge.cls}`}>
+                    <span className={`px-2 py-0.5 border text-xs font-bold tracking-widest uppercase bg-transparent ${badge.cls}`}>
                       {badge.text}
                     </span>
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-text truncate max-w-[200px] sm:max-w-[300px] uppercase tracking-wider">{s.topic || "全局上下文"}</span>
-                      <span className="text-[10px] text-dim tracking-widest uppercase">ID_{s.session_id.substring(0,8)}</span>
+                      <span className="text-base font-bold text-text truncate max-w-[200px] sm:max-w-[400px] uppercase tracking-wider">{s.topic || "全局上下文"}</span>
+                      <span className="text-xs text-dim tracking-widest uppercase">ID_{s.session_id.substring(0,8)}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-8 w-full sm:w-auto border-t sm:border-t-0 border-border/30 pt-3 sm:pt-0">
-                    <span className="text-xs text-dim whitespace-nowrap hidden sm:block tracking-widest uppercase">{s.created_at?.slice(0, 16)}</span>
+                    <span className="text-sm text-dim whitespace-nowrap hidden sm:block tracking-widest uppercase">{s.created_at?.slice(0, 16)}</span>
                     
                     <div className="flex items-center gap-4">
                       {hasScore ? (
                         <div className="flex flex-col items-end">
-                          <span className="text-[10px] text-dim tracking-widest uppercase">评级</span>
-                          <span className="px-2 py-0.5 border text-xs font-bold font-mono min-w-[48px] text-center" style={{ background: sc.bg, color: sc.color, borderColor: sc.border }}>
+                          <span className="text-xs text-dim tracking-widest uppercase">评级</span>
+                          <span className="px-3 py-1 border text-sm font-bold font-mono min-w-[56px] text-center" style={{ background: sc.bg, color: sc.color, borderColor: sc.border }}>
                             {s.avg_score}
                           </span>
                         </div>
                       ) : (
                         <div className="flex flex-col items-end">
-                          <span className="text-[10px] text-dim tracking-widest uppercase">评级</span>
-                          <span className="px-2 py-0.5 border border-border/50 text-xs text-dim bg-card min-w-[48px] text-center">
+                          <span className="text-xs text-dim tracking-widest uppercase">评级</span>
+                          <span className="px-3 py-1 border border-border/50 text-sm text-dim bg-card min-w-[56px] text-center">
                             --
                           </span>
                         </div>
                       )}
                       
                       <button
-                        className="p-1.5 bg-transparent border border-transparent text-dim hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                        className="p-2 bg-transparent border border-transparent text-dim hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
                         title="Delete Record"
                         onClick={(e) => handleDelete(e, s.session_id)}
                       >
-                        <X size={14} />
+                        <X size={16} />
                       </button>
                     </div>
                   </div>

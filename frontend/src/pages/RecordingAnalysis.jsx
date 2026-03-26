@@ -64,22 +64,22 @@ export default function RecordingAnalysis() {
 
   return (
     <div className="flex-1 p-6 md:p-10 lg:p-14 w-full relative z-10 text-text font-mono selection:bg-primary/30 flex flex-col items-center">
-      <div className="w-full max-w-[800px]">
+      <div className="w-full max-w-5xl">
         {/* Header */}
         <div className="mb-10 pb-6 border-b border-primary/20 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-teal-400/10 border border-teal-400/30 text-teal-400 text-[10px] tracking-widest mb-3 uppercase">
-              <Radio size={12} className="animate-pulse" /> 音频遥测
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-teal-400/10 border border-teal-400/30 text-teal-400 text-xs tracking-widest mb-3 uppercase">
+              <Radio size={14} className="animate-pulse" /> 音频遥测
             </div>
-            <h1 className="text-3xl md:text-4xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim">
+            <h1 className="text-3xl md:text-5xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim">
               录音复盘
             </h1>
-            <p className="text-xs text-dim tracking-widest mt-2">上传音频或粘贴转写文本进行 AI 联合分析</p>
+            <p className="text-sm text-dim tracking-widest mt-4">上传音频或粘贴转写文本进行 AI 联合分析</p>
           </div>
           <div className="text-right hidden md:block">
-            <div className="text-[10px] text-dim mb-1 tracking-widest">分析服务器</div>
-            <div className="text-sm font-bold text-teal-400 flex items-center gap-2 justify-end">
-               <Server size={14} /> 在线
+            <div className="text-xs text-dim mb-1 tracking-widest">分析服务器</div>
+            <div className="text-base font-bold text-teal-400 flex items-center gap-2 justify-end">
+               <Server size={16} /> 在线
             </div>
           </div>
         </div>
@@ -91,49 +91,49 @@ export default function RecordingAnalysis() {
 
           {/* Recording mode */}
           <div className="mb-8">
-            <div className="text-xs text-teal-400 font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
-              <Activity size={14}/> 录音模式
+            <div className="text-sm text-teal-400 font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
+              <Activity size={16}/> 录音模式
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
-                className={`flex items-center gap-3 p-4 border transition-all text-left relative overflow-hidden
+                className={`flex items-center gap-4 p-5 border transition-all text-left relative overflow-hidden
                   ${recordingMode === "dual"
                     ? "bg-teal-400/10 border-teal-400 text-teal-400"
                     : "bg-card border-border/50 text-dim hover:border-teal-400/50 hover:text-text"}`}
                 onClick={() => setRecordingMode("dual")}
               >
                 {recordingMode === "dual" && <div className="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 shadow-[0_0_8px_var(--color-teal-400)]" />}
-                <Users size={20} className={recordingMode === "dual" ? "text-teal-400" : ""} />
+                <Users size={24} className={recordingMode === "dual" ? "text-teal-400" : ""} />
                 <div>
-                  <div className="text-sm font-bold tracking-widest uppercase">双人对话</div>
-                  <div className="text-[10px] opacity-70 tracking-wider">面试官 + 候选人</div>
+                  <div className="text-base font-bold tracking-widest uppercase">双人对话</div>
+                  <div className="text-xs opacity-70 tracking-wider">面试官 + 候选人</div>
                 </div>
               </button>
               
               <button
-                className={`flex items-center gap-3 p-4 border transition-all text-left relative overflow-hidden
+                className={`flex items-center gap-4 p-5 border transition-all text-left relative overflow-hidden
                   ${recordingMode === "solo"
                     ? "bg-primary/10 border-primary text-primary"
                     : "bg-card border-border/50 text-dim hover:border-primary/50 hover:text-text"}`}
                 onClick={() => setRecordingMode("solo")}
               >
                 {recordingMode === "solo" && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_8px_var(--color-primary)]" />}
-                <User size={20} className={recordingMode === "solo" ? "text-primary" : ""} />
+                <User size={24} className={recordingMode === "solo" ? "text-primary" : ""} />
                 <div>
-                  <div className="text-sm font-bold tracking-widest uppercase">单人录音</div>
-                  <div className="text-[10px] opacity-70 tracking-wider">仅限候选人</div>
+                  <div className="text-base font-bold tracking-widest uppercase">单人录音</div>
+                  <div className="text-xs opacity-70 tracking-wider">仅限候选人</div>
                 </div>
               </button>
             </div>
           </div>
 
           {/* Optional: company & position */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="text-[10px] text-dim tracking-widest uppercase mb-2 block">目标组织 [可选]</label>
+              <label className="text-xs text-dim tracking-widest uppercase mb-2 block">目标组织 [可选]</label>
               <input
                 type="text"
-                className="w-full px-4 py-2 bg-card border border-border/50 text-sm text-text placeholder:text-dim/30 focus:outline-none focus:border-teal-400/50 transition-colors"
+                className="w-full px-5 py-3 bg-card border border-border/50 text-base text-text placeholder:text-dim/30 focus:outline-none focus:border-teal-400/50 transition-colors"
                 placeholder="如: 字节跳动"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
@@ -141,10 +141,10 @@ export default function RecordingAnalysis() {
               />
             </div>
             <div>
-              <label className="text-[10px] text-dim tracking-widest uppercase mb-2 block">目标角色 [可选]</label>
+              <label className="text-xs text-dim tracking-widest uppercase mb-2 block">目标角色 [可选]</label>
               <input
                 type="text"
-                className="w-full px-4 py-2 bg-card border border-border/50 text-sm text-text placeholder:text-dim/30 focus:outline-none focus:border-teal-400/50 transition-colors"
+                className="w-full px-5 py-3 bg-card border border-border/50 text-base text-text placeholder:text-dim/30 focus:outline-none focus:border-teal-400/50 transition-colors"
                 placeholder="如: 后端开发"
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
@@ -156,15 +156,15 @@ export default function RecordingAnalysis() {
 
         {/* Input tabs */}
         <div className="mb-8">
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-4 mb-6">
             <button
-              className={`px-6 py-2 text-xs font-bold tracking-widest uppercase border-b-2 transition-all ${inputTab === "upload" ? "text-teal-400 border-teal-400 bg-teal-400/5" : "text-dim border-transparent hover:text-text hover:bg-card"}`}
+              className={`px-8 py-3 text-sm font-bold tracking-widest uppercase border-b-2 transition-all ${inputTab === "upload" ? "text-teal-400 border-teal-400 bg-teal-400/5" : "text-dim border-transparent hover:text-text hover:bg-card"}`}
               onClick={() => setInputTab("upload")}
             >
               上传音频
             </button>
             <button
-              className={`px-6 py-2 text-xs font-bold tracking-widest uppercase border-b-2 transition-all ${inputTab === "paste" ? "text-primary border-primary bg-primary/5" : "text-dim border-transparent hover:text-text hover:bg-card"}`}
+              className={`px-8 py-3 text-sm font-bold tracking-widest uppercase border-b-2 transition-all ${inputTab === "paste" ? "text-primary border-primary bg-primary/5" : "text-dim border-transparent hover:text-text hover:bg-card"}`}
               onClick={() => setInputTab("paste")}
             >
               纯文本粘贴
@@ -174,23 +174,23 @@ export default function RecordingAnalysis() {
           {inputTab === "upload" && (
             <div className="space-y-4">
               <div
-                className={`flex flex-col items-center justify-center py-12 px-6 bg-bg-subtle border border-dashed transition-all cursor-pointer group
+                className={`flex flex-col items-center justify-center py-16 px-8 bg-bg-subtle border border-dashed transition-all cursor-pointer group
                   ${audioFile ? "border-teal-400/50 text-text" : "border-border/60 text-dim hover:border-teal-400/50 hover:bg-teal-400/5"}`}
                 onClick={() => fileRef.current?.click()}
               >
                 {audioFile ? (
                   <>
-                    <FileText size={32} className="text-teal-400 mb-4" />
-                    <span className="font-bold tracking-wider text-sm mb-2">{audioFile.name}</span>
-                    <span className="text-[10px] text-dim tracking-widest uppercase">
+                    <FileText size={40} className="text-teal-400 mb-5" />
+                    <span className="font-bold tracking-wider text-base mb-2">{audioFile.name}</span>
+                    <span className="text-xs text-dim tracking-widest uppercase">
                       {(audioFile.size / 1024 / 1024).toFixed(1)} MB // 点击重新上传
                     </span>
                   </>
                 ) : (
                   <>
-                    <Upload size={32} className="mb-4 text-dim group-hover:text-teal-400 transition-colors" />
-                    <span className="font-bold tracking-wider text-sm mb-2 uppercase text-text">拖拽或点击选择音频文件</span>
-                    <span className="text-[10px] text-dim tracking-widest uppercase">支持格式: MP3, WAV, M4A, WEBM</span>
+                    <Upload size={40} className="mb-5 text-dim group-hover:text-teal-400 transition-colors" />
+                    <span className="font-bold tracking-wider text-base mb-2 uppercase text-text">拖拽或点击选择音频文件</span>
+                    <span className="text-xs text-dim tracking-widest uppercase">支持格式: MP3, WAV, M4A, WEBM</span>
                   </>
                 )}
                 <input
@@ -204,7 +204,7 @@ export default function RecordingAnalysis() {
 
               {audioFile && !transcript && (
                 <button
-                  className={`w-full py-4 text-sm font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-3
+                  className={`w-full py-5 text-base font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-3
                     ${transcribing
                       ? "bg-teal-400/10 border border-teal-400/30 text-teal-400 cursor-wait"
                       : "bg-teal-400/20 border border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-bg"}`}
@@ -213,7 +213,7 @@ export default function RecordingAnalysis() {
                 >
                   {transcribing ? (
                     <>
-                      <Loader2 size={16} className="animate-spin" />
+                      <Loader2 size={20} className="animate-spin" />
                       音频流转写中...
                     </>
                   ) : (
@@ -226,7 +226,7 @@ export default function RecordingAnalysis() {
 
           {inputTab === "paste" && !transcript && (
             <textarea
-              className="w-full h-64 p-5 bg-bg-subtle border border-border/50 text-sm font-mono text-primary/90 leading-relaxed resize-y placeholder:text-dim/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 custom-scrollbar"
+              className="w-full h-80 p-6 bg-bg-subtle border border-border/50 text-base font-mono text-primary/90 leading-relaxed resize-y placeholder:text-dim/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 custom-scrollbar"
               placeholder={
                 recordingMode === "dual"
                   ? "在此粘贴面试转写记录...\n\n格式示例：\n面试官：请介绍一下你的背景。\n我：我是一名软件工程师..."
@@ -243,13 +243,13 @@ export default function RecordingAnalysis() {
         {transcript && (
           <div className="mb-8">
              <div className="flex items-center justify-between mb-4">
-              <div className="text-xs text-primary font-bold tracking-widest uppercase flex items-center gap-2">
-                <FileText size={14}/> 解析结果文本
+              <div className="text-sm text-primary font-bold tracking-widest uppercase flex items-center gap-2">
+                <FileText size={16}/> 解析结果文本
               </div>
-              <span className="text-[10px] text-dim tracking-widest uppercase bg-card px-2 py-0.5 border border-border/50">支持人工修正</span>
+              <span className="text-xs text-dim tracking-widest uppercase bg-card px-3 py-1 border border-border/50">支持人工修正</span>
             </div>
             <textarea
-              className="w-full h-80 p-5 bg-bg border border-primary/30 text-sm font-mono text-primary/90 leading-relaxed resize-y focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 custom-scrollbar"
+              className="w-full h-96 p-6 bg-bg border border-primary/30 text-base font-mono text-primary/90 leading-relaxed resize-y focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 custom-scrollbar"
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
               spellCheck={false}
@@ -259,15 +259,15 @@ export default function RecordingAnalysis() {
 
         {/* Error */}
         {error && (
-          <div className="mb-8 px-5 py-4 bg-red-500/5 border-l-4 border-red-500 text-sm text-red-400 font-mono flex items-center gap-3">
-            <Activity size={16} /> {error}
+          <div className="mb-8 px-6 py-5 bg-red-500/5 border-l-4 border-red-500 text-base text-red-400 font-mono flex items-center gap-3">
+            <Activity size={20} /> {error}
           </div>
         )}
 
         {/* Analyze button */}
         {transcript && (
           <button
-            className={`w-full py-4 text-base font-black tracking-widest uppercase transition-all relative overflow-hidden group border
+            className={`w-full py-5 text-xl font-black tracking-widest uppercase transition-all relative overflow-hidden group border
               ${canAnalyze
                 ? "bg-accent/10 border-accent text-accent hover:bg-accent hover:text-bg shadow-[0_0_20px_rgba(217,249,157,0.1)] hover:shadow-[0_0_40px_rgba(217,249,157,0.4)]"
                 : "bg-bg-subtle border-border/50 text-dim cursor-not-allowed"}`}
@@ -296,7 +296,7 @@ export default function RecordingAnalysis() {
         {/* Back */}
         <div className="mt-8 text-center">
           <button
-            className="px-6 py-2 bg-transparent text-dim text-[10px] font-bold tracking-widest uppercase border border-border/50 hover:border-primary/50 hover:text-primary transition-colors"
+            className="px-8 py-3 bg-transparent text-dim text-xs font-bold tracking-widest uppercase border border-border/50 hover:border-primary/50 hover:text-primary transition-colors"
             onClick={() => navigate("/")}
           >
             中止 // 返回主控台

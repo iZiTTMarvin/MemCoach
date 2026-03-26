@@ -14,7 +14,7 @@ function CollapsibleList({ items, limit, renderItem }) {
       {hasMore && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="bg-transparent border-none text-primary hover:text-primary-hover text-[11px] font-mono cursor-pointer py-2 text-left uppercase tracking-wider transition-colors flex items-center gap-1 mt-2"
+          className="bg-transparent border-none text-primary hover:text-primary-hover text-xs font-mono cursor-pointer py-2 text-left uppercase tracking-wider transition-colors flex items-center gap-1 mt-2"
         >
           {expanded ? <><ChevronDown size={14}/> 折叠数据</> : <><ChevronRight size={14}/> 展开日志 (+{items.length - limit})</>}
         </button>
@@ -107,7 +107,7 @@ export default function Profile() {
   if (loading) return (
     <div className="flex-1 flex flex-col items-center justify-center font-mono text-primary">
       <Activity size={32} className="animate-pulse mb-4" />
-      <div className="tracking-widest text-sm">正在获取用户画像...</div>
+      <div className="tracking-widest text-base">正在获取用户画像...</div>
     </div>
   );
 
@@ -122,8 +122,8 @@ export default function Profile() {
     return (
       <div className="flex-1 px-4 py-12 md:px-10 md:py-20 w-full flex flex-col items-center justify-center font-mono text-center">
         <Radar size={64} className="text-dim mb-6 opacity-30" />
-        <h1 className="text-2xl font-display font-bold uppercase tracking-widest text-text mb-4">画像节点为空</h1>
-        <p className="text-sm text-dim max-w-md leading-relaxed mb-8">
+        <h1 className="text-3xl font-display font-bold uppercase tracking-widest text-text mb-4">画像节点为空</h1>
+        <p className="text-base text-dim max-w-md leading-relaxed mb-8">
           无战斗数据可用。启动面试序列以开始编译你的自适应能力矩阵。
         </p>
         <button 
@@ -147,11 +147,11 @@ export default function Profile() {
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-primary/20 pb-6 mb-10 gap-4">
           <div>
-             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-[10px] tracking-widest mb-3 uppercase">
+             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-xs tracking-widest mb-3 uppercase">
               <UserIcon size={12} /> 用户遥测数据
             </div>
             <h1 className="text-3xl md:text-5xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim">
@@ -159,10 +159,10 @@ export default function Profile() {
             </h1>
           </div>
           <div className="text-right flex flex-col md:items-end">
-            <div className="text-[10px] text-dim mb-1 tracking-widest">上次同步时间</div>
-            <div className="text-sm text-primary">{profile.updated_at?.slice(0, 16) || "N/A"}</div>
-            <div className="text-[10px] text-dim mt-2 tracking-widest">已处理节点</div>
-            <div className="text-sm text-accent">{stats.total_answers || 0} 个</div>
+            <div className="text-xs text-dim mb-1 tracking-widest">上次同步时间</div>
+            <div className="text-base text-primary">{profile.updated_at?.slice(0, 16) || "N/A"}</div>
+            <div className="text-xs text-dim mt-2 tracking-widest">已处理节点</div>
+            <div className="text-base text-accent">{stats.total_answers || 0} 个</div>
           </div>
         </div>
 
@@ -172,18 +172,18 @@ export default function Profile() {
           {/* Global Metrics */}
           <div className="lg:col-span-4 bg-bg-subtle/80 backdrop-blur-sm border border-border/50 p-6 relative group hover:border-primary/50 transition-colors">
             <div className="absolute top-0 right-0 w-8 h-8 bg-gradient-to-bl from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <h2 className="text-xs text-primary font-bold tracking-widest uppercase mb-6 flex items-center gap-2">
-              <Activity size={14}/> 全局指标
+            <h2 className="text-sm text-primary font-bold tracking-widest uppercase mb-6 flex items-center gap-2">
+              <Activity size={16}/> 全局指标
             </h2>
             <div className="space-y-6">
               <div>
-                <div className="text-[10px] text-dim mb-1 tracking-widest">总演练次数</div>
-                <div className="text-4xl font-display font-bold text-text">{stats.total_sessions}</div>
+                <div className="text-xs text-dim mb-1 tracking-widest">总演练次数</div>
+                <div className="text-5xl font-display font-bold text-text">{stats.total_sessions}</div>
               </div>
               <div className="h-[1px] w-full bg-gradient-to-r from-border to-transparent" />
               <div>
-                <div className="text-[10px] text-dim mb-1 tracking-widest">综合评级</div>
-                <div className="text-4xl font-display font-bold text-accent">{stats.avg_score || "-"}</div>
+                <div className="text-xs text-dim mb-1 tracking-widest">综合评级</div>
+                <div className="text-5xl font-display font-bold text-accent">{stats.avg_score || "-"}</div>
               </div>
             </div>
           </div>
@@ -191,29 +191,29 @@ export default function Profile() {
           {/* Mode Breakdown */}
           <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="bg-bg-subtle/50 border border-border/50 p-6 flex flex-col">
-              <h3 className="text-[10px] text-dim font-bold tracking-widest uppercase mb-6 border-l-2 border-primary pl-3">简历节点统计</h3>
+              <h3 className="text-xs text-dim font-bold tracking-widest uppercase mb-6 border-l-2 border-primary pl-3">简历节点统计</h3>
               <div className="flex items-center gap-8 mt-auto">
                 <div>
-                  <div className="text-[10px] text-dim mb-1 tracking-widest">周期数</div>
-                  <div className="text-2xl font-bold text-text">{stats.resume_sessions || 0}</div>
+                  <div className="text-xs text-dim mb-1 tracking-widest">周期数</div>
+                  <div className="text-3xl font-bold text-text">{stats.resume_sessions || 0}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-dim mb-1 tracking-widest">平均分</div>
-                  <div className="text-2xl font-bold text-primary">{stats.resume_avg_score ?? "-"}</div>
+                  <div className="text-xs text-dim mb-1 tracking-widest">平均分</div>
+                  <div className="text-3xl font-bold text-primary">{stats.resume_avg_score ?? "-"}</div>
                 </div>
               </div>
             </div>
             
             <div className="bg-bg-subtle/50 border border-border/50 p-6 flex flex-col">
-              <h3 className="text-[10px] text-dim font-bold tracking-widest uppercase mb-6 border-l-2 border-accent pl-3">专项节点统计</h3>
+              <h3 className="text-xs text-dim font-bold tracking-widest uppercase mb-6 border-l-2 border-accent pl-3">专项节点统计</h3>
               <div className="flex items-center gap-8 mt-auto">
                 <div>
-                  <div className="text-[10px] text-dim mb-1 tracking-widest">周期数</div>
-                  <div className="text-2xl font-bold text-text">{stats.drill_sessions || 0}</div>
+                  <div className="text-xs text-dim mb-1 tracking-widest">周期数</div>
+                  <div className="text-3xl font-bold text-text">{stats.drill_sessions || 0}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-dim mb-1 tracking-widest">平均分</div>
-                  <div className="text-2xl font-bold text-accent">{stats.drill_avg_score ?? "-"}</div>
+                  <div className="text-xs text-dim mb-1 tracking-widest">平均分</div>
+                  <div className="text-3xl font-bold text-accent">{stats.drill_avg_score ?? "-"}</div>
                 </div>
               </div>
             </div>
@@ -223,8 +223,8 @@ export default function Profile() {
         {/* Growth Trend */}
         {(stats.score_history || []).length >= 2 && (
           <div className="mb-10">
-            <h2 className="text-xs text-primary font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
-               <Activity size={14}/> 战力轨迹
+            <h2 className="text-sm text-primary font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
+               <Activity size={16}/> 战力轨迹
             </h2>
             <div className="bg-bg-subtle/50 border border-border/50 p-6 relative overflow-hidden group">
               <div className="absolute left-0 top-0 w-1 h-full bg-primary/50 group-hover:bg-primary transition-colors" />
@@ -236,8 +236,8 @@ export default function Profile() {
         {/* Topic Mastery */}
         {Object.keys(profile.topic_mastery || {}).length > 0 && (
           <div className="mb-10">
-            <h2 className="text-xs text-primary font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
-               <Crosshair size={14}/> 领域掌握度映射
+            <h2 className="text-sm text-primary font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
+               <Crosshair size={16}/> 领域掌握度映射
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(profile.topic_mastery).map(([topic, data]) => (
@@ -250,8 +250,8 @@ export default function Profile() {
                     <Target size={40} />
                   </div>
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-bold tracking-wider uppercase text-text">{topic}</span>
-                    <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 tracking-widest">
+                    <span className="text-base font-bold tracking-wider uppercase text-text">{topic}</span>
+                    <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 tracking-widest">
                       {data.score ?? (data.level ? data.level * 20 : 0)}/100
                     </span>
                   </div>
@@ -261,7 +261,7 @@ export default function Profile() {
                       style={{ width: `${data.score ?? (data.level ? data.level * 20 : 0)}%` }}
                     />
                   </div>
-                  {data.notes && <div className="text-[11px] text-dim leading-relaxed font-sans">{data.notes}</div>}
+                  {data.notes && <div className="text-sm text-dim leading-relaxed font-sans mt-2">{data.notes}</div>}
                 </div>
               ))}
             </div>
@@ -276,13 +276,13 @@ export default function Profile() {
               <div className="bg-bg-subtle border border-border/50 p-6 relative">
                  <div className="absolute top-0 left-0 w-full h-1 bg-red-500/50" />
                  <div className="flex items-center justify-between mb-5">
-                   <h2 className="text-xs text-red-400 font-bold tracking-widest uppercase">关键漏洞</h2>
-                   <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-[10px]">已检测 {weakActive.length} 处</span>
+                   <h2 className="text-sm text-red-400 font-bold tracking-widest uppercase">关键漏洞</h2>
+                   <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs">已检测 {weakActive.length} 处</span>
                  </div>
                 <CollapsibleList items={weakActive} limit={4} renderItem={(w, i) => (
-                  <div key={i} className="px-4 py-3 bg-card/50 border border-border/30 text-xs text-dim hover:text-text hover:border-red-400/30 transition-colors flex flex-col gap-2">
+                  <div key={i} className="px-4 py-3 bg-card/50 border border-border/30 text-sm text-dim hover:text-text hover:border-red-400/30 transition-colors flex flex-col gap-2">
                     <div className="leading-relaxed font-sans">{w.point}</div>
-                    <div className="flex items-center gap-3 text-[10px] tracking-widest uppercase text-red-400/70">
+                    <div className="flex items-center gap-3 text-xs tracking-widest uppercase text-red-400/70">
                       {w.topic && <span>[ 节点: {w.topic} ]</span>}
                       <span>出现频次: {w.times_seen}</span>
                     </div>
@@ -295,11 +295,11 @@ export default function Profile() {
             {(profile.strong_points || []).length > 0 && (
               <div className="bg-bg-subtle border border-border/50 p-6 relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-primary/50" />
-                <h2 className="text-xs text-primary font-bold tracking-widest uppercase mb-5">验证优势</h2>
+                <h2 className="text-sm text-primary font-bold tracking-widest uppercase mb-5">验证优势</h2>
                 <CollapsibleList items={profile.strong_points} limit={4} renderItem={(s, i) => (
-                  <div key={i} className="px-4 py-3 bg-card/50 border border-border/30 text-xs text-dim hover:text-text hover:border-primary/30 transition-colors flex flex-col gap-2">
+                  <div key={i} className="px-4 py-3 bg-card/50 border border-border/30 text-sm text-dim hover:text-text hover:border-primary/30 transition-colors flex flex-col gap-2">
                     <div className="leading-relaxed font-sans">{s.point}</div>
-                    {s.topic && <div className="text-[10px] tracking-widest uppercase text-primary/70">[ 节点: {s.topic} ]</div>}
+                    {s.topic && <div className="text-xs tracking-widest uppercase text-primary/70">[ 节点: {s.topic} ]</div>}
                   </div>
                 )} />
               </div>
@@ -310,14 +310,14 @@ export default function Profile() {
         {/* Resolved Vulnerabilities */}
         {weakImproved.length > 0 && (
           <div className="mb-10">
-            <h2 className="text-xs text-dim font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
+            <h2 className="text-sm text-dim font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
                已修复漏洞 <span className="text-primary">[{weakImproved.length}]</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {weakImproved.map((w, i) => (
                 <div key={i} className="flex items-start gap-3 px-4 py-3 bg-card/30 border border-border/30 opacity-60 hover:opacity-100 transition-opacity">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                  <span className="text-[11px] text-dim font-sans line-through">{w.point}</span>
+                  <span className="text-sm text-dim font-sans line-through">{w.point}</span>
                 </div>
               ))}
             </div>
@@ -328,21 +328,21 @@ export default function Profile() {
         {((profile.thinking_patterns?.strengths || []).length > 0 ||
           (profile.thinking_patterns?.gaps || []).length > 0) && (
           <div className="mb-10">
-            <h2 className="text-xs text-primary font-bold tracking-widest uppercase mb-4">认知模式</h2>
+            <h2 className="text-sm text-primary font-bold tracking-widest uppercase mb-4">认知模式</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {(profile.thinking_patterns.strengths || []).length > 0 && (
                 <div className="p-6 border border-primary/20 bg-primary/5">
-                  <h3 className="text-[10px] text-primary mb-4 tracking-widest uppercase">优势启发式</h3>
+                  <h3 className="text-xs text-primary mb-4 tracking-widest uppercase">优势启发式</h3>
                   <CollapsibleList items={profile.thinking_patterns.strengths} limit={3} renderItem={(s, i) => (
-                    <div key={i} className="text-xs text-dim mb-2 font-sans pl-3 border-l border-primary/40 leading-relaxed">{s}</div>
+                    <div key={i} className="text-sm text-dim mb-2 font-sans pl-3 border-l border-primary/40 leading-relaxed">{s}</div>
                   )} />
                 </div>
               )}
               {(profile.thinking_patterns.gaps || []).length > 0 && (
                 <div className="p-6 border border-red-500/20 bg-red-500/5">
-                  <h3 className="text-[10px] text-red-400 mb-4 tracking-widest uppercase">认知差距</h3>
+                  <h3 className="text-xs text-red-400 mb-4 tracking-widest uppercase">认知差距</h3>
                   <CollapsibleList items={profile.thinking_patterns.gaps} limit={3} renderItem={(g, i) => (
-                    <div key={i} className="text-xs text-dim mb-2 font-sans pl-3 border-l border-red-500/40 leading-relaxed">{g}</div>
+                    <div key={i} className="text-sm text-dim mb-2 font-sans pl-3 border-l border-red-500/40 leading-relaxed">{g}</div>
                   )} />
                 </div>
               )}
@@ -353,21 +353,21 @@ export default function Profile() {
         {/* Communication Protocol */}
         {profile.communication?.style && (
           <div className="mb-10">
-            <h2 className="text-xs text-primary font-bold tracking-widest uppercase mb-4">通信协议分析</h2>
+            <h2 className="text-sm text-primary font-bold tracking-widest uppercase mb-4">通信协议分析</h2>
             <div className="p-6 md:p-8 bg-bg-subtle border border-border/50 relative overflow-hidden">
               <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
               
-              <div className="text-sm font-bold text-text mb-6 uppercase tracking-wider font-sans">
+              <div className="text-base font-bold text-text mb-6 uppercase tracking-wider font-sans">
                 &gt; {profile.communication.style}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-sans">
                 {(profile.communication.habits || []).length > 0 && (
                   <div>
-                    <h3 className="text-[10px] text-dim font-mono tracking-widest uppercase mb-3">观察到的模式</h3>
+                    <h3 className="text-xs text-dim font-mono tracking-widest uppercase mb-3">观察到的模式</h3>
                     <ul className="space-y-2">
                       {profile.communication.habits.map((h, i) => (
-                        <li key={i} className="text-xs text-dim flex items-start gap-2">
+                        <li key={i} className="text-sm text-dim flex items-start gap-2">
                           <span className="text-primary/50 mt-0.5">-</span>
                           <span className="leading-relaxed">{h}</span>
                         </li>
@@ -378,10 +378,10 @@ export default function Profile() {
                 
                 {(profile.communication.suggestions || []).length > 0 && (
                   <div>
-                    <h3 className="text-[10px] text-accent font-mono tracking-widest uppercase mb-3">优化目标</h3>
+                    <h3 className="text-xs text-accent font-mono tracking-widest uppercase mb-3">优化目标</h3>
                     <ul className="space-y-2">
                       {profile.communication.suggestions.map((s, i) => (
-                        <li key={i} className="text-xs text-text flex items-start gap-2">
+                        <li key={i} className="text-sm text-text flex items-start gap-2">
                            <span className="text-accent mt-0.5">&gt;</span>
                            <span className="leading-relaxed">{s}</span>
                         </li>

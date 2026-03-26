@@ -66,24 +66,24 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 w-full min-h-full p-6 md:p-10 relative z-10 font-mono flex flex-col gap-8 text-text selection:bg-primary/30">
+    <div className="flex-1 w-full min-h-full p-6 md:p-10 lg:p-14 max-w-7xl mx-auto relative z-10 font-mono flex flex-col gap-8 text-text selection:bg-primary/30">
       
       {/* Header Area */}
       <motion.div variants={itemVariants} initial="hidden" animate="visible" className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-primary/20 pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-xs tracking-widest mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/30 text-primary text-sm tracking-widest mb-3">
             <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
             控制台已就绪
           </div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-300 to-accent">
+          <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-300 to-accent">
             训练矩阵
           </h1>
         </div>
         <div className="text-right flex flex-col md:items-end">
-          <div className="text-xs text-dim mb-1">系统状态</div>
-          <div className="flex items-center gap-3 text-sm">
-             <span className="flex items-center gap-1.5"><Activity size={14} className="text-primary"/> 极佳</span>
-             <span className="flex items-center gap-1.5 border-l border-primary/30 pl-3"><Database size={14} className="text-accent"/> 已同步</span>
+          <div className="text-sm text-dim mb-1">系统状态</div>
+          <div className="flex items-center gap-3 text-base">
+             <span className="flex items-center gap-1.5"><Activity size={16} className="text-primary"/> 极佳</span>
+             <span className="flex items-center gap-1.5 border-l border-primary/30 pl-3"><Database size={16} className="text-accent"/> 已同步</span>
           </div>
         </div>
       </motion.div>
@@ -103,8 +103,8 @@ export default function Home() {
               <Crosshair size={100} />
             </div>
             
-            <h2 className="text-lg font-display font-semibold mb-5 flex items-center gap-2 text-text">
-              <Zap className="text-accent" size={18} />
+            <h2 className="text-xl font-display font-semibold mb-5 flex items-center gap-2 text-text">
+              <Zap className="text-accent" size={20} />
               选择战斗序列
             </h2>
             
@@ -121,8 +121,8 @@ export default function Home() {
                   <FileText size={20} />
                 </div>
                 <div>
-                  <h3 className={`text-base font-bold mb-1 font-display tracking-wide ${mode === "resume" ? "text-primary" : "text-text"}`}>简历模拟面试</h3>
-                  <p className="text-xs text-dim leading-relaxed font-sans">基于上传的 PDF 简历进行全频段扫描与连环追问。</p>
+                  <h3 className={`text-lg font-bold mb-1 font-display tracking-wide ${mode === "resume" ? "text-primary" : "text-text"}`}>简历模拟面试</h3>
+                  <p className="text-sm text-dim leading-relaxed font-sans">基于上传的 PDF 简历进行全频段扫描与连环追问。</p>
                 </div>
                 {/* Corner accent */}
                 {mode === "resume" && <div className="absolute top-0 right-0 w-3 h-3 bg-primary" />}
@@ -140,8 +140,8 @@ export default function Home() {
                   <ShieldCheck size={20} />
                 </div>
                 <div>
-                  <h3 className={`text-base font-bold mb-1 font-display tracking-wide ${mode === "topic_drill" ? "text-accent" : "text-text"}`}>专项强化训练</h3>
-                  <p className="text-xs text-dim leading-relaxed font-sans">针对特定领域进行高强度抗压测试与盲区扫荡。</p>
+                  <h3 className={`text-lg font-bold mb-1 font-display tracking-wide ${mode === "topic_drill" ? "text-accent" : "text-text"}`}>专项强化训练</h3>
+                  <p className="text-sm text-dim leading-relaxed font-sans">针对特定领域进行高强度抗压测试与盲区扫荡。</p>
                 </div>
                 {/* Corner accent */}
                 {mode === "topic_drill" && <div className="absolute top-0 right-0 w-3 h-3 bg-accent" />}
@@ -160,26 +160,26 @@ export default function Home() {
                 className="bg-bg-subtle border border-primary/20 p-6 relative overflow-hidden"
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-transparent" />
-                <h3 className="text-xs font-bold text-primary mb-4 tracking-widest uppercase">配置数据源</h3>
+                <h3 className="text-sm font-bold text-primary mb-4 tracking-widest uppercase">配置数据源</h3>
                 {resumeFile ? (
                   <div className="flex items-center justify-between p-4 bg-card border border-primary/30">
                     <div className="flex items-center gap-3">
-                      <Terminal size={18} className="text-primary" />
+                      <Terminal size={20} className="text-primary" />
                       <div>
-                        <div className="font-semibold text-text text-sm">{resumeFile.filename}</div>
-                        <div className="text-xs text-dim">状态: 解析就绪 // {(resumeFile.size / 1024).toFixed(0)} KB</div>
+                        <div className="font-semibold text-text text-base">{resumeFile.filename}</div>
+                        <div className="text-sm text-dim">状态: 解析就绪 // {(resumeFile.size / 1024).toFixed(0)} KB</div>
                       </div>
                     </div>
-                    <label className="px-4 py-2 bg-primary/10 text-primary border border-primary/30 text-xs font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/20 transition-colors">
+                    <label className="px-4 py-2 bg-primary/10 text-primary border border-primary/30 text-sm font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/20 transition-colors">
                       {uploading ? "正在覆写..." : "重新上传"}
                       <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
                     </label>
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center p-8 border border-dashed border-primary/40 bg-card/30 cursor-pointer hover:bg-primary/5 transition-all group">
-                    <FileText size={28} className="text-dim group-hover:text-primary transition-colors mb-3" />
-                    <span className="font-bold text-text text-sm mb-1">{uploading ? "正在上传至核心节点..." : "点击或拖拽上传 PDF 简历"}</span>
-                    <span className="text-xs text-dim">最大负载体积: 10MB</span>
+                    <FileText size={32} className="text-dim group-hover:text-primary transition-colors mb-3" />
+                    <span className="font-bold text-text text-base mb-1">{uploading ? "正在上传至核心节点..." : "点击或拖拽上传 PDF 简历"}</span>
+                    <span className="text-sm text-dim">最大负载体积: 10MB</span>
                     <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} disabled={uploading} />
                   </label>
                 )}
@@ -195,7 +195,7 @@ export default function Home() {
                 className="bg-bg-subtle border border-accent/20 p-6 relative overflow-hidden"
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-accent to-transparent" />
-                <h3 className="text-xs font-bold text-accent mb-4 tracking-widest uppercase">选择目标领域</h3>
+                <h3 className="text-sm font-bold text-accent mb-4 tracking-widest uppercase">选择目标领域</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {Object.entries(topics).map(([key, info]) => (
                     <TopicCard
@@ -223,7 +223,7 @@ export default function Home() {
                 <button
                   disabled={!canStart || loading}
                   onClick={handleStart}
-                  className={`relative w-full py-4 font-display font-black text-lg tracking-widest uppercase overflow-hidden group
+                  className={`relative w-full py-5 font-display font-black text-xl tracking-widest uppercase overflow-hidden group
                     ${(!canStart || loading) 
                       ? "bg-bg-subtle text-dim cursor-not-allowed border border-border/50" 
                       : "bg-primary text-bg shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] border border-transparent"}`}
@@ -266,14 +266,14 @@ export default function Home() {
             <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
             
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display font-semibold text-sm tracking-widest text-primary uppercase">
+              <h3 className="font-display font-semibold text-base tracking-widest text-primary uppercase">
                 战斗情报
               </h3>
               <button 
                 onClick={() => navigate("/profile")}
-                className="text-xs text-dim hover:text-primary transition-colors flex items-center gap-1"
+                className="text-sm text-dim hover:text-primary transition-colors flex items-center gap-1"
               >
-                查看完整日志 <ChevronRight size={12} />
+                查看完整日志 <ChevronRight size={14} />
               </button>
             </div>
 
@@ -281,14 +281,14 @@ export default function Home() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-bg-subtle border border-border p-3">
-                    <div className="text-[10px] text-dim mb-1">总演练次数</div>
-                    <div className="text-2xl font-bold text-text">
+                    <div className="text-xs text-dim mb-1">总演练次数</div>
+                    <div className="text-3xl font-bold text-text">
                       {profile.stats.total_sessions}
                     </div>
                   </div>
                   <div className="bg-bg-subtle border border-border p-3">
-                    <div className="text-[10px] text-dim mb-1">综合战力评级</div>
-                    <div className="text-2xl font-bold text-accent">
+                    <div className="text-xs text-dim mb-1">综合战力评级</div>
+                    <div className="text-3xl font-bold text-accent">
                       {profile.stats.avg_score || "-"}
                     </div>
                   </div>
@@ -296,14 +296,14 @@ export default function Home() {
 
                 {profile.topic_mastery && Object.keys(profile.topic_mastery).length > 0 && (
                   <div>
-                    <div className="text-[10px] text-dim mb-3">领域掌握度映射</div>
+                    <div className="text-xs text-dim mb-3">领域掌握度映射</div>
                     <div className="space-y-3">
                       {Object.entries(profile.topic_mastery)
                         .sort((a, b) => (b[1].score || 0) - (a[1].score || 0))
                         .slice(0, 3)
                         .map(([t, d], idx) => (
                           <div key={t} className="relative">
-                            <div className="flex justify-between text-xs mb-1 font-sans">
+                            <div className="flex justify-between text-sm mb-1 font-sans">
                               <span className="text-text">{t}</span>
                               <span className="text-primary font-mono">{d.score || 0}</span>
                             </div>
@@ -323,19 +323,19 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 opacity-50">
-                 <Database size={24} className="mb-3 text-dim" />
-                 <p className="text-xs text-dim text-center">暂无数据记录<br/>请完成首次演练以激活看板</p>
+                 <Database size={32} className="mb-3 text-dim" />
+                 <p className="text-sm text-dim text-center">暂无数据记录<br/>请完成首次演练以激活看板</p>
               </div>
             )}
           </div>
 
           {/* Quick Tool */}
           <div className="bg-bg-subtle border border-border/50 hover:border-teal-400/50 transition-colors p-1 group cursor-pointer" onClick={() => navigate("/recording")}>
-            <div className="border border-border/50 border-dashed p-4 flex items-center justify-between text-sm group-hover:bg-teal-400/5 transition-colors">
+            <div className="border border-border/50 border-dashed p-4 flex items-center justify-between text-base group-hover:bg-teal-400/5 transition-colors">
               <span className="font-semibold text-text group-hover:text-teal-400 transition-colors flex items-center gap-2">
-                <Mic size={16} /> 外部录音转录与复盘
+                <Mic size={18} /> 外部录音转录与复盘
               </span>
-              <ChevronRight size={16} className="text-dim group-hover:text-teal-400 group-hover:translate-x-1 transition-all" />
+              <ChevronRight size={18} className="text-dim group-hover:text-teal-400 group-hover:translate-x-1 transition-all" />
             </div>
           </div>
           
