@@ -33,3 +33,8 @@ llm.md
 .claude/
 .codex/
 不管这个文件/
+
+.agents/
+.opencode/
+.agent/
+
