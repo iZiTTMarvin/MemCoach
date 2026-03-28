@@ -82,7 +82,7 @@ export default function Landing() {
           </motion.h1>
 
           <motion.p variants={itemVariants} className="text-lg md:text-xl text-dim max-w-2xl font-light mb-12">
-            摆脱刻板的题海战术。运用神经语义网络与动态知识图谱，精准扫描你的能力盲区，构建专属的抗压训练场。
+            告别无效题海。基于你的真实能力画像，动态生成针对性面试场景，精准打击薄弱环节，打造真正有效的技术提升路径。
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-6">
