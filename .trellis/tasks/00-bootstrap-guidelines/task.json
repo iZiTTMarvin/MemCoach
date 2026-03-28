@@ -2,13 +2,13 @@
   "id": "00-bootstrap-guidelines",
   "name": "Bootstrap Guidelines",
   "description": "Fill in project development guidelines for AI agents",
-  "status": "in_progress",
+  "status": "done",
   "dev_type": "docs",
   "priority": "P1",
   "creator": "许皓辰",
   "assignee": "许皓辰",
   "createdAt": "2026-03-28",
-  "completedAt": null,
+  "completedAt": "2026-03-28",
   "commit": null,
   "subtasks": [
     {
