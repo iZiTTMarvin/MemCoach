@@ -1,0 +1,4 @@
+{"file": ".trellis/workflow.md", "reason": "Project workflow and conventions"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend development guide"}
+{"file": ".trellis\\tasks\\03-29-github-project-interview-analyzer\\prd.md", "reason": "Parent phase-1 design source"}
+{"file": ".trellis\\tasks\\03-30-project-analysis-orchestration-api\\prd.md", "reason": "Child task scope and acceptance"}

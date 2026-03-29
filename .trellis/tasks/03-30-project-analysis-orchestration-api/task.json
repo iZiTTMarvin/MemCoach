@@ -1,0 +1,49 @@
+{
+  "id": "project-analysis-orchestration-api",
+  "name": "project-analysis-orchestration-api",
+  "title": "项目分析任务编排与 API",
+  "description": "实现项目分析任务的后端编排、状态机与 API，包括 resolve、create、poll、result 获取，以及最小可用的产物生成流程",
+  "status": "planning",
+  "dev_type": "backend",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-30",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "backend/main.py",
+    "backend/storage/sessions.py",
+    "backend/llm_provider.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "编排子任务。依赖数据模型与 GitHub 源接入，负责把仓库解析、过滤、生成和状态落盘串成可轮询的长任务。训练入口本身不在这里闭环，但要为结果页返回完整 result payload。",
+  "meta": {}
+}

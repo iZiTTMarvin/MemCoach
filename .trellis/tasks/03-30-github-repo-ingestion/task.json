@@ -1,0 +1,48 @@
+{
+  "id": "github-repo-ingestion",
+  "name": "github-repo-ingestion",
+  "title": "GitHub 仓库解析与快照过滤",
+  "description": "实现公开 GitHub 仓库的 URL 解析、默认分支与分支列表获取、commit 锁定、archive 下载、安全解压与文件过滤",
+  "status": "planning",
+  "dev_type": "backend",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-30",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "backend/config.py",
+    "backend/indexer.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "源接入子任务。目标是把公开仓库变成可供分析的安全文本输入，并明确体积、文件数、二进制文件和依赖目录的过滤边界。本任务不负责写数据库状态、不暴露最终 API 页面。",
+  "meta": {}
+}

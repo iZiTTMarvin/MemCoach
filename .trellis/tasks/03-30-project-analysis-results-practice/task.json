@@ -1,0 +1,50 @@
+{
+  "id": "project-analysis-results-practice",
+  "name": "project-analysis-results-practice",
+  "title": "结果工作区与项目答题训练入口",
+  "description": "实现结果工作区、证据展示、项目经历草稿、进入项目答题训练入口，并完成 Phase 1 端到端验收",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-30",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "frontend/src/pages/Interview.jsx",
+    "frontend/src/pages/Review.jsx",
+    "frontend/src/api/interview.js",
+    "backend/main.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "闭环子任务。目标是把结果页真正接回 MemCoach 训练主线，而不是停在静态报告。除了前端工作区，还需要最小后端接口支持，并负责按测试计划做 Phase 1 验收。",
+  "meta": {}
+}

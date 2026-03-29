@@ -1,0 +1,49 @@
+{
+  "id": "project-analysis-data-model",
+  "name": "project-analysis-data-model",
+  "title": "项目分析数据模型与持久化",
+  "description": "为 GitHub 项目分析官 Phase 1 建立独立的数据模型、结果契约与持久化能力，避免污染现有 sessions 语义",
+  "status": "planning",
+  "dev_type": "backend",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-30",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "backend/storage/sessions.py",
+    "backend/models.py",
+    "backend/config.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "基础设施子任务。目标是新增 project_analyses 独立存储与结果 schema，为后续 GitHub 解析、任务编排和结果页提供稳定契约。不在本任务内实现 GitHub 下载、前端页面或训练入口。",
+  "meta": {}
+}
