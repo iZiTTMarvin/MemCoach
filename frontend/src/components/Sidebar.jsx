@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home, User, BookOpen, GitFork, Clock, Mic,
-  Sun, Moon, LogOut, Menu, X, Terminal
+  Sun, Moon, LogOut, Menu, X, Terminal, FolderGit2
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { path: "/graph", label: "图谱 / GRAPH", icon: GitFork },
   { path: "/history", label: "记录 / HISTORY", icon: Clock },
   { path: "/recording", label: "复盘 / RECORDING", icon: Mic },
+  { path: "/project-analysis", label: "项目 / PROJECT", icon: FolderGit2 },
 ];
 
 export default function Sidebar() {

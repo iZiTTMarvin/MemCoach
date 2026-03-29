@@ -7,6 +7,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
+from pydantic import BaseModel, Field
 
 from backend.models import (
     StartInterviewRequest, ChatRequest, EndDrillRequest,
@@ -31,6 +32,21 @@ from backend.auth import (
     init_users_table, ensure_default_user,
     create_user, authenticate_user, create_token, get_current_user,
 )
+from backend.project_analysis.pipeline import (
+    AnalysisPipelineError,
+    STATUS_ANALYZING,
+    STATUS_CANCELLED,
+    STATUS_COMPLETED,
+    STATUS_FAILED,
+    STATUS_FETCHING,
+    STATUS_FILTERING,
+    STATUS_QUEUED,
+    cancel_analysis_job,
+    create_analysis_job,
+    get_analysis,
+    resolve_repo_preview,
+    run_analysis_job,
+)
 
 app = FastAPI(title="MemCoach", version="0.2.0")
 
@@ -47,6 +63,139 @@ router = APIRouter(prefix="/api")
 _graphs: dict[str, dict] = {}
 # 专项训练会话数据
 _drill_sessions: dict[str, dict] = {}
+
+
+class ProjectAnalysisResolveRequest(BaseModel):
+    """项目分析仓库解析请求."""
+
+    repo_url: str
+
+
+class ProjectAnalysisCreateRequest(BaseModel):
+    """项目分析任务创建请求."""
+
+    repo_url: str
+    branch: str | None = None
+    role_summary: str = ""
+    owned_scopes: list[str] = Field(default_factory=list)
+
+
+def _analysis_public_view(record: dict, include_result: bool = False) -> dict:
+    """返回前端可直接消费的分析任务视图."""
+    status = record.get("status")
+    base = {
+        "analysis_id": record.get("analysis_id"),
+        "repo_url": record.get("repo_url"),
+        "repo_name": record.get("repo_name"),
+        "branch": record.get("branch"),
+        "commit_sha": record.get("commit_sha"),
+        "analysis_time": ((record.get("result") or {}).get("metadata") or {}).get("analyzed_at"),
+        "status": status,
+        "role_summary": record.get("role_summary", ""),
+        "owned_scopes": record.get("owned_scopes", []),
+        "error_code": record.get("error_code"),
+        "error_message": record.get("error_message"),
+        "created_at": record.get("created_at"),
+        "updated_at": record.get("updated_at"),
+        "metadata": record.get("metadata", {}),
+        "message": _analysis_status_message(status),
+        "progress_message": _analysis_status_message(status),
+    }
+    if include_result:
+        base["result"] = record.get("result", {})
+    return base
+
+
+def _analysis_status_message(status: str | None) -> str:
+    """返回状态对应的可展示提示。"""
+    mapping = {
+        STATUS_QUEUED: "任务已创建，等待分析。",
+        STATUS_FETCHING: "正在拉取仓库快照。",
+        STATUS_FILTERING: "正在过滤高价值文件。",
+        STATUS_ANALYZING: "正在生成项目深挖问题与拆解结果。",
+        STATUS_COMPLETED: "分析已完成。",
+        STATUS_FAILED: "分析失败，请查看错误信息。",
+        STATUS_CANCELLED: "分析任务已取消。",
+    }
+    return mapping.get(status or "", "未知状态。")
+
+
+def _build_project_practice_questions(record: dict) -> list[dict]:
+    """将项目分析 questions 转换为专项训练题目结构。"""
+    result = record.get("result") or {}
+    questions = result.get("questions") or []
+    practice_questions: list[dict] = []
+    for index, question in enumerate(questions, start=1):
+        practice_questions.append(
+            {
+                "id": index,
+                "question": question.get("question") or f"项目问题 {index}",
+                "difficulty": 3,
+                "focus_area": "project_analysis",
+                "reference_answer_points": question.get("reference_answer_points", []),
+                "follow_up_directions": question.get("follow_up_directions", []),
+                "evidence": question.get("evidence", []),
+            }
+        )
+    return practice_questions
+
+
+def _evaluate_project_practice_answers(questions: list[dict], answers: list[dict]) -> tuple[list[dict], dict, str]:
+    """对项目答题训练做最小可用评估，避免依赖知识库 topic。"""
+    answer_map = {a["question_id"]: a["answer"] for a in answers}
+    scores: list[dict] = []
+    total_score = 0.0
+    answered_count = 0
+    new_weak_points: list[str] = []
+    new_strong_points: list[str] = []
+
+    for question in questions:
+        qid = question["id"]
+        answer = (answer_map.get(qid) or "").strip()
+        reference_points = question.get("reference_answer_points", [])
+
+        if not answer:
+            scores.append(
+                {
+                    "question_id": qid,
+                    "score": None,
+                    "assessment": "未作答",
+                    "improvement": "先尝试围绕项目事实给出完整表达。",
+                    "difficulty": question.get("difficulty", 3),
+                }
+            )
+            new_weak_points.append(f"Q{qid}: 未能围绕项目问题给出回答")
+            continue
+
+        answered_count += 1
+        score = 8 if len(answer) >= 80 else 6 if len(answer) >= 30 else 4
+        total_score += score
+        assessment = "回答较完整，已覆盖项目背景与实现细节。" if score >= 8 else "回答有基本框架，但可以补充更多项目事实与取舍。" if score >= 6 else "回答过短，缺少足够的项目细节支撑。"
+        improvement = "补充你负责的模块、具体实现与权衡过程。"
+        scores.append(
+            {
+                "question_id": qid,
+                "score": score,
+                "assessment": assessment,
+                "improvement": improvement,
+                "difficulty": question.get("difficulty", 3),
+                "reference_answer_points": reference_points,
+            }
+        )
+        if score >= 8:
+            new_strong_points.append(f"Q{qid}: 能较完整表达项目实现与思路")
+        else:
+            new_weak_points.append(f"Q{qid}: 项目表达还不够具体")
+
+    avg_score = round(total_score / answered_count, 1) if answered_count else 0
+    overall = {
+        "avg_score": avg_score,
+        "summary": "项目答题训练已完成。当前评估基于回答完整度与项目表达覆盖度给出。",
+        "new_weak_points": new_weak_points,
+        "new_strong_points": new_strong_points,
+    }
+    review = _format_drill_review(questions, answers, scores, overall)
+    return scores, overall, review
 
 
 @app.on_event("startup")
@@ -654,6 +803,19 @@ async def end_interview(session_id: str, body: EndDrillRequest = None,
         questions = entry["questions"]
         answers = body.answers if body and body.answers else []
 
+        if entry.get("mode") == "project_analysis":
+            save_drill_answers(session_id, answers, user_id=user_id)
+            scores, overall, review = _evaluate_project_practice_answers(questions, answers)
+            save_review(session_id, review, scores, overall.get("new_weak_points", []), overall, user_id=user_id)
+            del _drill_sessions[session_id]
+            return {
+                "session_id": session_id,
+                "mode": "topic_drill",
+                "review": review,
+                "scores": scores,
+                "overall": overall,
+            }
+
         # Save answers to SQLite
         save_drill_answers(session_id, answers, user_id=user_id)
 
@@ -1050,6 +1212,112 @@ async def delete_session_endpoint(session_id: str, user_id: str = Depends(get_cu
 async def get_interview_topics(user_id: str = Depends(get_current_user)):
     """获取已完成会话中的不同话题（用于过滤下拉框）"""
     return list_distinct_topics(user_id=user_id)
+
+
+# ── 项目分析（Phase 1）──
+
+@router.post("/project-analysis/resolve")
+async def project_analysis_resolve(
+    req: ProjectAnalysisResolveRequest,
+    user_id: str = Depends(get_current_user),
+):
+    """解析公开 GitHub 仓库并返回默认分支与可选分支."""
+    try:
+        return resolve_repo_preview(req.repo_url, user_id)
+    except AnalysisPipelineError as e:
+        raise HTTPException(400, str(e))
+
+
+@router.post("/project-analysis")
+async def project_analysis_create(
+    req: ProjectAnalysisCreateRequest,
+    background_tasks: BackgroundTasks,
+    user_id: str = Depends(get_current_user),
+):
+    """创建项目分析任务，并通过后台任务执行分析."""
+    try:
+        record = create_analysis_job(
+            repo_url=req.repo_url,
+            user_id=user_id,
+            branch=req.branch,
+            role_summary=req.role_summary,
+            owned_scopes=req.owned_scopes,
+        )
+    except AnalysisPipelineError as e:
+        raise HTTPException(400, str(e))
+
+    background_tasks.add_task(run_analysis_job, record["analysis_id"], user_id)
+    return _analysis_public_view(record)
+
+
+@router.get("/project-analysis/{analysis_id}")
+async def project_analysis_status(analysis_id: str, user_id: str = Depends(get_current_user)):
+    """查询项目分析任务状态."""
+    record = get_analysis(analysis_id, user_id)
+    if not record:
+        raise HTTPException(404, "Analysis not found.")
+    return _analysis_public_view(record)
+
+
+@router.get("/project-analysis/{analysis_id}/status")
+async def project_analysis_status_alias(analysis_id: str, user_id: str = Depends(get_current_user)):
+    """查询项目分析任务状态（前端轮询别名接口）。"""
+    record = get_analysis(analysis_id, user_id)
+    if not record:
+        raise HTTPException(404, "Analysis not found.")
+    return _analysis_public_view(record)
+
+
+@router.post("/project-analysis/{analysis_id}/cancel")
+async def project_analysis_cancel(analysis_id: str, user_id: str = Depends(get_current_user)):
+    """取消尚未结束的项目分析任务。"""
+    record = cancel_analysis_job(analysis_id, user_id)
+    if not record:
+        raise HTTPException(404, "Analysis not found.")
+    return _analysis_public_view(record)
+
+
+@router.get("/project-analysis/{analysis_id}/result")
+async def project_analysis_result(analysis_id: str, user_id: str = Depends(get_current_user)):
+    """获取项目分析结果（仅 completed 状态可读取）."""
+    record = get_analysis(analysis_id, user_id)
+    if not record:
+        raise HTTPException(404, "Analysis not found.")
+    if record.get("status") != STATUS_COMPLETED:
+        raise HTTPException(409, f"Analysis not completed. Current status: {record.get('status')}")
+    return _analysis_public_view(record, include_result=True)
+
+
+@router.post("/project-analysis/{analysis_id}/practice")
+async def project_analysis_practice(analysis_id: str, user_id: str = Depends(get_current_user)):
+    """将项目分析结果桥接为一次专项训练会话。"""
+    record = get_analysis(analysis_id, user_id)
+    if not record:
+        raise HTTPException(404, "Analysis not found.")
+    if record.get("status") != STATUS_COMPLETED:
+        raise HTTPException(409, "Analysis not completed.")
+
+    questions = _build_project_practice_questions(record)
+    if not questions:
+        raise HTTPException(400, "Analysis result does not contain practice questions.")
+
+    session_id = str(uuid.uuid4())[:8]
+    topic = f"project::{record.get('repo_name', 'analysis')}"
+    create_session(session_id, mode="topic_drill", topic=topic, questions=questions, user_id=user_id)
+    _drill_sessions[session_id] = {
+        "topic": topic,
+        "questions": questions,
+        "user_id": user_id,
+        "mode": "project_analysis",
+        "analysis_id": analysis_id,
+        "result": record.get("result", {}),
+    }
+    return {
+        "session_id": session_id,
+        "mode": "topic_drill",
+        "topic": topic,
+        "questions": questions,
+    }
 
 
 app.include_router(router)

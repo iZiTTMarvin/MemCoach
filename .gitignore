@@ -37,4 +37,11 @@ llm.md
 .agents/
 .opencode/
 .agent/
+.tmp-tests/
+.tmp-project-analysis/
+.tmp_test_db/
+.tmp_test_project_analysis/
+.tmp-test-workspace/
+data/pa_test_*/
+data/project_analyses_test_*/
 

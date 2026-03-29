@@ -5,6 +5,10 @@
   - 新建 5 个 Phase 1 子任务，覆盖数据模型、GitHub 源接入、后端任务编排、前端导入流、结果与训练闭环。
   - 为每个子任务补充 `task.json` 描述、`prd.md` 边界与 Trellis 上下文文件，形成可继续推进的任务树。
   - 更新父任务元数据，记录 autoplan 后的执行顺序与子任务结构。
+- **修复**: 收口 GitHub 项目分析官 Phase 1 的跨层整合问题。
+  - 统一项目分析后端正式契约、存储与编排逻辑，补齐 `status / result / cancel / practice` 相关链路。
+  - 接通导入向导到结果工作区、结果工作区到项目答题训练的前后端路径。
+  - 更新 `.trellis/spec/` 相关规范并同步到 `src/templates/markdown/spec/`，固化本次跨层契约教训。
 
 ## 2026-03-27
 - **UI/UX**: 优化面试(Interview)页面的布局及字体大小。

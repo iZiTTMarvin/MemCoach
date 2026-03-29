@@ -13,6 +13,8 @@ import Knowledge from "./pages/Knowledge";
 import TopicDetail from "./pages/TopicDetail";
 import Graph from "./pages/Graph";
 import RecordingAnalysis from "./pages/RecordingAnalysis";
+import ProjectAnalysis from "./pages/ProjectAnalysis";
+import ProjectAnalysisResult from "./pages/ProjectAnalysisResult";
 import NotFound from "./pages/NotFound";
 
 function ProtectedRoute({ children }) {
@@ -75,6 +77,8 @@ function AppRoutes() {
                 <Route path="/knowledge" element={<Knowledge />} />
                 <Route path="/graph" element={<Graph />} />
                 <Route path="/recording" element={<RecordingAnalysis />} />
+                <Route path="/project-analysis" element={<ProjectAnalysis />} />
+                <Route path="/project-analysis/:analysisId/result" element={<ProjectAnalysisResult />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AppShell>
