@@ -1,0 +1,3 @@
+{"file": "backend/project_analysis/pipeline.py", "reason": "当前路径与任务状态机问题集中在这里"}
+{"file": "backend/project_analysis/filtering.py", "reason": "需要定位 relative_to 与路径归一化行为"}
+{"file": ".trellis/tasks/03-31-import-pipeline-hardening/prd.md", "reason": "本任务的排障边界与验收标准"}

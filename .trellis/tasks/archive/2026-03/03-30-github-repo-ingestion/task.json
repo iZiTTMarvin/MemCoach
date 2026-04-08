@@ -1,0 +1,48 @@
+{
+  "id": "github-repo-ingestion",
+  "name": "github-repo-ingestion",
+  "title": "GitHub 仓库解析与快照过滤",
+  "description": "实现公开 GitHub 仓库的 URL 解析、默认分支与分支列表获取、commit 锁定、archive 下载、安全解压与文件过滤",
+  "status": "archived",
+  "dev_type": "backend",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-30",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "backend/config.py",
+    "backend/indexer.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "已归档。该任务下沉淀了 archive 下载、安全解压和过滤底座，但原始任务边界围绕公开 URL 导入设计，已在 2026-03-31 被 GitHub 绑定公开仓库版 Phase 1 替代。后续接入与改造由 03-31-authorized-public-repo-discovery、03-31-branch-scope-discovery 和 03-31-import-pipeline-hardening 承接。",
+  "meta": {}
+}

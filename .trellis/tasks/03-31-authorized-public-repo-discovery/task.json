@@ -1,15 +1,15 @@
 {
-  "id": "project-analysis-orchestration-api",
-  "name": "project-analysis-orchestration-api",
-  "title": "项目分析任务编排与 API",
-  "description": "实现项目分析任务的后端编排、状态机与 API，包括 resolve、create、poll、result 获取，以及最小可用的产物生成流程",
+  "id": "authorized-public-repo-discovery",
+  "name": "authorized-public-repo-discovery",
+  "title": "已授权公开仓库发现与选择",
+  "description": "在 GitHub 已连接前提下，拉取当前用户已授权的公开仓库列表，支持搜索、分页与仓库选择，替代旧的公开 URL 手工输入主入口",
   "status": "planning",
-  "dev_type": "backend",
+  "dev_type": "fullstack",
   "scope": null,
   "priority": "P1",
   "creator": "许皓辰",
   "assignee": "许皓辰",
-  "createdAt": "2026-03-30",
+  "createdAt": "2026-03-31",
   "completedAt": null,
   "branch": null,
   "base_branch": "main",
@@ -40,10 +40,11 @@
   "parent": "03-29-github-project-interview-analyzer",
   "relatedFiles": [
     "backend/main.py",
-    "backend/storage/sessions.py",
-    "backend/llm_provider.py",
+    "backend/config.py",
+    "frontend/src/pages/ProjectAnalysis.jsx",
+    "frontend/src/api/projectAnalysis.js",
     ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
   ],
-  "notes": "编排子任务。依赖数据模型与 GitHub 源接入，负责把仓库解析、过滤、生成和状态落盘串成可轮询的长任务。训练入口本身不在这里闭环，但要为结果页返回完整 result payload。",
+  "notes": "仓库发现任务必须围绕“已授权公开仓库”展开，而不是继续扩展 repo_url 解析。Phase 1 允许保留 URL 导入作为兼容能力，但主入口和主要验证路径必须切到仓库列表选择。",
   "meta": {}
 }

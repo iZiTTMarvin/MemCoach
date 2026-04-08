@@ -1,8 +1,8 @@
 {
   "id": "github-project-interview-analyzer",
   "name": "github-project-interview-analyzer",
-  "title": "GitHub 项目分析官一期方案",
-  "description": "为 MemCoach 设计 GitHub 项目分析官一期方案，定义输入方式、分析边界、核心产物与分阶段路线图",
+  "title": "GitHub 项目分析官 Phase 1（GitHub 绑定公开仓库版）",
+  "description": "为 MemCoach 设计并执行新的 GitHub 项目分析官 Phase 1：通过 GitHub 绑定获取用户已授权的公开仓库，支持仓库/分支选择、目录优先加文件补充的负责范围确认、异步分析、结果工作区与项目答题训练闭环",
   "status": "planning",
   "dev_type": "fullstack",
   "scope": null,
@@ -37,21 +37,25 @@
   "pr_url": null,
   "subtasks": [],
   "children": [
-    "03-30-project-analysis-data-model",
-    "03-30-github-repo-ingestion",
-    "03-30-project-analysis-orchestration-api",
-    "03-30-project-analysis-import-flow",
-    "03-30-project-analysis-results-practice"
+    "03-31-github-app-auth-connection",
+    "03-31-authorized-public-repo-discovery",
+    "03-31-branch-scope-discovery",
+    "03-31-analysis-orchestration-v2",
+    "03-31-result-workspace-practice-bridge",
+    "03-31-import-pipeline-hardening"
   ],
   "parent": null,
   "relatedFiles": [
+    "backend/auth.py",
     "backend/main.py",
-    "backend/indexer.py",
-    "backend/storage/sessions.py",
-    "frontend/src/api/interview.js",
-    "frontend/src/pages/Home.jsx",
-    "frontend/src/pages/Interview.jsx"
+    "backend/project_analysis/github_source.py",
+    "backend/project_analysis/pipeline.py",
+    "backend/storage/project_analyses.py",
+    "frontend/src/api/projectAnalysis.js",
+    "frontend/src/pages/ProjectAnalysis.jsx",
+    "frontend/src/pages/ProjectAnalysisResult.jsx",
+    "frontend/src/components/Sidebar.jsx"
   ],
-  "notes": "一期方案已确认：公开 GitHub 仓库 URL 入口、默认分支预选并允许切换、一次分析锁定单个 commit、临时代码快照分析、删除源码后仅保留精简分析包；autoplan 已完成并回写到 prd.md，补充了负责范围声明、证据溯源、异步任务模型、结果到训练入口、独立 project_analyses 存储模型与测试计划工件（C:\\Users\\xuhaochen\\.gstack\\projects\\MemCoach\\xuhaochen-main-test-plan-20260330-003536.md）。Phase 1 已拆分为 5 个 Trellis 子任务，推荐顺序：1) project-analysis-data-model 与 github-repo-ingestion 可并行；2) project-analysis-orchestration-api；3) project-analysis-import-flow；4) project-analysis-results-practice。",
+  "notes": "2026-03-31 路线重构：父任务从“公开 GitHub URL + 手填负责范围”的旧入口切换为“GitHub 绑定 + 已授权公开仓库列表 + 分支选择 + 目录优先/文件补充的混合范围确认”。私有仓库明确延后到 Phase 2，分析结果仍需回到 MemCoach 的项目答题训练主线。03-30 的五个旧子任务已归档到 .trellis/tasks/archive/2026-03/，这些任务下沉淀的 project_analyses 存储、archive 下载、过滤、结果页和训练桥接代码应视为可复用底座，而不是当前产品路线的任务边界。推荐顺序：1) github-app-auth-connection；2) authorized-public-repo-discovery；3) branch-scope-discovery；4) analysis-orchestration-v2；5) result-workspace-practice-bridge；6) import-pipeline-hardening 并行补齐底座稳定性。",
   "meta": {}
 }

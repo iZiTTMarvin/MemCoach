@@ -3,7 +3,7 @@
   "name": "project-analysis-results-practice",
   "title": "结果工作区与项目答题训练入口",
   "description": "实现结果工作区、证据展示、项目经历草稿、进入项目答题训练入口，并完成 Phase 1 端到端验收",
-  "status": "planning",
+  "status": "archived",
   "dev_type": "fullstack",
   "scope": null,
   "priority": "P1",
@@ -45,6 +45,6 @@
     "backend/main.py",
     ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
   ],
-  "notes": "闭环子任务。目标是把结果页真正接回 MemCoach 训练主线，而不是停在静态报告。除了前端工作区，还需要最小后端接口支持，并负责按测试计划做 Phase 1 验收。",
+  "notes": "已归档。该任务已沉淀结果页和训练桥接方向，但它属于旧入口闭环的一部分。2026-03-31 起，该能力由 03-31-result-workspace-practice-bridge 在新的 GitHub 绑定公开仓库路线下继续演进。",
   "meta": {}
 }

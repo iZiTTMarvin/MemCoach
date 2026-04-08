@@ -1,0 +1,5 @@
+{"file": ".trellis/workflow.md", "reason": "Project workflow and conventions"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend development guide"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Cross-layer checklist"}
+{"file": ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md", "reason": "Parent phase-1 product source"}
+{"file": ".trellis/tasks/03-31-analysis-orchestration-v2/prd.md", "reason": "Child task scope and acceptance"}

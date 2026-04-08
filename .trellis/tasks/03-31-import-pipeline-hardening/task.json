@@ -1,0 +1,50 @@
+{
+  "id": "import-pipeline-hardening",
+  "name": "import-pipeline-hardening",
+  "title": "导入链路稳定性修复与迁移底座",
+  "description": "修复当前项目分析导入链路中的路径归一化、archive 过滤、错误收敛与迁移期兼容问题，为新路线提供稳定底座，并解决现有 Windows 路径错误",
+  "status": "planning",
+  "dev_type": "backend",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-31",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "backend/project_analysis/filtering.py",
+    "backend/project_analysis/pipeline.py",
+    "backend/project_analysis/github_source.py",
+    "backend/main.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "这是过渡期底座任务。重点是修复现有 Windows `relative_to()` 路径错误、archive/filtering 失败路径和迁移期兼容问题，让旧代码资产在新路线下可继续复用，而不是让新路线建立在不稳定实现上。",
+  "meta": {}
+}

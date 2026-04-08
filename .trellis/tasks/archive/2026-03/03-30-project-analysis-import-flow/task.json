@@ -1,0 +1,50 @@
+{
+  "id": "project-analysis-import-flow",
+  "name": "project-analysis-import-flow",
+  "title": "项目分析导入向导与进度流",
+  "description": "实现项目分析导入向导：仓库 URL 输入、默认分支预选与切换、负责范围声明、分析创建与进度轮询",
+  "status": "archived",
+  "dev_type": "frontend",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-30",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "frontend/src/App.jsx",
+    "frontend/src/components/Sidebar.jsx",
+    "frontend/src/pages/Home.jsx",
+    "frontend/src/api/interview.js",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "已归档。该任务已经形成 4 步短向导和状态展示，但它服务于“公开 URL + 手填范围”的旧入口，已在 2026-03-31 被 GitHub 绑定公开仓库版 Phase 1 替代。相关状态设计和页面骨架可复用到新的仓库选择与范围确认流程。",
+  "meta": {}
+}

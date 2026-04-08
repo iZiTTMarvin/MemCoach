@@ -1,0 +1,50 @@
+{
+  "id": "result-workspace-practice-bridge",
+  "name": "result-workspace-practice-bridge",
+  "title": "结果工作区与项目答题训练闭环",
+  "description": "在新仓库选择模型下保持项目分析结果页、证据展示与项目答题训练入口闭环成立，并补齐仓库、分支、commit 与范围快照的展示",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-31",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "frontend/src/pages/ProjectAnalysisResult.jsx",
+    "frontend/src/pages/Interview.jsx",
+    "frontend/src/api/projectAnalysis.js",
+    "backend/main.py",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "该任务应尽量复用现有结果页与训练桥接资产，但要把展示重点切到新的 repo / branch / commit / ownership 快照模型，并确保低置信、失败和训练入口状态在新路线下依然清晰。",
+  "meta": {}
+}

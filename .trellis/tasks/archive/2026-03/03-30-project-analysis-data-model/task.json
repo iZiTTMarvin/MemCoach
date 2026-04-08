@@ -3,7 +3,7 @@
   "name": "project-analysis-data-model",
   "title": "项目分析数据模型与持久化",
   "description": "为 GitHub 项目分析官 Phase 1 建立独立的数据模型、结果契约与持久化能力，避免污染现有 sessions 语义",
-  "status": "planning",
+  "status": "archived",
   "dev_type": "backend",
   "scope": null,
   "priority": "P1",
@@ -44,6 +44,6 @@
     "backend/config.py",
     ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
   ],
-  "notes": "基础设施子任务。目标是新增 project_analyses 独立存储与结果 schema，为后续 GitHub 解析、任务编排和结果页提供稳定契约。不在本任务内实现 GitHub 下载、前端页面或训练入口。",
+  "notes": "已归档。该任务下沉淀的 project_analyses 存储与结果契约已经具备可复用价值，但原任务边界服务于“公开 URL + 手填范围”的旧入口，已在 2026-03-31 被 GitHub 绑定公开仓库版 Phase 1 替代。后续相关改造由 03-31-analysis-orchestration-v2 与 03-31-import-pipeline-hardening 承接。",
   "meta": {}
 }

@@ -1,9 +1,9 @@
 {
-  "id": "github-repo-ingestion",
-  "name": "github-repo-ingestion",
-  "title": "GitHub 仓库解析与快照过滤",
-  "description": "实现公开 GitHub 仓库的 URL 解析、默认分支与分支列表获取、commit 锁定、archive 下载、安全解压与文件过滤",
-  "status": "planning",
+  "id": "project-analysis-orchestration-api",
+  "name": "project-analysis-orchestration-api",
+  "title": "项目分析任务编排与 API",
+  "description": "实现项目分析任务的后端编排、状态机与 API，包括 resolve、create、poll、result 获取，以及最小可用的产物生成流程",
+  "status": "archived",
   "dev_type": "backend",
   "scope": null,
   "priority": "P1",
@@ -39,10 +39,11 @@
   "children": [],
   "parent": "03-29-github-project-interview-analyzer",
   "relatedFiles": [
-    "backend/config.py",
-    "backend/indexer.py",
+    "backend/main.py",
+    "backend/storage/sessions.py",
+    "backend/llm_provider.py",
     ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
   ],
-  "notes": "源接入子任务。目标是把公开仓库变成可供分析的安全文本输入，并明确体积、文件数、二进制文件和依赖目录的过滤边界。本任务不负责写数据库状态、不暴露最终 API 页面。",
+  "notes": "已归档。该任务已实现部分异步分析与 API 编排能力，但输入契约仍基于 repo_url 与手填范围，已在 2026-03-31 被新的 analysis-orchestration-v2 任务替代。可复用的状态机与结果落盘逻辑继续作为底座存在。",
   "meta": {}
 }

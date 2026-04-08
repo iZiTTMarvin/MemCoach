@@ -1,0 +1,51 @@
+{
+  "id": "branch-scope-discovery",
+  "name": "branch-scope-discovery",
+  "title": "分支选择与目录+文件混合范围发现",
+  "description": "在仓库已选中前提下获取分支列表、仓库树与关键文件内容，产出目录优先、文件补充的负责范围候选，并提供用户确认交互",
+  "status": "planning",
+  "dev_type": "fullstack",
+  "scope": null,
+  "priority": "P1",
+  "creator": "许皓辰",
+  "assignee": "许皓辰",
+  "createdAt": "2026-03-31",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "current_phase": 0,
+  "next_action": [
+    {
+      "phase": 1,
+      "action": "implement"
+    },
+    {
+      "phase": 2,
+      "action": "check"
+    },
+    {
+      "phase": 3,
+      "action": "finish"
+    },
+    {
+      "phase": 4,
+      "action": "create-pr"
+    }
+  ],
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "03-29-github-project-interview-analyzer",
+  "relatedFiles": [
+    "backend/main.py",
+    "backend/project_analysis/github_source.py",
+    "backend/project_analysis/filtering.py",
+    "frontend/src/pages/ProjectAnalysis.jsx",
+    "frontend/src/api/projectAnalysis.js",
+    ".trellis/tasks/03-29-github-project-interview-analyzer/prd.md"
+  ],
+  "notes": "这是新路线里最关键的产品信任任务。用户不再手填范围，而是由系统给出目录推荐与文件补充候选，用户确认后再开始分析。推荐策略必须兼顾普通项目和简单 monorepo，不要求一步到位支持复杂组织级仓库。",
+  "meta": {}
+}

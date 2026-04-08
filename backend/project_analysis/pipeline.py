@@ -161,9 +161,8 @@ def run_analysis_job(analysis_id: str, user_id: str) -> None:
         _ensure_not_cancelled(analysis_id, user_id)
 
         repo_ref = parse_public_github_repo_url(record["repo_url"])
-        temp_base = settings.base_dir / ".tmp-project-analysis"
-        temp_base.mkdir(parents=True, exist_ok=True)
-        temp_dir_path = Path(tempfile.mkdtemp(prefix="project-analysis-", dir=temp_base))
+        # 使用系统临时目录，避免在项目根目录下创建文件触发 uvicorn --reload
+        temp_dir_path = Path(tempfile.mkdtemp(prefix="memcoach-project-analysis-"))
         archive_path = download_commit_archive(
             repo_ref,
             record["commit_sha"],

@@ -129,6 +129,7 @@ After implementation:
 - [ ] 核对前端调用路径与后端真实路由一一对应
 - [ ] 确认没有 fallback store / fallback schema 与正式实现并存
 - [ ] 确认测试不会遗留 `.tmp_*` 或 `data/*_test_*` 产物
+- [ ] 后台任务的文件 IO 不在项目根目录下（避免触发 uvicorn --reload）
 
 ---
 

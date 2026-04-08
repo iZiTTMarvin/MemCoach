@@ -14,11 +14,11 @@ This directory contains guidelines for backend development. Fill in each file wi
 
 | Guide | Description | Status |
 |-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | To fill |
-| [Database Guidelines](./database-guidelines.md) | ORM patterns, queries, migrations | To fill |
-| [Error Handling](./error-handling.md) | Error types, handling strategies | To fill |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
-| [Logging Guidelines](./logging-guidelines.md) | Structured logging, log levels | To fill |
+| [Directory Structure](./directory-structure.md) | Module organization and file layout | Ready |
+| [Database Guidelines](./database-guidelines.md) | ORM patterns, queries, migrations | Ready |
+| [Error Handling](./error-handling.md) | Error types, handling strategies | Ready |
+| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | Ready |
+| [Logging Guidelines](./logging-guidelines.md) | Structured logging, log levels | Ready |
 
 ---
 

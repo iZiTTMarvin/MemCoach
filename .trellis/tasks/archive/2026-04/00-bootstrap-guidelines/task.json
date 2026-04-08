@@ -2,29 +2,20 @@
   "id": "00-bootstrap-guidelines",
   "name": "Bootstrap Guidelines",
   "description": "Fill in project development guidelines for AI agents",
-  "status": "done",
+  "status": "completed",
   "dev_type": "docs",
   "priority": "P1",
   "creator": "许皓辰",
   "assignee": "许皓辰",
   "createdAt": "2026-03-28",
-  "completedAt": "2026-03-28",
+  "completedAt": "2026-04-08",
   "commit": null,
-  "subtasks": [
-    {
-      "name": "Fill backend guidelines",
-      "status": "pending"
-    },
-    {
-      "name": "Add code examples",
-      "status": "pending"
-    }
-  ],
+  "subtasks": [],
   "children": [],
   "parent": null,
   "relatedFiles": [
     ".trellis/spec/backend/"
   ],
-  "notes": "First-time setup task created by trellis init (backend project)",
+  "notes": "初始 Trellis 引导任务，后端规范索引与核心 guideline 文件已完成落地，可归档。",
   "meta": {}
 }
