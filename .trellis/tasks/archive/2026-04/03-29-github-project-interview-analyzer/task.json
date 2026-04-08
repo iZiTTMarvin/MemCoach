@@ -37,8 +37,6 @@
   "pr_url": null,
   "subtasks": [],
   "children": [
-    "03-31-github-app-auth-connection",
-    "03-31-authorized-public-repo-discovery",
     "03-31-branch-scope-discovery",
     "03-31-analysis-orchestration-v2",
     "03-31-result-workspace-practice-bridge",
@@ -58,4 +56,5 @@
   ],
   "notes": "2026-03-31 路线重构：父任务从“公开 GitHub URL + 手填负责范围”的旧入口切换为“GitHub 绑定 + 已授权公开仓库列表 + 分支选择 + 目录优先/文件补充的混合范围确认”。私有仓库明确延后到 Phase 2，分析结果仍需回到 MemCoach 的项目答题训练主线。03-30 的五个旧子任务已归档到 .trellis/tasks/archive/2026-03/，这些任务下沉淀的 project_analyses 存储、archive 下载、过滤、结果页和训练桥接代码应视为可复用底座，而不是当前产品路线的任务边界。推荐顺序：1) github-app-auth-connection；2) authorized-public-repo-discovery；3) branch-scope-discovery；4) analysis-orchestration-v2；5) result-workspace-practice-bridge；6) import-pipeline-hardening 并行补齐底座稳定性。",
   "meta": {}
+}ta": {}
 }
