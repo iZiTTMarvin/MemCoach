@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home, User, BookOpen, GitFork, Clock, Mic,
-  Sun, Moon, LogOut, Menu, X, Terminal, FolderGit2
+  Sun, Moon, LogOut, Menu, X, Terminal, FolderGit2,
+  PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -22,11 +23,16 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
   const [open, setOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem("sidebar_collapsed") === "true");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("sidebar_collapsed", isCollapsed);
+  }, [isCollapsed]);
 
   // Close on route change
   useEffect(() => {
@@ -44,39 +50,56 @@ export default function Sidebar() {
   };
 
   const nav = (
-    <aside className="flex flex-col h-full w-[260px] bg-bg-subtle/80 backdrop-blur-xl border-r border-primary/20 shadow-[4px_0_24px_rgba(0,0,0,0.5)] relative z-20 font-mono">
+    <aside className={`flex flex-col h-full bg-bg-subtle/80 backdrop-blur-xl border-r border-primary/20 shadow-[4px_0_24px_rgba(0,0,0,0.5)] relative z-20 font-mono transition-all duration-300 ${isCollapsed ? "w-[80px]" : "w-[260px]"}`}>
       {/* Decorative scanning line */}
       <div className="absolute top-0 right-0 bottom-0 w-[1px] overflow-hidden">
         <div className="w-full h-1/3 bg-gradient-to-b from-transparent via-primary/50 to-transparent animate-[scanline_4s_linear_infinite]" />
       </div>
 
+      {/* Collapse Toggle Button (Desktop only) */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsCollapsed(prev => !prev);
+        }}
+        className="absolute -right-3 top-8 w-6 h-6 bg-card border border-primary/40 rounded-full flex items-center justify-center text-dim hover:text-primary hover:border-primary transition-all z-50 shadow-md hidden md:flex"
+      >
+        {isCollapsed ? <PanelLeftOpen size={12} /> : <PanelLeftClose size={12} />}
+      </button>
+
       {/* Logo */}
       <div
-        className="flex items-center gap-3 px-6 py-8 cursor-pointer shrink-0 group border-b border-primary/10"
+        className={`flex items-center px-6 py-8 cursor-pointer shrink-0 group border-b border-primary/10 ${isCollapsed ? "justify-center px-0" : "gap-3"}`}
         onClick={() => navigate("/")}
       >
-        <div className="w-10 h-10 rounded-none border border-primary/40 bg-card/60 flex items-center justify-center relative overflow-hidden group-hover:border-primary transition-colors">
+        <div className="w-10 h-10 rounded-none border border-primary/40 bg-card/60 flex items-center justify-center relative overflow-hidden group-hover:border-primary transition-colors shrink-0">
           <div className="absolute inset-0 bg-primary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           <Terminal size={20} className="text-primary relative z-10" />
         </div>
-        <div className="flex flex-col">
-          <span className="text-lg font-bold tracking-widest text-text group-hover:text-primary transition-colors">
-            MEMCOACH
-          </span>
-          <span className="text-[10px] text-primary/60 tracking-widest">系统_已连接</span>
-        </div>
+        {!isCollapsed && (
+          <div className="flex flex-col overflow-hidden">
+            <span className="text-lg font-bold tracking-widest text-text group-hover:text-primary transition-colors truncate">
+              MEMCOACH
+            </span>
+            <span className="text-xs text-primary/60 tracking-widest truncate">系统_已连接</span>
+          </div>
+        )}
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 flex flex-col gap-2 px-4 overflow-y-auto pt-6 pb-6 scrollbar-hide">
-        <div className="text-[10px] text-primary/40 tracking-widest px-2 mb-2 uppercase">核心_功能模块</div>
+      <nav className="flex-1 flex flex-col gap-2 px-4 overflow-y-auto pt-6 pb-6 scrollbar-hide overflow-x-hidden">
+        {!isCollapsed && <div className="text-xs text-primary/40 tracking-widest px-2 mb-2 uppercase whitespace-nowrap">核心_功能模块</div>}
+        {isCollapsed && <div className="w-full h-[1px] bg-primary/10 mb-2"></div>}
+        
         {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
           const NavIcon = Icon;
           return (
           <button
             key={path}
             onClick={() => navigate(path)}
-            className={`flex items-center gap-3 w-full px-4 py-3 text-xs transition-all duration-300 text-left relative overflow-hidden group
+            title={isCollapsed ? label : undefined}
+            className={`flex items-center w-full py-3 transition-all duration-300 relative overflow-hidden group
+              ${isCollapsed ? "justify-center px-0" : "gap-3 px-4 text-left"}
               ${isActive(path)
                 ? "bg-primary/10 text-primary font-bold border border-primary/30"
                 : "text-dim hover:text-text hover:bg-hover/50 border border-transparent"
@@ -85,41 +108,47 @@ export default function Sidebar() {
             {isActive(path) && (
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_8px_var(--color-primary)]" />
             )}
-            <NavIcon size={16} className={`relative z-10 transition-transform duration-300 ${isActive(path) ? "text-primary" : "group-hover:text-primary"}`} />
-            <span className="relative z-10 tracking-wider">{label}</span>
-            {isActive(path) && <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />}
+            <NavIcon size={isCollapsed ? 20 : 16} className={`relative z-10 shrink-0 transition-transform duration-300 ${isActive(path) ? "text-primary" : "group-hover:text-primary"}`} />
+            {!isCollapsed && <span className="relative z-10 tracking-wider text-sm whitespace-nowrap">{label}</span>}
+            {isActive(path) && !isCollapsed && <span className="absolute right-3 w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />}
           </button>
         )})}
       </nav>
 
       {/* Bottom section */}
-      <div className="px-4 pb-6 pt-4 border-t border-primary/10 mt-auto shrink-0 space-y-2 bg-gradient-to-t from-bg-subtle/80 to-transparent">
+      <div className={`px-4 pb-6 pt-4 border-t border-primary/10 mt-auto shrink-0 space-y-2 bg-gradient-to-t from-bg-subtle/80 to-transparent ${isCollapsed ? "flex flex-col items-center" : ""}`}>
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-3 w-full px-4 py-2.5 text-xs text-dim uppercase tracking-wider
-                     hover:text-text hover:bg-hover/50 border border-transparent hover:border-primary/30 transition-all group"
+          title={isCollapsed ? (theme === "dark" ? "浅色模式" : "深空模式") : undefined}
+          className={`flex items-center py-2.5 transition-all group border border-transparent hover:border-primary/30 hover:bg-hover/50
+            ${isCollapsed ? "justify-center px-0 w-10 h-10 rounded-md" : "gap-3 w-full px-4 text-sm text-dim uppercase tracking-wider hover:text-text"}`}
         >
-          <div className="relative">
+          <div className="relative shrink-0">
             {theme === "dark" ? (
-              <Sun size={16} className="group-hover:text-accent transition-colors" />
+              <Sun size={isCollapsed ? 18 : 16} className="group-hover:text-accent transition-colors" />
             ) : (
-              <Moon size={16} className="group-hover:text-primary transition-colors" />
+              <Moon size={isCollapsed ? 18 : 16} className="group-hover:text-primary transition-colors" />
             )}
           </div>
-          {theme === "dark" ? "浅色模式" : "深空模式"}
+          {!isCollapsed && (theme === "dark" ? "浅色模式" : "深空模式")}
         </button>
 
         {/* User + logout */}
         {user && (
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-2.5 text-xs text-dim uppercase tracking-wider
-                       hover:text-red-400 hover:bg-red-400/10 border border-transparent hover:border-red-400/30 transition-all group"
+            title={isCollapsed ? "断开连接" : undefined}
+            className={`flex items-center py-2.5 transition-all group border border-transparent hover:border-red-400/30 hover:bg-red-400/10
+              ${isCollapsed ? "justify-center px-0 w-10 h-10 rounded-md" : "gap-3 w-full px-4 text-sm text-dim uppercase tracking-wider hover:text-red-400"}`}
           >
-            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="truncate flex-1">{user.name || user.email}</span>
-            <span className="text-[10px] text-red-500/50 group-hover:text-red-400">断开连接</span>
+            <LogOut size={isCollapsed ? 18 : 16} className="shrink-0 group-hover:-translate-x-1 transition-transform" />
+            {!isCollapsed && (
+              <>
+                <span className="truncate flex-1 text-left whitespace-nowrap">{user.name || user.email}</span>
+                <span className="text-xs text-red-500/50 group-hover:text-red-400 whitespace-nowrap">断开连接</span>
+              </>
+            )}
           </button>
         )}
       </div>

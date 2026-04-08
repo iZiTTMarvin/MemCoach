@@ -81,7 +81,7 @@ export default function TopicDetail() {
             <div className="relative z-10">{getTopicIcon(topicInfo?.icon, 32)}</div>
           </div>
           <div className="flex-1">
-            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/5 border border-primary/20 text-primary text-[10px] tracking-widest mb-2 uppercase">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/5 border border-primary/20 text-primary text-[11px] tracking-widest mb-2 uppercase">
               <Target size={10} /> 领域详情
             </div>
             <h1 className="text-3xl md:text-4xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim mb-2">
@@ -101,7 +101,7 @@ export default function TopicDetail() {
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex flex-col items-center shrink-0">
               <span className="text-3xl font-black text-primary leading-none">{mastery.score ?? (mastery.level ? mastery.level * 20 : 0)}</span>
-              <span className="text-[10px] text-dim tracking-widest">/100</span>
+              <span className="text-[11px] text-dim tracking-widest">/100</span>
             </div>
             <div className="flex-1">
               <div className="h-1.5 w-full bg-card border border-border/50 overflow-hidden mb-2">
@@ -110,7 +110,7 @@ export default function TopicDetail() {
                   style={{ width: `${mastery.score ?? (mastery.level ? mastery.level * 20 : 0)}%` }}
                 />
               </div>
-              <div className="text-[10px] text-dim tracking-widest uppercase">掌握程度节点</div>
+              <div className="text-[11px] text-dim tracking-widest uppercase">掌握程度节点</div>
             </div>
             {mastery.notes && <div className="text-xs text-primary/80 border-l border-primary/30 pl-4 max-w-[250px] hidden md:block leading-relaxed">{mastery.notes}</div>}
           </div>
@@ -124,7 +124,7 @@ export default function TopicDetail() {
              </h2>
             {retrospective && (
               <button
-                className="px-4 py-1.5 bg-primary/10 border border-primary text-primary text-[10px] font-bold tracking-widest uppercase cursor-pointer transition-all hover:bg-primary hover:text-bg disabled:opacity-50"
+                className="px-4 py-1.5 bg-primary/10 border border-primary text-primary text-[11px] font-bold tracking-widest uppercase cursor-pointer transition-all hover:bg-primary hover:text-bg disabled:opacity-50"
                 onClick={handleGenerate}
                 disabled={generating}
               >
@@ -195,7 +195,7 @@ export default function TopicDetail() {
                       )}
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-[10px] text-dim tracking-widest uppercase hidden sm:block">ID_{s.session_id.substring(0,8)}</span>
+                      <span className="text-[11px] text-dim tracking-widest uppercase hidden sm:block">ID_{s.session_id.substring(0,8)}</span>
                       <ArrowLeft size={16} className="text-primary rotate-180 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                     </div>
                   </div>

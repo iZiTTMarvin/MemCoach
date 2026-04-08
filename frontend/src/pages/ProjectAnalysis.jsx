@@ -416,7 +416,7 @@ export default function ProjectAnalysis() {
     <div className="flex-1 w-full min-h-full p-6 md:p-10 lg:p-14 max-w-7xl mx-auto relative z-10 font-mono flex flex-col gap-7 text-text">
       {/* 页头 */}
       <div className="flex flex-col gap-3 border-b border-primary/20 pb-6">
-        <div className="inline-flex items-center gap-2 text-xs tracking-widest uppercase px-3 py-1 border border-primary/40 bg-primary/10 text-primary w-fit">
+        <div className="inline-flex items-center gap-2 text-sm tracking-widest uppercase px-3 py-1 border border-primary/40 bg-primary/10 text-primary w-fit">
           <Terminal size={14} />
           GitHub 项目分析官
         </div>
@@ -433,7 +433,7 @@ export default function ProjectAnalysis() {
         {STEP_LABELS.map((item) => (
           <div
             key={item.key}
-            className={`border px-2 py-2.5 text-[10px] md:text-xs tracking-widest uppercase text-center ${
+            className={`border px-2 py-2.5 text-xs md:text-sm tracking-widest uppercase text-center ${
               step === item.key
                 ? "border-primary bg-primary/15 text-primary"
                 : step > item.key
@@ -479,7 +479,7 @@ export default function ProjectAnalysis() {
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
               <div>
                 <div className="font-semibold mb-1">当前环境未配置 GitHub 连接</div>
-                <div className="text-xs text-yellow-300/70">请联系管理员配置 GitHub App，或使用其他方式导入项目。</div>
+                <div className="text-sm text-yellow-300/70">请联系管理员配置 GitHub App，或使用其他方式导入项目。</div>
               </div>
             </div>
           )}
@@ -523,7 +523,7 @@ export default function ProjectAnalysis() {
                 )}
                 <span className="text-sm text-primary">{ghUser.login}</span>
                 <button
-                  className="text-xs text-dim hover:text-red-300 border border-border/60 px-2 py-1 uppercase tracking-widest"
+                  className="text-sm text-dim hover:text-red-300 border border-border/60 px-2 py-1 uppercase tracking-widest"
                   disabled={disconnecting}
                   onClick={handleDisconnect}
                 >
@@ -571,8 +571,8 @@ export default function ProjectAnalysis() {
                   <GitBranch size={16} className="text-primary mt-1 shrink-0" />
                   <div className="flex flex-col gap-1 min-w-0">
                     <span className="text-sm text-text font-semibold truncate">{r.full_name}</span>
-                    {r.description && <span className="text-xs text-dim truncate">{r.description}</span>}
-                    <span className="text-[10px] text-dim">
+                    {r.description && <span className="text-sm text-dim truncate">{r.description}</span>}
+                    <span className="text-xs text-dim">
                       默认分支: {r.default_branch} · 更新于 {new Date(r.updated_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -582,7 +582,7 @@ export default function ProjectAnalysis() {
           )}
 
           {repoTotal > 20 && (
-            <div className="flex items-center justify-between text-xs text-dim">
+            <div className="flex items-center justify-between text-sm text-dim">
               <span>共 {repoTotal} 个仓库，第 {repoPage} 页</span>
               <div className="flex gap-2">
                 {repoPage > 1 && (
@@ -621,13 +621,13 @@ export default function ProjectAnalysis() {
             <GitBranch size={18} className="text-primary mt-0.5" />
             <div className="flex flex-col gap-1">
               <span className="text-sm text-text font-semibold">{selectedRepo.full_name}</span>
-              {selectedRepo.description && <span className="text-xs text-dim">{selectedRepo.description}</span>}
+              {selectedRepo.description && <span className="text-sm text-dim">{selectedRepo.description}</span>}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-dim tracking-widest uppercase">分析分支</label>
+              <label className="text-sm text-dim tracking-widest uppercase">分析分支</label>
               <select
                 className="border border-border bg-bg px-3 py-3 text-sm outline-none focus:border-primary"
                 value={selectedBranch}
@@ -641,7 +641,7 @@ export default function ProjectAnalysis() {
               </select>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-dim tracking-widest uppercase">项目角色（必填）</label>
+              <label className="text-sm text-dim tracking-widest uppercase">项目角色（必填）</label>
               <input
                 className="border border-border bg-bg px-3 py-3 text-sm outline-none focus:border-primary"
                 value={roleSummary}
@@ -660,7 +660,7 @@ export default function ProjectAnalysis() {
             <div className="flex flex-col gap-4">
               {scopeData.recommended_directories?.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs text-dim tracking-widest uppercase flex items-center gap-2">
+                  <label className="text-sm text-dim tracking-widest uppercase flex items-center gap-2">
                     <FolderOpen size={12} />
                     推荐目录（主选择）
                   </label>
@@ -687,13 +687,13 @@ export default function ProjectAnalysis() {
                               </div>
                               <div className="flex flex-col gap-0.5 min-w-0">
                                 <span className="text-sm text-text font-semibold">{dir.path}/</span>
-                                <span className="text-[10px] text-dim">{dir.reason}</span>
-                                <span className="text-[10px] text-primary">{dir.file_count} 个文件</span>
+                                <span className="text-xs text-dim">{dir.reason}</span>
+                                <span className="text-xs text-primary">{dir.file_count} 个文件</span>
                               </div>
                             </button>
                             <button
                               type="button"
-                              className="shrink-0 px-2 py-1 text-[10px] border border-border/60 text-dim hover:text-text"
+                              className="shrink-0 px-2 py-1 text-xs border border-border/60 text-dim hover:text-text"
                               onClick={() => toggleExpandedDir(dir.path)}
                             >
                               {expanded ? "收起文件" : `展开文件 ${childFiles.length}`}
@@ -720,15 +720,15 @@ export default function ProjectAnalysis() {
                                           {fileSelected && <Check size={10} />}
                                         </div>
                                         <div className="flex flex-col gap-0.5 min-w-0">
-                                          <span className="text-xs text-text break-all">{file.path}</span>
-                                          <span className="text-[10px] text-dim">从目录展开补充到文件粒度</span>
+                                          <span className="text-sm text-text break-all">{file.path}</span>
+                                          <span className="text-xs text-dim">从目录展开补充到文件粒度</span>
                                         </div>
                                       </button>
                                     );
                                   })}
                                 </div>
                               ) : (
-                                <div className="text-[10px] text-dim">该目录下暂无可直接补充选择的文本文件。</div>
+                                <div className="text-xs text-dim">该目录下暂无可直接补充选择的文本文件。</div>
                               )}
                             </div>
                           )}
@@ -741,7 +741,7 @@ export default function ProjectAnalysis() {
 
               {scopeData.important_files?.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs text-dim tracking-widest uppercase flex items-center gap-2">
+                  <label className="text-sm text-dim tracking-widest uppercase flex items-center gap-2">
                     <FileCode2 size={12} />
                     重要文件（补充选择）
                   </label>
@@ -760,8 +760,8 @@ export default function ProjectAnalysis() {
                             {on && <Check size={10} />}
                           </div>
                           <div className="flex flex-col gap-0.5 min-w-0">
-                            <span className="text-xs text-text">{f.path}</span>
-                            <span className="text-[10px] text-dim">{f.reason}</span>
+                            <span className="text-sm text-text">{f.path}</span>
+                            <span className="text-xs text-dim">{f.reason}</span>
                           </div>
                         </button>
                       );
@@ -772,16 +772,16 @@ export default function ProjectAnalysis() {
 
               {(selectedDirs.size > 0 || selectedFiles.size > 0) && (
                 <div className="border border-accent/30 bg-accent/5 p-3">
-                  <div className="text-xs text-accent tracking-widest uppercase mb-2">已选范围</div>
+                  <div className="text-sm text-accent tracking-widest uppercase mb-2">已选范围</div>
                   <div className="flex flex-wrap gap-1.5">
                     {[...selectedDirs].map((p) => (
-                      <span key={p} className="inline-flex items-center gap-1 px-2 py-1 text-[10px] border border-primary/40 bg-primary/10 text-primary">
+                      <span key={p} className="inline-flex items-center gap-1 px-2 py-1 text-xs border border-primary/40 bg-primary/10 text-primary">
                         <FolderOpen size={10} /> {p}/
                         <button className="ml-1 hover:text-red-300" onClick={() => toggleDir(p)}>×</button>
                       </span>
                     ))}
                     {[...selectedFiles].map((p) => (
-                      <span key={p} className="inline-flex items-center gap-1 px-2 py-1 text-[10px] border border-border/60 bg-bg text-dim">
+                      <span key={p} className="inline-flex items-center gap-1 px-2 py-1 text-xs border border-border/60 bg-bg text-dim">
                         <FileCode2 size={10} /> {p}
                         <button className="ml-1 hover:text-red-300" onClick={() => toggleFile(p)}>×</button>
                       </span>
@@ -792,7 +792,7 @@ export default function ProjectAnalysis() {
 
               {scopeData.tree_summary && (
                 <div className="flex flex-col gap-2">
-                  <div className="text-[10px] text-dim">
+                  <div className="text-xs text-dim">
                     仓库树：{scopeData.tree_summary.directories} 个目录，{scopeData.tree_summary.files} 个文件
                   </div>
                   <div className="border border-border/60 bg-bg p-3 max-h-52 overflow-y-auto">
@@ -800,7 +800,7 @@ export default function ProjectAnalysis() {
                       {(scopeData.tree || []).map((node) => (
                         <div
                           key={node.path}
-                          className="text-[11px] text-dim break-all"
+                          className="text-xs text-dim break-all"
                           style={{ paddingLeft: `${Math.max((node.depth - 1) * 12, 0)}px` }}
                         >
                           {node.type === "tree" ? "📁" : "📄"} {node.path}
@@ -844,7 +844,7 @@ export default function ProjectAnalysis() {
         <section className="border border-primary/20 bg-bg-subtle p-6 md:p-8 flex flex-col gap-5">
           <h2 className="text-xl font-display font-bold tracking-wide text-text">Step 4：分析进度</h2>
           <div className="border border-border/70 bg-bg p-4 flex flex-col gap-3">
-            <div className="text-xs tracking-widest uppercase text-dim">
+            <div className="text-sm tracking-widest uppercase text-dim">
               analysis_id: <span className="text-primary">{analysisId || "-"}</span>
             </div>
             <div className="text-sm text-text">
@@ -903,11 +903,11 @@ export default function ProjectAnalysis() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="border border-border bg-bg p-4">
-              <div className="text-xs text-dim tracking-widest uppercase mb-2">任务 ID</div>
+              <div className="text-sm text-dim tracking-widest uppercase mb-2">任务 ID</div>
               <div className="text-primary break-all">{analysisId}</div>
             </div>
             <div className="border border-border bg-bg p-4">
-              <div className="text-xs text-dim tracking-widest uppercase mb-2">完成状态</div>
+              <div className="text-sm text-dim tracking-widest uppercase mb-2">完成状态</div>
               <div className="text-primary">{analysisStatus}</div>
             </div>
           </div>
@@ -932,7 +932,7 @@ export default function ProjectAnalysis() {
         </section>
       )}
 
-      <div className="border border-border/70 bg-bg px-4 py-3 text-xs text-dim tracking-wide">
+      <div className="border border-border/70 bg-bg px-4 py-3 text-sm text-dim tracking-wide">
         全局状态快照：{connLoading ? "checking…" : statusLabel(analysisStatus || connState || "empty")}
       </div>
     </div>

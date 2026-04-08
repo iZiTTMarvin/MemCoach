@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-04-08
+- **UI/UX**：前端界面字体与侧边栏优化。
+  - 侧边栏新增折叠伸缩功能，通过切换展开状态释放主工作区宽度。
+  - 批量放大全局及核心页面（如项目分析与结果页）中过小的字体，并优化行高与间距提升阅读体验。
 - **前端**：完成 GitHub 项目分析官 Phase 1 前端导入向导重构。
   - 新增 `githubConnection.js` API 层，覆盖连接状态、OAuth 发起、断连、仓库列表、分支列表、范围候选共 6 个接口。
   - 新增 `createProjectAnalysisV2`，使用 `repo_snapshot + selected_scope_snapshot` 新契约创建分析任务。

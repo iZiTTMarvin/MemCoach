@@ -211,11 +211,11 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
           </div>
           <div className="flex gap-4 border border-border/50 bg-card p-2">
             <div className="flex flex-col px-3 border-r border-border/50">
-              <span className="text-[10px] text-dim tracking-widest">总节点数</span>
+              <span className="text-[11px] text-dim tracking-widest">总节点数</span>
               <span className="text-lg font-bold text-text">{questions?.length || 0}</span>
             </div>
             <div className="flex flex-col px-3">
-              <span className="text-[10px] text-dim tracking-widest">已解析</span>
+              <span className="text-[11px] text-dim tracking-widest">已解析</span>
               <span className="text-lg font-bold text-accent">{answers?.filter((a) => a.answer).length || 0}</span>
             </div>
           </div>
@@ -277,10 +277,10 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
               return (
                 <div key={q.id} className="bg-card/40 border border-dashed border-border/50 p-5 opacity-60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-opacity hover:opacity-100">
                   <div className="flex items-start sm:items-center gap-3">
-                    <span className="text-[10px] font-bold text-accent border border-accent/30 px-2 py-0.5 shrink-0">节点_{q.id}</span>
+                    <span className="text-[11px] font-bold text-accent border border-accent/30 px-2 py-0.5 shrink-0">节点_{q.id}</span>
                     <span className="text-xs text-dim font-sans">{q.question.slice(0, 80)}{q.question.length > 80 ? "..." : ""}</span>
                   </div>
-                  <span className="text-[10px] tracking-widest uppercase text-red-500/70 border border-red-500/20 px-2 py-1 shrink-0 bg-red-500/5">未解决</span>
+                  <span className="text-[11px] tracking-widest uppercase text-red-500/70 border border-red-500/20 px-2 py-1 shrink-0 bg-red-500/5">未解决</span>
                 </div>
               );
             }
@@ -293,13 +293,13 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 pb-4 border-b border-border/50">
                   <div className="flex flex-col gap-2 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-primary border border-primary/30 bg-primary/10 px-2 py-0.5">节点_{q.id}</span>
-                      {q.focus_area && <span className="text-[10px] text-dim tracking-widest uppercase bg-card border border-border px-2 py-0.5">{q.focus_area}</span>}
+                      <span className="text-[11px] font-bold text-primary border border-primary/30 bg-primary/10 px-2 py-0.5">节点_{q.id}</span>
+                      {q.focus_area && <span className="text-[11px] text-dim tracking-widest uppercase bg-card border border-border px-2 py-0.5">{q.focus_area}</span>}
                     </div>
                     <div className="text-sm font-medium leading-relaxed text-text font-sans mt-2">{q.question}</div>
                   </div>
                   <div className="flex flex-col items-end shrink-0">
-                    <span className="text-[10px] text-dim tracking-widest uppercase mb-1">评分</span>
+                    <span className="text-[11px] text-dim tracking-widest uppercase mb-1">评分</span>
                     <span className="text-lg font-bold px-3 py-1 border bg-card" style={{ borderColor: qsc.border, color: qsc.text }}>
                       {score ?? "-"}/10
                     </span>
@@ -310,7 +310,7 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
                 <div className="mb-6 relative">
                   <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-dim/30" />
                   <div className="pl-4">
-                    <div className="text-[10px] font-bold tracking-widest text-dim uppercase mb-2">捕获响应</div>
+                    <div className="text-[11px] font-bold tracking-widest text-dim uppercase mb-2">捕获响应</div>
                     <div className="text-xs leading-relaxed text-dim font-sans whitespace-pre-wrap">{answer}</div>
                   </div>
                 </div>
@@ -319,14 +319,14 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
                 <div className="bg-card border border-border/50 p-5 space-y-4">
                   {s.assessment && s.assessment !== "未作答" && (
                     <div>
-                      <div className="text-[10px] tracking-widest uppercase text-primary/70 mb-1">系统评估</div>
+                      <div className="text-[11px] tracking-widest uppercase text-primary/70 mb-1">系统评估</div>
                       <div className="text-xs leading-relaxed text-text font-sans">{s.assessment}</div>
                     </div>
                   )}
 
                   {s.improvement && (
                     <div className="bg-accent/5 border border-accent/20 p-3 mt-2">
-                      <div className="text-[10px] tracking-widest uppercase text-accent mb-1 flex items-center gap-1.5"><Zap size={10}/> 优化建议</div>
+                      <div className="text-[11px] tracking-widest uppercase text-accent mb-1 flex items-center gap-1.5"><Zap size={10}/> 优化建议</div>
                       <div className="text-xs leading-relaxed text-accent-light font-sans">{s.improvement}</div>
                     </div>
                   )}
@@ -334,13 +334,13 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
                   <div className="flex flex-col sm:flex-row gap-4 pt-3 border-t border-border/50 mt-4">
                     {s.understanding && s.understanding !== "未作答" && (
                        <div className="flex-1">
-                        <div className="text-[10px] tracking-widest uppercase text-dim mb-1">理解程度</div>
+                        <div className="text-[11px] tracking-widest uppercase text-dim mb-1">理解程度</div>
                         <div className="text-xs text-text font-sans italic">{s.understanding}</div>
                       </div>
                     )}
                     {s.key_missing?.length > 0 && (
                       <div className="flex-1">
-                        <div className="text-[10px] tracking-widest uppercase text-red-400 mb-1">缺失关键点</div>
+                        <div className="text-[11px] tracking-widest uppercase text-red-400 mb-1">缺失关键点</div>
                         <div className="text-xs text-red-300 font-sans leading-relaxed">{s.key_missing.join(" | ")}</div>
                       </div>
                     )}
@@ -353,7 +353,7 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
                     {refAnswers[q.id] ? (
                       <div className="border border-primary/30 bg-bg p-5 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full pointer-events-none" />
-                        <div className="text-[10px] font-bold tracking-widest text-primary mb-3 flex items-center gap-2">
+                        <div className="text-[11px] font-bold tracking-widest text-primary mb-3 flex items-center gap-2">
                           <BookOpen size={12} /> 参考数据
                         </div>
                         <div className="md-content text-xs font-sans text-dim">
@@ -362,7 +362,7 @@ function DrillReview({ scores, overall, questions, answers, topic }) {
                       </div>
                     ) : (
                       <button
-                        className="w-full py-3 border border-border/50 bg-card hover:border-primary/50 hover:text-primary transition-colors text-[10px] font-bold tracking-widest uppercase text-dim flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:border-border/50 disabled:hover:text-dim"
+                        className="w-full py-3 border border-border/50 bg-card hover:border-primary/50 hover:text-primary transition-colors text-[11px] font-bold tracking-widest uppercase text-dim flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:border-border/50 disabled:hover:text-dim"
                         onClick={() => handleRefAnswer(q.id, q.question)}
                         disabled={refLoading[q.id]}
                       >
@@ -455,7 +455,7 @@ export default function Review() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-primary/20 pb-6 mb-10 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-[10px] tracking-widest mb-3 uppercase">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-[11px] tracking-widest mb-3 uppercase">
               <Terminal size={12} /> {isRecording ? "音频评估" : showDrill ? "演练评估" : "简历评估"}
             </div>
             <h1 className="text-3xl md:text-5xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim">
@@ -463,7 +463,7 @@ export default function Review() {
             </h1>
           </div>
           <div className="text-right flex flex-col md:items-end">
-            <div className="text-[10px] text-dim mb-1 tracking-widest">会话_ID</div>
+            <div className="text-[11px] text-dim mb-1 tracking-widest">会话_ID</div>
             <div className="text-xs font-bold text-primary px-2 py-1 border border-primary/30 bg-primary/5">{sessionId}</div>
           </div>
         </div>
@@ -493,7 +493,7 @@ export default function Review() {
             {messages.length > 0 && (
               <div className="mt-8">
                 <button
-                  className="w-full py-4 border border-border/50 bg-card hover:border-primary/50 transition-colors text-[10px] font-bold tracking-widest uppercase flex items-center justify-center gap-2 group"
+                  className="w-full py-4 border border-border/50 bg-card hover:border-primary/50 transition-colors text-[11px] font-bold tracking-widest uppercase flex items-center justify-center gap-2 group"
                   onClick={() => setShowTranscript(!showTranscript)}
                 >
                   <Activity size={14} className="text-dim group-hover:text-primary transition-colors" />
@@ -510,7 +510,7 @@ export default function Review() {
                     <div className="space-y-4 relative z-10">
                       {messages.map((msg, i) => (
                         <div key={i} className="flex flex-col gap-1 pb-4 border-b border-border/30 last:border-0 last:pb-0">
-                          <span className="text-[10px] tracking-widest font-bold uppercase" style={{ color: msg.role === "user" ? "var(--accent)" : "var(--primary)" }}>
+                          <span className="text-[11px] tracking-widest font-bold uppercase" style={{ color: msg.role === "user" ? "var(--accent)" : "var(--primary)" }}>
                             {msg.role === "user" ? "候选人节点" : "面试官节点"}:
                           </span>
                           <span className="text-xs font-sans leading-relaxed text-text">
@@ -529,7 +529,7 @@ export default function Review() {
         {/* Footer / Back */}
         <div className="mt-12 text-center border-t border-border/50 pt-8">
           <button
-            className="px-8 py-3 bg-transparent border border-primary/30 text-primary text-[10px] font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors relative overflow-hidden group"
+            className="px-8 py-3 bg-transparent border border-primary/30 text-primary text-[11px] font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors relative overflow-hidden group"
             onClick={() => navigate("/")}
           >
             <span className="absolute inset-0 bg-primary/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />

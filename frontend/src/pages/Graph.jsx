@@ -113,7 +113,7 @@ export default function Graph() {
         {/* Title row */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-primary/20 pb-6 mb-8 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-[10px] tracking-widest mb-2 uppercase">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary text-[11px] tracking-widest mb-2 uppercase">
               <GitFork size={12} /> 拓扑图谱
             </div>
             <h1 className="text-3xl md:text-5xl font-display font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-text via-slate-300 to-dim">
@@ -121,7 +121,7 @@ export default function Graph() {
             </h1>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-dim mb-1 tracking-widest">网络节点总数</div>
+            <div className="text-[11px] text-dim mb-1 tracking-widest">网络节点总数</div>
             <div className="text-lg font-bold text-primary">{graphData ? graphData.nodes.length : 0}</div>
           </div>
         </div>
@@ -207,7 +207,7 @@ export default function Graph() {
               <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary" />
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary" />
               
-              <div className="text-[10px] text-primary tracking-widest uppercase mb-2">节点检查</div>
+              <div className="text-[11px] text-primary tracking-widest uppercase mb-2">节点检查</div>
               <div className="font-bold leading-relaxed mb-3">{hoveredNode.question}</div>
               
               <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
@@ -236,7 +236,7 @@ export default function Graph() {
 
         {/* Legend */}
         {selectedTopic && graphData && graphData.nodes.length > 0 && (
-          <div className="flex items-center gap-6 mt-6 p-4 bg-card/40 border border-border/50 text-[10px] text-dim font-bold tracking-widest uppercase flex-wrap">
+          <div className="flex items-center gap-6 mt-6 p-4 bg-card/40 border border-border/50 text-[11px] text-dim font-bold tracking-widest uppercase flex-wrap">
             <span className="mr-2 text-primary">图例:</span>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-[#10b981] shadow-[0_0_8px_#10b981]" />

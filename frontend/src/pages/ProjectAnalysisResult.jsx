@@ -121,7 +121,7 @@ function statusLabel(status) {
 function SectionHeader({ icon, title, right }) {
   return (
     <div className="flex items-center justify-between mb-5 border-b border-primary/20 pb-3">
-      <h2 className="text-xs font-bold tracking-widest uppercase text-primary flex items-center gap-2">
+      <h2 className="text-sm font-bold tracking-widest uppercase text-primary flex items-center gap-2">
         {icon}
         {title}
       </h2>
@@ -137,19 +137,19 @@ function EvidenceItem({ item, index }) {
   const lines = item?.lines || item?.line_range || "";
   return (
     <div className="p-4 border border-border/60 bg-card/50">
-      <div className="text-[11px] text-accent font-bold tracking-widest uppercase mb-2">
+      <div className="text-xs text-accent font-bold tracking-widest uppercase mb-2">
         来源文件: {file}
       </div>
       {reason && (
-        <div className="text-xs text-dim font-sans leading-relaxed mb-2">{reason}</div>
+        <div className="text-sm text-dim font-sans leading-loose mb-2">{reason}</div>
       )}
       {lines && (
-        <div className="text-[11px] text-dim tracking-widest uppercase mb-2">
+        <div className="text-xs text-dim tracking-widest uppercase mb-2">
           行范围: {String(lines)}
         </div>
       )}
       {snippet && (
-        <pre className="text-xs text-text leading-relaxed bg-bg p-3 border border-border/50 overflow-x-auto whitespace-pre-wrap">
+        <pre className="text-sm text-text leading-loose bg-bg p-3 border border-border/50 overflow-x-auto whitespace-pre-wrap">
           {snippet}
         </pre>
       )}
@@ -230,11 +230,11 @@ export default function ProjectAnalysisResult() {
       <div className="flex-1 min-h-0 p-8 md:p-12 max-w-5xl mx-auto w-full text-text font-mono">
         <div className="bg-bg-subtle border border-red-500/40 p-8">
           <SectionHeader icon={<AlertTriangle size={14} />} title="结果加载失败" />
-          <p className="text-sm leading-relaxed text-dim font-sans">
+          <p className="text-sm leading-loose text-dim font-sans">
             未找到 `analysis_id`，请从项目分析流程重新进入结果页。
           </p>
           <button
-            className="mt-6 px-5 py-2 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors"
+            className="mt-6 px-5 py-2 border border-primary text-primary text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors"
             onClick={() => navigate("/")}
           >
             返回主页
@@ -252,13 +252,13 @@ export default function ProjectAnalysisResult() {
           icon={<FileCode2 size={14} />}
           title="项目分析结果工作区"
           right={
-            <span className="text-[10px] px-2 py-1 border border-primary/30 text-primary tracking-widest uppercase">
+            <span className="text-xs px-2 py-1 border border-primary/30 text-primary tracking-widest uppercase">
               {statusLabel(data.status)}
             </span>
           }
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="bg-card border border-border/50 p-4">
             <div className="text-dim tracking-widest uppercase mb-2">Repo</div>
             <div className="text-text break-all">{data.repoName || data.repoUrl || "-"}</div>
@@ -292,7 +292,7 @@ export default function ProjectAnalysisResult() {
                 {data.selectedScopeSnapshot.map((item, index) => (
                   <span
                     key={`${item.path}-${index}`}
-                    className={`inline-flex items-center gap-2 px-2 py-1 border text-[11px] ${
+                    className={`inline-flex items-center gap-2 px-2 py-1 border text-xs ${
                       item.type === "file"
                         ? "border-border/60 text-dim bg-bg"
                         : "border-primary/40 text-primary bg-primary/10"
@@ -312,7 +312,7 @@ export default function ProjectAnalysisResult() {
 
         <div className="flex flex-wrap items-center gap-3 mt-5">
           <button
-            className={`px-4 py-2 border text-xs font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 border text-sm font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
               loading ? "border-dim text-dim" : "border-primary text-primary hover:bg-primary hover:text-bg"
             }`}
             onClick={() => fetchResult()}
@@ -322,7 +322,7 @@ export default function ProjectAnalysisResult() {
             刷新结果
           </button>
           <button
-            className={`px-4 py-2 border text-xs font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
+            className={`px-4 py-2 border text-sm font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
               startingPractice
                 ? "border-dim text-dim"
                 : "border-accent text-accent hover:bg-accent hover:text-bg"
@@ -334,7 +334,7 @@ export default function ProjectAnalysisResult() {
             进入项目答题训练
           </button>
           {isRunning && (
-            <span className="text-[11px] text-dim tracking-widest uppercase flex items-center gap-2">
+            <span className="text-xs text-dim tracking-widest uppercase flex items-center gap-2">
               <Activity size={12} className="animate-pulse text-primary" />
               分析尚未完成，训练入口将在完成后可用
             </span>
@@ -342,19 +342,19 @@ export default function ProjectAnalysisResult() {
         </div>
 
         {requestError && (
-          <div className="mt-4 text-xs text-red-400 border border-red-500/40 bg-red-500/5 p-3">
+          <div className="mt-4 text-sm text-red-400 border border-red-500/40 bg-red-500/5 p-3">
             加载错误: {requestError}
           </div>
         )}
         {data.status === "failed" && (
-          <div className="mt-4 text-xs text-red-400 border border-red-500/40 bg-red-500/5 p-3">
+          <div className="mt-4 text-sm text-red-400 border border-red-500/40 bg-red-500/5 p-3">
             分析失败
             {data.errorCode ? ` [${data.errorCode}]` : ""}:{" "}
             {data.errorMessage || "请重试或返回重新发起分析。"}
           </div>
         )}
         {data.status === "cancelled" && (
-          <div className="mt-4 text-xs text-dim border border-border/60 bg-card/50 p-3">
+          <div className="mt-4 text-sm text-dim border border-border/60 bg-card/50 p-3">
             分析任务已取消。你可以返回导入页重新开始。
           </div>
         )}
@@ -364,7 +364,7 @@ export default function ProjectAnalysisResult() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setTab("questions")}
-            className={`px-3 py-2 text-xs font-bold tracking-widest uppercase border transition-colors ${
+            className={`px-3 py-2 text-sm font-bold tracking-widest uppercase border transition-colors ${
               tab === "questions"
                 ? "border-primary text-primary bg-primary/10"
                 : "border-border text-dim hover:text-text hover:border-primary/50"
@@ -375,7 +375,7 @@ export default function ProjectAnalysisResult() {
           </button>
           <button
             onClick={() => setTab("breakdown")}
-            className={`px-3 py-2 text-xs font-bold tracking-widest uppercase border transition-colors ${
+            className={`px-3 py-2 text-sm font-bold tracking-widest uppercase border transition-colors ${
               tab === "breakdown"
                 ? "border-primary text-primary bg-primary/10"
                 : "border-border text-dim hover:text-text hover:border-primary/50"
@@ -386,7 +386,7 @@ export default function ProjectAnalysisResult() {
           </button>
           <button
             onClick={() => setTab("resume")}
-            className={`px-3 py-2 text-xs font-bold tracking-widest uppercase border transition-colors ${
+            className={`px-3 py-2 text-sm font-bold tracking-widest uppercase border transition-colors ${
               tab === "resume"
                 ? "border-primary text-primary bg-primary/10"
                 : "border-border text-dim hover:text-text hover:border-primary/50"
@@ -412,13 +412,13 @@ export default function ProjectAnalysisResult() {
               <div key={key} className="bg-bg-subtle border border-border/60 p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="text-[10px] text-primary tracking-widest uppercase mb-2">
+                    <div className="text-xs text-primary tracking-widest uppercase mb-2">
                       Question #{q.id}
                     </div>
-                    <div className="text-sm leading-relaxed text-text font-sans">{q.question}</div>
+                    <div className="text-sm leading-loose text-text font-sans">{q.question}</div>
                   </div>
                   <button
-                    className="px-3 py-1 border border-accent/50 text-accent text-[10px] font-bold tracking-widest uppercase hover:bg-accent hover:text-bg transition-colors"
+                    className="px-3 py-1 border border-accent/50 text-accent text-xs font-bold tracking-widest uppercase hover:bg-accent hover:text-bg transition-colors"
                     onClick={() =>
                       setExpandedEvidence((prev) => ({ ...prev, [key]: !prev[key] }))
                     }
@@ -429,31 +429,31 @@ export default function ProjectAnalysisResult() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                   <div className="bg-card border border-border/50 p-4">
-                    <div className="text-[10px] text-dim tracking-widest uppercase mb-2">
+                    <div className="text-xs text-dim tracking-widest uppercase mb-2">
                       参考答题点
                     </div>
                     {q.answerPoints.length ? (
-                      <ul className="list-disc list-inside text-xs text-text font-sans space-y-1">
+                      <ul className="list-disc list-inside text-sm text-text font-sans space-y-1">
                         {q.answerPoints.map((p, idx) => (
                           <li key={`${key}-a-${idx}`}>{p}</li>
                         ))}
                       </ul>
                     ) : (
-                      <div className="text-xs text-dim">暂无</div>
+                      <div className="text-sm text-dim">暂无</div>
                     )}
                   </div>
                   <div className="bg-card border border-border/50 p-4">
-                    <div className="text-[10px] text-dim tracking-widest uppercase mb-2">
+                    <div className="text-xs text-dim tracking-widest uppercase mb-2">
                       追问方向
                     </div>
                     {q.followUps.length ? (
-                      <ul className="list-disc list-inside text-xs text-text font-sans space-y-1">
+                      <ul className="list-disc list-inside text-sm text-text font-sans space-y-1">
                         {q.followUps.map((f, idx) => (
                           <li key={`${key}-f-${idx}`}>{f}</li>
                         ))}
                       </ul>
                     ) : (
-                      <div className="text-xs text-dim">暂无</div>
+                      <div className="text-sm text-dim">暂无</div>
                     )}
                   </div>
                 </div>
@@ -465,7 +465,7 @@ export default function ProjectAnalysisResult() {
                         <EvidenceItem key={`${key}-e-${idx}`} item={ev} index={idx} />
                       ))
                     ) : (
-                      <div className="text-xs text-dim">暂无可展示证据。</div>
+                      <div className="text-sm text-dim">暂无可展示证据。</div>
                     )}
                   </div>
                 )}
@@ -480,7 +480,7 @@ export default function ProjectAnalysisResult() {
           <SectionHeader icon={<FolderTree size={14} />} title="项目拆解报告" />
 
           {data.breakdown.summary && (
-            <div className="text-sm text-text font-sans leading-relaxed bg-card border border-border/50 p-4">
+            <div className="text-sm text-text font-sans leading-loose bg-card border border-border/50 p-4">
               {data.breakdown.summary}
             </div>
           )}
@@ -494,9 +494,9 @@ export default function ProjectAnalysisResult() {
               ["潜在风险", data.breakdown.risks],
             ].map(([title, values]) => (
               <div key={title} className="bg-card border border-border/50 p-4">
-                <div className="text-[10px] text-primary tracking-widest uppercase mb-2">{title}</div>
+                <div className="text-xs text-primary tracking-widest uppercase mb-2">{title}</div>
                 {Array.isArray(values) && values.length ? (
-                  <ul className="list-disc list-inside text-xs text-text font-sans space-y-1">
+                  <ul className="list-disc list-inside text-sm text-text font-sans space-y-1">
                     {values.map((v, idx) => (
                       <li key={`${title}-${idx}`}>
                         {typeof v === "string" ? v : v?.module_name || v?.name || JSON.stringify(v)}
@@ -505,7 +505,7 @@ export default function ProjectAnalysisResult() {
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-xs text-dim">暂无</div>
+                  <div className="text-sm text-dim">暂无</div>
                 )}
               </div>
             ))}
@@ -520,7 +520,7 @@ export default function ProjectAnalysisResult() {
             title="项目经历草稿"
             right={
               <button
-                className="px-3 py-1 border border-primary/50 text-primary text-[10px] font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors"
+                className="px-3 py-1 border border-primary/50 text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors"
                 onClick={() =>
                   navigator.clipboard
                     ?.writeText(
@@ -536,17 +536,17 @@ export default function ProjectAnalysisResult() {
               </button>
             }
           />
-          <div className="bg-card border border-border/50 p-5 text-sm text-text font-sans leading-relaxed md-content">
+          <div className="bg-card border border-border/50 p-5 text-sm text-text font-sans leading-loose md-content">
             {typeof data.resumeDraft === "string" ? (
               <ReactMarkdown>{data.resumeDraft}</ReactMarkdown>
             ) : (
-              <pre className="text-xs whitespace-pre-wrap">
+              <pre className="text-sm whitespace-pre-wrap">
                 {JSON.stringify(data.resumeDraft, null, 2)}
               </pre>
             )}
           </div>
           {!isCompleted && (
-            <div className="mt-4 text-xs text-dim flex items-center gap-2">
+            <div className="mt-4 text-sm text-dim flex items-center gap-2">
               <LoaderCircle size={12} className="animate-spin" />
               结果尚未完成，草稿内容可能为空或不完整。
             </div>
@@ -556,7 +556,7 @@ export default function ProjectAnalysisResult() {
 
       <div className="pb-6">
         <button
-          className={`w-full md:w-auto px-6 py-3 border text-xs font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
+          className={`w-full md:w-auto px-6 py-3 border text-sm font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
             startingPractice
               ? "border-dim text-dim"
               : "border-accent text-accent hover:bg-accent hover:text-bg"
@@ -570,13 +570,13 @@ export default function ProjectAnalysisResult() {
       </div>
 
       {!isCompleted && (
-        <div className="text-[11px] text-dim border border-border/60 bg-card/50 p-3 flex items-center gap-2">
+        <div className="text-xs text-dim border border-border/60 bg-card/50 p-3 flex items-center gap-2">
           {isRunning ? <Activity size={12} className="text-primary animate-pulse" /> : <AlertTriangle size={12} />}
           当前任务状态为 {statusLabel(data.status)}，建议待完成后再进入训练。
         </div>
       )}
       {isCompleted && (
-        <div className="text-[11px] text-primary border border-primary/30 bg-primary/5 p-3 flex items-center gap-2">
+        <div className="text-xs text-primary border border-primary/30 bg-primary/5 p-3 flex items-center gap-2">
           <CheckCircle2 size={12} />
           分析完成，可直接进入项目答题训练。
         </div>
