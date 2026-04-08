@@ -271,7 +271,7 @@ export default function Knowledge() {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-display font-bold uppercase tracking-widest text-primary flex items-center gap-2">
               <Activity size={20} />
-              知识矩阵矩阵
+              知识矩阵
             </h1>
             {selected && (
               <div className="text-sm text-dim bg-primary/5 border border-primary/20 px-4 py-1.5 flex items-center gap-2">

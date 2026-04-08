@@ -17,6 +17,7 @@ This directory contains guidelines for backend development. Fill in each file wi
 | [Directory Structure](./directory-structure.md) | Module organization and file layout | Ready |
 | [Database Guidelines](./database-guidelines.md) | ORM patterns, queries, migrations | Ready |
 | [Error Handling](./error-handling.md) | Error types, handling strategies | Ready |
+| [GitHub Project Analysis](./github-project-analysis.md) | GitHub 连接、仓库发现、范围候选与分析 V2 契约 | Ready |
 | [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | Ready |
 | [Logging Guidelines](./logging-guidelines.md) | Structured logging, log levels | Ready |
 

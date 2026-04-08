@@ -2,16 +2,18 @@
 # 核心依赖: FastAPI, LangChain, LangGraph, LlamaIndex, bge-m3 embeddings
 import uuid
 from datetime import datetime
+from urllib.parse import urlencode
 
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
 from backend.models import (
     StartInterviewRequest, ChatRequest, EndDrillRequest,
-    RecordingAnalyzeRequest, RegisterRequest, LoginRequest,
+    RecordingAnalyzeRequest, RegisterRequest, LoginRequest, GitHubConnectStartRequest,
     InterviewMode, InterviewPhase,
 )
 from backend.graphs.resume_interview import compile_resume_interview
@@ -32,6 +34,12 @@ from backend.auth import (
     init_users_table, ensure_default_user,
     create_user, authenticate_user, create_token, get_current_user,
 )
+from backend.github_connection import (
+    GitHubConnectionConfigError,
+    GitHubConnectionError,
+    create_github_connect_session,
+    handle_github_callback,
+)
 from backend.project_analysis.pipeline import (
     AnalysisPipelineError,
     STATUS_ANALYZING,
@@ -46,6 +54,17 @@ from backend.project_analysis.pipeline import (
     get_analysis,
     resolve_repo_preview,
     run_analysis_job,
+)
+from backend.project_analysis.github_source import GitHubApiError
+from backend.project_analysis.repo_selection import (
+    build_scope_candidates,
+    get_repository_branches,
+    list_authorized_public_repositories,
+)
+from backend.storage.github_connections import (
+    disconnect_github_connection,
+    get_github_connection,
+    init_github_connections_table,
 )
 
 app = FastAPI(title="MemCoach", version="0.2.0")
@@ -74,10 +93,59 @@ class ProjectAnalysisResolveRequest(BaseModel):
 class ProjectAnalysisCreateRequest(BaseModel):
     """项目分析任务创建请求."""
 
-    repo_url: str
+    repo_url: str = ""
     branch: str | None = None
     role_summary: str = ""
     owned_scopes: list[str] = Field(default_factory=list)
+    repo_snapshot: dict | None = None
+    selected_scope_snapshot: list[dict] = Field(default_factory=list)
+
+
+def _github_connection_public_view(user_id: str) -> dict:
+    """返回前端可直接消费的 GitHub 连接状态。"""
+    configured = bool(
+        settings.github_app_client_id.strip()
+        and settings.github_app_client_secret.strip()
+        and settings.backend_public_url.strip()
+        and settings.frontend_app_url.strip()
+    )
+    record = get_github_connection(user_id)
+    if not record or record.get("status") != "connected":
+        return {
+            "configured": configured,
+            "connected": False,
+            "status": record.get("status") if record else "disconnected",
+            "github_login": record.get("github_login") if record else "",
+            "github_name": record.get("github_name") if record else "",
+            "github_avatar_url": record.get("github_avatar_url") if record else "",
+            "installation_id": record.get("installation_id") if record else None,
+            "installations": record.get("installations") if record else [],
+            "connected_at": record.get("created_at") if record else None,
+            "updated_at": record.get("updated_at") if record else None,
+            "access_token_expires_at": record.get("access_token_expires_at") if record else None,
+        }
+    return {
+        "configured": configured,
+        "connected": True,
+        "status": "connected",
+        "github_login": record.get("github_login", ""),
+        "github_name": record.get("github_name", ""),
+        "github_avatar_url": record.get("github_avatar_url", ""),
+        "installation_id": record.get("installation_id"),
+        "installations": record.get("installations", []),
+        "connected_at": record.get("created_at"),
+        "updated_at": record.get("updated_at"),
+        "access_token_expires_at": record.get("access_token_expires_at"),
+    }
+
+
+def _raise_github_connection_http_error(exc: GitHubConnectionError) -> None:
+    """将 GitHub 连接错误映射为 HTTPException。"""
+    if exc.code == "github_not_connected":
+        raise HTTPException(409, exc.message)
+    if exc.code in {"github_unauthorized", "github_token_expired"}:
+        raise HTTPException(401, exc.message)
+    raise HTTPException(400, exc.message)
 
 
 def _analysis_public_view(record: dict, include_result: bool = False) -> dict:
@@ -93,6 +161,8 @@ def _analysis_public_view(record: dict, include_result: bool = False) -> dict:
         "status": status,
         "role_summary": record.get("role_summary", ""),
         "owned_scopes": record.get("owned_scopes", []),
+        "repo_source": record.get("repo_source", {}),
+        "selected_scope_snapshot": record.get("selected_scope_snapshot", []),
         "error_code": record.get("error_code"),
         "error_message": record.get("error_message"),
         "created_at": record.get("created_at"),
@@ -214,6 +284,7 @@ def preload_models():
     # Init tables + default user
     init_memory_table()
     init_users_table()
+    init_github_connections_table()
     ensure_default_user()
     logger.info("Database tables initialized.")
 
@@ -242,6 +313,118 @@ def login(req: LoginRequest):
         raise HTTPException(401, "Invalid email or password")
     token = create_token(user["id"])
     return {"token": token, "user": user}
+
+
+@router.post("/github/connection/start")
+def github_connection_start(
+    req: GitHubConnectStartRequest,
+    user_id: str = Depends(get_current_user),
+):
+    """生成 GitHub 授权地址。"""
+    try:
+        return create_github_connect_session(user_id, redirect_path=req.redirect_path)
+    except GitHubConnectionConfigError as exc:
+        raise HTTPException(503, exc.message)
+
+
+@router.get("/github/connection/status")
+def github_connection_status(user_id: str = Depends(get_current_user)):
+    """获取当前用户的 GitHub 连接状态。"""
+    return _github_connection_public_view(user_id)
+
+
+@router.delete("/github/connection")
+def github_connection_disconnect(user_id: str = Depends(get_current_user)):
+    """断开当前用户的 GitHub 连接。"""
+    disconnect_github_connection(user_id)
+    return _github_connection_public_view(user_id)
+
+
+@router.get("/github/connection/callback", include_in_schema=False)
+def github_connection_callback(
+    code: str | None = None,
+    state: str | None = None,
+    installation_id: int | None = None,
+    setup_action: str | None = None,
+    error: str | None = None,
+    error_description: str | None = None,
+):
+    """处理 GitHub OAuth 回调并回跳前端。"""
+    try:
+        payload = handle_github_callback(
+            code=code,
+            state=state,
+            installation_id=installation_id,
+            setup_action=setup_action,
+            error=error,
+            error_description=error_description,
+        )
+    except GitHubConnectionError as exc:
+        redirect_url = (
+            f"{settings.frontend_app_url.rstrip('/')}/project-analysis?"
+            f"{urlencode({
+                'github_connected': '0',
+                'error_code': exc.code,
+                'error_message': exc.message,
+            })}"
+        )
+        return RedirectResponse(url=redirect_url, status_code=302)
+    return RedirectResponse(url=payload["redirect_url"], status_code=302)
+
+
+@router.get("/github/repositories")
+def github_authorized_repositories(
+    query: str = "",
+    page: int = 1,
+    per_page: int = 20,
+    user_id: str = Depends(get_current_user),
+):
+    """列出当前用户已授权的公开仓库。"""
+    try:
+        return list_authorized_public_repositories(
+            user_id,
+            query=query,
+            page=max(page, 1),
+            per_page=min(max(per_page, 1), 50),
+        )
+    except GitHubConnectionError as exc:
+        _raise_github_connection_http_error(exc)
+
+
+@router.get("/github/repositories/{owner}/{repo}/branches")
+def github_repository_branches(
+    owner: str,
+    repo: str,
+    user_id: str = Depends(get_current_user),
+):
+    """获取仓库分支与默认分支。"""
+    try:
+        return get_repository_branches(user_id, owner=owner, repo=repo)
+    except GitHubConnectionError as exc:
+        _raise_github_connection_http_error(exc)
+    except GitHubApiError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@router.get("/github/repositories/{owner}/{repo}/scope-candidates")
+def github_repository_scope_candidates(
+    owner: str,
+    repo: str,
+    branch: str,
+    user_id: str = Depends(get_current_user),
+):
+    """获取仓库范围候选（目录优先 + 文件补充）。"""
+    try:
+        return build_scope_candidates(
+            user_id,
+            owner=owner,
+            repo=repo,
+            branch=branch,
+        )
+    except GitHubConnectionError as exc:
+        _raise_github_connection_http_error(exc)
+    except GitHubApiError as exc:
+        raise HTTPException(400, str(exc))
 
 
 @router.get("/")
@@ -1238,10 +1421,12 @@ async def project_analysis_create(
     try:
         record = create_analysis_job(
             repo_url=req.repo_url,
+            repo_snapshot=req.repo_snapshot,
             user_id=user_id,
             branch=req.branch,
             role_summary=req.role_summary,
             owned_scopes=req.owned_scopes,
+            selected_scope_snapshot=req.selected_scope_snapshot,
         )
     except AnalysisPipelineError as e:
         raise HTTPException(400, str(e))

@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 
 from backend.config import settings
+from backend.github_connection import GitHubConnectionError, get_valid_github_access_token
 from backend.project_analysis.contracts import (
     AnalysisStatus,
     EvidenceItem,
@@ -33,9 +34,11 @@ from backend.project_analysis.github_source import (
     GitHubBranchInfo,
     GitHubNotFoundError,
     GitHubPrivateRepoError,
+    GitHubRepoRef,
     GitHubRateLimitError,
     GitHubUrlError,
     download_commit_archive,
+    fetch_repo_info,
     parse_public_github_repo_url,
     resolve_branch_commit,
     resolve_repo_from_url,
@@ -66,9 +69,9 @@ class AnalysisPipelineError(Exception):
 
 def resolve_repo_preview(repo_url: str, user_id: str) -> dict:
     """解析公开仓库预览信息。"""
-    _ = user_id  # 预留给未来的用户级 token / 配额逻辑
+    token = _resolve_analysis_github_token(user_id, require_connection=False)
     try:
-        repo_info = resolve_repo_from_url(repo_url)
+        repo_info = resolve_repo_from_url(repo_url, token=token)
     except GitHubUrlError as exc:
         raise AnalysisPipelineError("invalid_repo_url", str(exc)) from exc
     except GitHubPrivateRepoError as exc:
@@ -102,28 +105,37 @@ def resolve_repo_preview(repo_url: str, user_id: str) -> dict:
 
 def create_analysis_job(
     *,
-    repo_url: str,
+    repo_url: str = "",
+    repo_snapshot: dict | None = None,
     user_id: str,
     branch: str | None,
     role_summary: str,
-    owned_scopes: list[str],
+    owned_scopes: list[str] | None = None,
+    selected_scope_snapshot: list[dict] | None = None,
 ) -> dict:
     """创建项目分析任务。"""
-    preview = resolve_repo_preview(repo_url, user_id)
-    repo = preview["repo"]
+    token = _resolve_analysis_github_token(user_id, require_connection=bool(repo_snapshot))
+    normalized_repo_source = _normalize_repo_source(repo_url, repo_snapshot, user_id, token=token)
+    repo = normalized_repo_source["repo"]
     chosen_branch = (branch or repo["default_branch"] or "main").strip()
-    repo_ref = parse_public_github_repo_url(repo_url)
-    commit_sha = _resolve_commit(repo_ref, chosen_branch)
+    repo_ref = normalized_repo_source["repo_ref"]
+    commit_sha = _resolve_commit(repo_ref, chosen_branch, token=token)
     analysis_id = uuid.uuid4().hex[:12]
+    normalized_scope_snapshot = _normalize_scope_snapshot(selected_scope_snapshot or [])
+    normalized_owned_scopes = _normalize_owned_scopes(
+        owned_scopes or [item["path"] for item in normalized_scope_snapshot]
+    )
 
     create_project_analysis(
         analysis_id=analysis_id,
-        repo_url=repo_url,
+        repo_url=normalized_repo_source["repo_url"],
         repo_name=repo["full_name"],
         branch=chosen_branch,
         commit_sha=commit_sha,
         role_summary=role_summary.strip(),
-        owned_scopes=_normalize_owned_scopes(owned_scopes),
+        owned_scopes=normalized_owned_scopes,
+        repo_source=normalized_repo_source["repo_source"],
+        selected_scope_snapshot=normalized_scope_snapshot,
         user_id=user_id,
     )
     record = get_analysis(analysis_id, user_id)
@@ -161,12 +173,17 @@ def run_analysis_job(analysis_id: str, user_id: str) -> None:
         _ensure_not_cancelled(analysis_id, user_id)
 
         repo_ref = parse_public_github_repo_url(record["repo_url"])
+        token = _resolve_analysis_github_token(
+            user_id,
+            require_connection=bool((record.get("repo_source") or {}).get("installation_id")),
+        )
         # 使用系统临时目录，避免在项目根目录下创建文件触发 uvicorn --reload
         temp_dir_path = Path(tempfile.mkdtemp(prefix="memcoach-project-analysis-"))
         archive_path = download_commit_archive(
             repo_ref,
             record["commit_sha"],
             temp_dir_path / "archive",
+            token=token,
         )
 
         update_project_analysis_status(analysis_id, STATUS_FILTERING, user_id=user_id)
@@ -248,9 +265,9 @@ def is_terminal_status(status: str) -> bool:
     return status in {STATUS_COMPLETED, STATUS_FAILED, STATUS_CANCELLED}
 
 
-def _resolve_commit(repo_ref, branch: str) -> str:
+def _resolve_commit(repo_ref, branch: str, token: str | None = None) -> str:
     try:
-        return resolve_branch_commit(repo_ref, branch)
+        return resolve_branch_commit(repo_ref, branch, token=token)
     except GitHubNotFoundError as exc:
         raise AnalysisPipelineError("branch_not_found", str(exc)) from exc
     except GitHubRateLimitError as exc:
@@ -274,14 +291,107 @@ def _normalize_owned_scopes(owned_scopes: list[str]) -> list[str]:
     return normalized
 
 
+def _normalize_scope_snapshot(selected_scope_snapshot: list[dict]) -> list[dict]:
+    normalized: list[dict] = []
+    seen_paths: set[str] = set()
+    for item in selected_scope_snapshot:
+        path = str(item.get("path") or "").strip()
+        item_type = str(item.get("type") or "").strip() or "directory"
+        if not path or path in seen_paths:
+            continue
+        if item_type not in {"directory", "file"}:
+            item_type = "directory"
+        normalized.append({"path": path, "type": item_type})
+        seen_paths.add(path)
+    return normalized
+
+
+def _normalize_repo_source(
+    repo_url: str,
+    repo_snapshot: dict | None,
+    user_id: str,
+    *,
+    token: str | None = None,
+) -> dict:
+    if repo_snapshot:
+        owner = str(repo_snapshot.get("owner") or "").strip()
+        repo = str(repo_snapshot.get("repo") or "").strip()
+        full_name = str(repo_snapshot.get("full_name") or "").strip()
+        if (not owner or not repo) and full_name and "/" in full_name:
+            owner, repo = full_name.split("/", 1)
+        if not owner or not repo:
+            raise AnalysisPipelineError("invalid_repo_snapshot", "仓库快照缺少 owner/repo。")
+
+        repo_ref = GitHubRepoRef(owner=owner, repo=repo)
+        try:
+            repo_info = fetch_repo_info(repo_ref, token=token)
+        except GitHubPrivateRepoError as exc:
+            raise AnalysisPipelineError("private_repo_unsupported", str(exc)) from exc
+        except GitHubNotFoundError as exc:
+            raise AnalysisPipelineError("repo_not_found", str(exc)) from exc
+        except GitHubRateLimitError as exc:
+            raise AnalysisPipelineError("github_rate_limited", str(exc)) from exc
+        except GitHubApiError as exc:
+            raise AnalysisPipelineError("github_api_error", str(exc)) from exc
+
+        html_url = str(repo_snapshot.get("html_url") or repo_info.html_url)
+        return {
+            "repo_ref": repo_ref,
+            "repo_url": html_url,
+            "repo": {
+                "name": repo_info.ref.repo,
+                "full_name": repo_info.ref.full_name,
+                "default_branch": repo_info.default_branch,
+                "description": repo_info.description,
+                "html_url": html_url,
+            },
+            "repo_source": {
+                "provider": "github",
+                "owner": owner,
+                "repo": repo,
+                "full_name": repo_info.ref.full_name,
+                "html_url": html_url,
+                "installation_id": repo_snapshot.get("installation_id"),
+            },
+        }
+
+    preview = resolve_repo_preview(repo_url, user_id)
+    repo = preview["repo"]
+    repo_ref = parse_public_github_repo_url(repo_url)
+    return {
+        "repo_ref": repo_ref,
+        "repo_url": repo_url,
+        "repo": repo,
+        "repo_source": {
+            "provider": "github",
+            "owner": repo_ref.owner,
+            "repo": repo_ref.repo,
+            "full_name": repo_ref.full_name,
+            "html_url": repo_url,
+            "installation_id": None,
+        },
+    }
+
+
+def _resolve_analysis_github_token(user_id: str, *, require_connection: bool) -> str | None:
+    """在分析相关 GitHub 请求中优先使用用户 token。"""
+    try:
+        return get_valid_github_access_token(user_id)
+    except GitHubConnectionError as exc:
+        if not require_connection and exc.code == "github_not_connected":
+            return None
+        raise AnalysisPipelineError(exc.code, exc.message) from exc
+
+
 def _detect_repo_root(extracted_root: Path, extracted_files: list[Path]) -> Path:
     if not extracted_files:
-        return extracted_root
-    first = extracted_files[0]
-    relative_parts = first.relative_to(extracted_root).parts
+        return extracted_root.resolve()
+    root = extracted_root.resolve()
+    first = extracted_files[0].resolve()
+    relative_parts = first.relative_to(root).parts
     if relative_parts:
-        return extracted_root / relative_parts[0]
-    return extracted_root
+        return root / relative_parts[0]
+    return root
 
 
 def _build_result_payload(record: dict, files: list[FilteredTextFile], summary) -> dict:

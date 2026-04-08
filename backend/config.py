@@ -62,6 +62,14 @@ class Settings(BaseSettings):
     default_name: str = "xhc"                   # 默认管理员名称
     allow_registration: bool = False              # 是否允许公开注册
 
+    # ==================== GitHub App 配置 ====================
+    github_app_client_id: str = ""           # GitHub App Client ID
+    github_app_client_secret: str = ""       # GitHub App Client Secret
+    github_app_slug: str = ""                # GitHub App Slug（预留给后续安装/跳转）
+    github_oauth_state_secret: str = ""      # GitHub OAuth state 签名密钥，留空则回退到 jwt_secret
+    backend_public_url: str = "http://localhost:8000"   # 后端对浏览器可访问的地址
+    frontend_app_url: str = "http://localhost:5173"     # 前端页面地址
+
     # ==================== 面试配置 ====================
     max_questions_per_phase: int = 5   # 每个面试阶段的最大题目数
     max_drill_questions: int = 15     # 专项训练的最大题目数
@@ -149,6 +157,25 @@ class Settings(BaseSettings):
             Path: 用户索引缓存目录的完整路径
         """
         return self.user_data_dir(user_id) / ".index_cache"
+
+    @property
+    def github_state_secret(self) -> str:
+        """
+        获取 GitHub OAuth state 使用的签名密钥。
+
+        Returns:
+            str: 若显式配置 github_oauth_state_secret 则优先使用，否则复用 jwt_secret
+        """
+        return self.github_oauth_state_secret or self.jwt_secret
+
+    def github_oauth_callback_url(self) -> str:
+        """
+        获取 GitHub OAuth 回调 URL。
+
+        Returns:
+            str: GitHub App 配置中应登记的回调地址
+        """
+        return f"{self.backend_public_url.rstrip('/')}/api/github/connection/callback"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

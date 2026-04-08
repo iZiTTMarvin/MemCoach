@@ -49,6 +49,8 @@ def _get_conn() -> sqlite3.Connection:
             commit_sha     TEXT NOT NULL,
             role_summary   TEXT DEFAULT '',
             owned_scopes   TEXT DEFAULT '[]',
+            repo_source_json TEXT DEFAULT '{}',
+            selected_scope_snapshot_json TEXT DEFAULT '[]',
             status         TEXT NOT NULL DEFAULT 'queued',
             error_code     TEXT,
             error_message  TEXT,
@@ -73,6 +75,8 @@ def _get_conn() -> sqlite3.Connection:
         ("commit_sha", "TEXT NOT NULL DEFAULT ''"),
         ("role_summary", "TEXT DEFAULT ''"),
         ("owned_scopes", "TEXT DEFAULT '[]'"),
+        ("repo_source_json", "TEXT DEFAULT '{}'"),
+        ("selected_scope_snapshot_json", "TEXT DEFAULT '[]'"),
         ("status", "TEXT NOT NULL DEFAULT 'queued'"),
         ("error_code", "TEXT"),
         ("error_message", "TEXT"),
@@ -98,18 +102,34 @@ def create_project_analysis(
     user_id: str,
     role_summary: str = "",
     owned_scopes: list[str] | None = None,
+    repo_source: Mapping[str, Any] | None = None,
+    selected_scope_snapshot: list[Mapping[str, Any]] | None = None,
     status: str = AnalysisStatus.QUEUED.value,
 ) -> None:
     """创建项目分析任务。"""
     normalized_status = _validate_status(status)
     scopes = owned_scopes or []
+    repo_source_payload = dict(repo_source or {})
+    selected_scope_payload = [dict(item) for item in (selected_scope_snapshot or [])]
 
     conn = _get_conn()
     conn.execute(
         """
         INSERT INTO project_analyses
-        (analysis_id, user_id, repo_url, repo_name, branch, commit_sha, role_summary, owned_scopes, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (
+            analysis_id,
+            user_id,
+            repo_url,
+            repo_name,
+            branch,
+            commit_sha,
+            role_summary,
+            owned_scopes,
+            repo_source_json,
+            selected_scope_snapshot_json,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             analysis_id,
@@ -120,6 +140,8 @@ def create_project_analysis(
             commit_sha,
             role_summary,
             json.dumps(scopes, ensure_ascii=False),
+            json.dumps(repo_source_payload, ensure_ascii=False),
+            json.dumps(selected_scope_payload, ensure_ascii=False),
             normalized_status,
         ),
     )
@@ -190,6 +212,8 @@ def get_project_analysis(analysis_id: str, *, user_id: str) -> dict[str, Any] | 
 
     result = dict(row)
     result["owned_scopes"] = json.loads(result.get("owned_scopes") or "[]")
+    result["repo_source"] = json.loads(result.get("repo_source_json") or "{}")
+    result["selected_scope_snapshot"] = json.loads(result.get("selected_scope_snapshot_json") or "[]")
     result["result"] = json.loads(result.get("result_json") or "{}")
     return result
 
@@ -240,4 +264,3 @@ def delete_project_analysis(analysis_id: str, *, user_id: str) -> bool:
     conn.commit()
     conn.close()
     return cursor.rowcount > 0
-

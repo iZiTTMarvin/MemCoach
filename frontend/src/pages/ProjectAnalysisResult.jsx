@@ -57,22 +57,37 @@ function normalizeBreakdown(input) {
   };
 }
 
+function normalizeScopeSnapshot(input) {
+  const arr = Array.isArray(input) ? input : [];
+  return arr
+    .map((item) => ({
+      path: item?.path || "",
+      type: item?.type || "directory",
+    }))
+    .filter((item) => item.path);
+}
+
 function normalizeResult(payload) {
   const p = payload || {};
   const meta = p.metadata || p.meta || {};
   const result = p.result || p;
+  const repoSource = p.repo_source || meta.repo_source || {};
 
   return {
     analysisId: p.analysis_id || p.id || meta.analysis_id || "",
     status: p.status || meta.status || "",
-    repoName: p.repo_name || meta.repo_name || "",
-    repoUrl: p.repo_url || meta.repo_url || "",
+    repoName: repoSource.full_name || p.repo_name || meta.repo_name || "",
+    repoUrl: repoSource.html_url || p.repo_url || meta.repo_url || "",
+    repoSource,
     branch: p.branch || meta.branch || "",
     commitSha: p.commit_sha || meta.commit_sha || "",
     analysisTime:
       p.analysis_time || p.updated_at || p.completed_at || meta.analysis_time || "",
     errorCode: p.error_code || "",
     errorMessage: p.error_message || "",
+    selectedScopeSnapshot: normalizeScopeSnapshot(
+      p.selected_scope_snapshot || meta.selected_scope_snapshot || [],
+    ),
     questions: normalizeQuestions(result.questions),
     breakdown: normalizeBreakdown(result.breakdown),
     resumeDraft:
@@ -247,6 +262,16 @@ export default function ProjectAnalysisResult() {
           <div className="bg-card border border-border/50 p-4">
             <div className="text-dim tracking-widest uppercase mb-2">Repo</div>
             <div className="text-text break-all">{data.repoName || data.repoUrl || "-"}</div>
+            {data.repoUrl && (
+              <a
+                className="block mt-2 text-primary break-all hover:underline"
+                href={data.repoUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {data.repoUrl}
+              </a>
+            )}
           </div>
           <div className="bg-card border border-border/50 p-4">
             <div className="text-dim tracking-widest uppercase mb-2">Branch</div>
@@ -259,6 +284,29 @@ export default function ProjectAnalysisResult() {
           <div className="bg-card border border-border/50 p-4">
             <div className="text-dim tracking-widest uppercase mb-2">Analysis Time</div>
             <div className="text-text">{formatTime(data.analysisTime)}</div>
+          </div>
+          <div className="bg-card border border-border/50 p-4 md:col-span-2">
+            <div className="text-dim tracking-widest uppercase mb-2">Confirmed Scope</div>
+            {data.selectedScopeSnapshot.length ? (
+              <div className="flex flex-wrap gap-2">
+                {data.selectedScopeSnapshot.map((item, index) => (
+                  <span
+                    key={`${item.path}-${index}`}
+                    className={`inline-flex items-center gap-2 px-2 py-1 border text-[11px] ${
+                      item.type === "file"
+                        ? "border-border/60 text-dim bg-bg"
+                        : "border-primary/40 text-primary bg-primary/10"
+                    }`}
+                  >
+                    {item.type === "file" ? <FileCode2 size={10} /> : <FolderTree size={10} />}
+                    {item.path}
+                    {item.type === "directory" ? "/" : ""}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-dim">未返回用户确认范围。</div>
+            )}
           </div>
         </div>
 

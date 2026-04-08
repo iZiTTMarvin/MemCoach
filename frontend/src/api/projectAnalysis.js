@@ -95,6 +95,30 @@ export async function cancelProjectAnalysis(analysisId) {
   return res.json();
 }
 
+/**
+ * 使用新契约创建分析任务（GitHub 绑定仓库入口）
+ * repo_snapshot + selected_scope_snapshot
+ */
+export async function createProjectAnalysisV2({
+  repoSnapshot,
+  branch,
+  roleSummary,
+  selectedScopeSnapshot,
+}) {
+  const res = await authFetch(`${API_BASE}/project-analysis`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      repo_snapshot: repoSnapshot,
+      branch,
+      role_summary: roleSummary,
+      selected_scope_snapshot: selectedScopeSnapshot,
+    }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
 export async function startProjectAnalysisPractice(analysisId) {
   const res = await authFetch(`${API_BASE}/project-analysis/${analysisId}/practice`, {
     method: "POST",

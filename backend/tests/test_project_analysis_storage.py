@@ -73,6 +73,18 @@ class TestProjectAnalysesStorage(unittest.TestCase):
             commit_sha="abc1234",
             role_summary="负责后端分析管线",
             owned_scopes=["backend", "storage"],
+            repo_source={
+                "provider": "github",
+                "owner": "example",
+                "repo": "repo",
+                "full_name": "example/repo",
+                "html_url": "https://github.com/example/repo",
+                "installation_id": 456,
+            },
+            selected_scope_snapshot=[
+                {"path": "backend", "type": "directory"},
+                {"path": "backend/storage/project_analyses.py", "type": "file"},
+            ],
             user_id=self.user_id,
         )
 
@@ -81,6 +93,8 @@ class TestProjectAnalysesStorage(unittest.TestCase):
         self.assertEqual(record["status"], AnalysisStatus.QUEUED.value)
         self.assertEqual(record["repo_name"], "repo")
         self.assertEqual(record["owned_scopes"], ["backend", "storage"])
+        self.assertEqual(record["repo_source"]["full_name"], "example/repo")
+        self.assertEqual(record["selected_scope_snapshot"][0]["path"], "backend")
         self.assertEqual(record["result"], {})
 
     def test_update_status_and_save_result(self):

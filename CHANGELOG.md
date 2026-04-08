@@ -1,10 +1,20 @@
 # Changelog
 
 ## 2026-04-08
+- **前端**：完成 GitHub 项目分析官 Phase 1 前端导入向导重构。
+  - 新增 `githubConnection.js` API 层，覆盖连接状态、OAuth 发起、断连、仓库列表、分支列表、范围候选共 6 个接口。
+  - 新增 `createProjectAnalysisV2`，使用 `repo_snapshot + selected_scope_snapshot` 新契约创建分析任务。
+  - 重写 `ProjectAnalysis.jsx`，主入口切换为"连接 GitHub → 选已授权仓库 → 选分支 → 目录/文件范围 → 创建分析"五步流程，支持目录展开到文件级补充选择，消费 OAuth callback query 参数，保留结果页与训练闭环。
+  - 补齐 `ProjectAnalysisResult.jsx` 的仓库快照与用户确认范围展示，确保结果页和新契约一致。
 - **流程**：整理 Trellis 活跃任务，收口已完成但未归档的历史项。
   - 归档 `03-30-fix-watchfiles-reload-tmp-dir`，将已完成的临时目录修复任务移出活跃区。
   - 清理 `00-bootstrap-guidelines` 的占位子项与 backend 指南索引状态，并完成归档准备。
   - 保留 `03-29` 父任务与 6 个 `03-31` 子任务，作为后续 GitHub 项目分析官 Phase 1 的正式开发任务树。
+- **功能**：完成 GitHub 项目分析官 Phase 1 第一阶段后端主干。
+  - 新增 GitHub 连接能力：授权发起、回调落库、状态查询、断连，以及用户 access token 刷新能力。
+  - 新增已授权公开仓库列表、分支查询、目录优先+文件补充的范围候选接口。
+  - 升级项目分析存储与编排，支持 `repo_snapshot + selected_scope_snapshot` 新输入契约，修复 callback 失败跳转的 query 编码问题，并补齐 Windows 路径归一化回归测试。
+  - 贯通 GitHub 用户 token 到分析创建与后台下载链路，已绑定 GitHub 的仓库分析不再退回匿名 GitHub API 请求。
 
 ## 2026-03-31
 - **规划**: 重构 GitHub 项目分析官 Phase 1 的 Trellis 任务树，切换到 GitHub 绑定公开仓库版路线。
