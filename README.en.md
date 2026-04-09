@@ -2,7 +2,7 @@
 
 MemCoach is an AI interview training platform for software engineering candidates. It combines resume-driven mock interviews, GitHub project analysis, and a persistent profile memory system that keeps learning your weak points, strengths, and communication patterns over time.
 
-[Demo](https://aari.top/) | [Chinese Version](README.md)
+[Chinese Version](README.md)
 
 ---
 
