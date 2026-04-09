@@ -20,21 +20,26 @@ export default function TechSpecs() {
 
   useEffect(() => {
     let index = 0;
-    const timer = setInterval(() => {
-      if (index < welcomeText.length) {
-        setTypedText(welcomeText.slice(0, index + 1));
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-    }, 30);
+    let timer;
+    // 配合大门开启时机，延迟 2.8s 开始打字
+    const startDelay = setTimeout(() => {
+      timer = setInterval(() => {
+        if (index < welcomeText.length) {
+          setTypedText(welcomeText.slice(0, index + 1));
+          index++;
+        } else {
+          clearInterval(timer);
+        }
+      }, 30);
+    }, 2800);
 
     const cursorTimer = setInterval(() => {
       setShowCursor(prev => !prev);
     }, 500);
 
     return () => {
-      clearInterval(timer);
+      clearTimeout(startDelay);
+      if (timer) clearInterval(timer);
       clearInterval(cursorTimer);
     };
   }, []);
@@ -74,7 +79,7 @@ export default function TechSpecs() {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 2.5
+        delayChildren: 2.8
       }
     }
   };
@@ -149,7 +154,7 @@ export default function TechSpecs() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 2.6 }}
           className="mb-12 text-center"
         >
           <div className="inline-block relative">
@@ -175,7 +180,7 @@ export default function TechSpecs() {
           ref={terminalRef}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 2.7 }}
           className="mb-16 relative"
         >
           <div className="bg-bg-subtle/90 backdrop-blur-xl border border-primary/30 rounded-lg overflow-hidden shadow-2xl">
@@ -222,7 +227,7 @@ export default function TechSpecs() {
                   key={tech.name}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.5 + index * 0.1 }}
+                  transition={{ delay: 3.0 + index * 0.1 }}
                   whileHover={{ 
                     scale: 1.05, 
                     rotateX: 5,
@@ -265,7 +270,7 @@ export default function TechSpecs() {
                   key={feature.title}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 3.3 + index * 0.08 }}
+                  transition={{ delay: 3.5 + index * 0.08 }}
                   whileHover={{ 
                     scale: 1.02,
                     borderColor: "rgba(16, 185, 129, 0.5)"
@@ -365,7 +370,7 @@ export default function TechSpecs() {
                 fill="none"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 2, delay: 4 }}
+                transition={{ duration: 2, delay: 4.2 }}
               />
               <motion.path
                 d="M 600 150 Q 800 200 1000 150"
@@ -374,7 +379,7 @@ export default function TechSpecs() {
                 fill="none"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 2, delay: 4.5 }}
+                transition={{ duration: 2, delay: 4.7 }}
               />
             </svg>
           </motion.div>
@@ -456,189 +461,285 @@ function IntroSequence({ onComplete }) {
     return () => clearTimeout(timer);
   }, [onComplete]);
 
-  // 极具阻尼感的贝塞尔曲线，强调重量和爆发力
-  const mechanicalEasing = [0.8, 0, 0.2, 1];
+  // 极具阻尼感的贝塞尔曲线，强调重量和爆发力 (初速极大，后段极慢)
+  const mechanicalEasing = [0.85, 0, 0.15, 1];
+  // 锁扣回缩的顿挫感
+  const lockEasing = [0.4, -0.4, 0.2, 1.5];
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none flex">
+    <div className="fixed inset-0 z-50 pointer-events-none flex overflow-hidden">
+      {/* 底层深渊背景，门拉开时立即消失，无缝透出底层真实页面 */}
+      <motion.div 
+        className="absolute inset-0 bg-[#0a0e12] z-[-1]" 
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ delay: 2.4, duration: 0.1 }}
+      />
+
       {/* 门缝背后的极强光源（开门时的爆光剪影效果） */}
       <motion.div 
         className="absolute inset-0 bg-[#00f0ff] z-0 mix-blend-screen"
         initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 0, 0.8, 0] }}
-        transition={{ times: [0, 2.4/3.6, 2.5/3.6, 3.2/3.6], duration: 3.6 }}
+        animate={{ opacity: [0, 0, 1, 0] }}
+        transition={{ times: [0, 2.3/3.6, 2.5/3.6, 3.4/3.6], duration: 3.6 }}
       />
 
-      {/* 左半边门与系统背景 */}
+      {/* ================= 左半边门与系统背景 ================= */}
       <motion.div
-        className="relative w-1/2 h-full bg-[#0a0e12] z-10 overflow-hidden flex justify-end items-center border-r border-[#111820]"
+        className="relative w-1/2 h-full bg-[#0a0e12] z-10 overflow-hidden flex justify-end items-center border-r border-[#00f0ff]/20 shadow-[20px_0_50px_rgba(0,0,0,0.8)]"
         initial={{ x: 0 }}
         animate={{ x: "-100%" }}
-        transition={{ delay: 2.5, duration: 0.7, ease: mechanicalEasing }}
+        transition={{ delay: 2.5, duration: 0.8, ease: mechanicalEasing }}
       >
         {/* PCB 底纹 (极暗呼吸) */}
         <motion.div 
           className="absolute inset-0 opacity-[0.03]"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.05, 0.02, 0.05] }}
+          animate={{ opacity: [0, 0.08, 0.02, 0.06] }}
           transition={{ duration: 0.8, repeat: 3, repeatType: "reverse" }}
         >
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <pattern id="pcb" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 0 30 L 30 30 L 30 60 M 30 0 L 30 30 L 60 30" fill="none" stroke="#ffffff" strokeWidth="1"/>
-              <circle cx="30" cy="30" r="2" fill="#ffffff" />
+            <pattern id="pcb" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+              <path d="M 0 40 L 20 40 L 40 20 L 40 0 M 40 80 L 40 60 L 60 40 L 80 40" fill="none" stroke="#ffffff" strokeWidth="1"/>
+              <circle cx="20" cy="40" r="2" fill="#ffffff" />
+              <circle cx="60" cy="40" r="2" fill="#ffffff" />
             </pattern>
             <rect width="100%" height="100%" fill="url(#pcb)" />
           </svg>
         </motion.div>
 
-        {/* 能量传输线 (从极左侧到中央大门，利用 viewBox 拉伸适应) */}
-        <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-80">
+        {/* 能量传输线 (左侧 -> 中央) */}
+        <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-90">
           <defs>
             <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feGaussianBlur stdDeviation="6" result="blur" />
               <feMerge>
+                <feMergeNode in="blur" />
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <linearGradient id="lineGradL" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="transparent" />
+              <stop offset="50%" stopColor="#00f0ff" />
+              <stop offset="100%" stopColor="#fff" />
+            </linearGradient>
           </defs>
-          {/* 主干线 1 */}
+          {/* 主干线 1 (上方) */}
           <motion.path
-            d="M 0 300 L 600 300 L 700 450 L 1000 450"
+            d="M -100 200 L 400 200 L 500 350 L 1000 350"
             fill="none"
-            stroke="#00f0ff"
+            stroke="url(#lineGradL)"
             strokeWidth="3"
             vectorEffect="non-scaling-stroke"
             filter="url(#cyanGlow)"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-            transition={{ delay: 0.8, duration: 1.2, ease: "linear" }}
+            transition={{ delay: 0.6, duration: 1.2, ease: "circIn" }}
           />
-          {/* 主干线 2 */}
+          {/* 主干线 2 (下方) */}
           <motion.path
-            d="M 0 700 L 400 700 L 500 550 L 1000 550"
+            d="M -100 800 L 300 800 L 450 650 L 1000 650"
             fill="none"
-            stroke="#00f0ff"
-            strokeWidth="2"
+            stroke="url(#lineGradL)"
+            strokeWidth="4"
             vectorEffect="non-scaling-stroke"
             filter="url(#cyanGlow)"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: [0, 1, 0] }}
-            transition={{ delay: 1.0, duration: 1.0, ease: "linear" }}
+            transition={{ delay: 0.9, duration: 1.0, ease: "circIn" }}
           />
-          {/* 细节点缀线 */}
+          {/* 细节点缀线群 */}
           <motion.path
-            d="M 0 500 L 800 500 L 850 480 L 1000 480"
+            d="M 200 450 L 600 450 L 650 480 L 1000 480 M 0 550 L 800 550 L 850 520 L 1000 520"
             fill="none"
             stroke="#00f0ff"
             strokeWidth="1"
             vectorEffect="non-scaling-stroke"
             initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: [0, 0.8, 0] }}
-            transition={{ delay: 1.2, duration: 0.8, ease: "linear" }}
+            animate={{ pathLength: 1, opacity: [0, 0.6, 0] }}
+            transition={{ delay: 1.1, duration: 0.8, ease: "linear" }}
           />
         </svg>
 
-        {/* 左半机械门体 */}
-        <div className="relative w-[300px] h-[480px] bg-[#11161d] border-y border-l border-[#2a3642] rounded-l-lg shadow-[-30px_0_60px_rgba(0,0,0,0.8)_inset] flex flex-col justify-center items-end pr-2 overflow-hidden">
-          {/* 表面金属纹理与接缝 */}
-          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_98%,#ffffff_98%),linear-gradient(0deg,transparent_98%,#ffffff_98%)] bg-[size:40px_40px]" />
-          <div className="absolute top-10 right-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
-          <div className="absolute bottom-10 right-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
+        {/* 左半中央机械门体 (厚重质感) */}
+        <div className="relative w-[380px] h-[65vh] bg-gradient-to-br from-[#1a212a] to-[#0d1117] border-y border-l border-[#3a4652] rounded-l-2xl shadow-[-40px_0_80px_rgba(0,0,0,0.95)_inset,_10px_0_30px_rgba(0,240,255,0.05)] flex flex-col justify-center items-end pr-2 overflow-hidden">
+          {/* 表面装甲接缝与划痕纹理 */}
+          <div className="absolute inset-0 opacity-10 bg-[linear-gradient(90deg,transparent_98%,#fff_98%),linear-gradient(0deg,transparent_98%,#fff_98%)] bg-[size:60px_60px]" />
+          <div className="absolute top-0 right-12 w-[1px] h-full bg-gradient-to-b from-transparent via-[#ffffff15] to-transparent" />
+          
+          {/* 装饰性散热口 */}
+          <div className="absolute top-16 right-6 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-16 h-1.5 bg-[#05080a] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.15)]" />
+            ))}
+          </div>
+          <div className="absolute bottom-16 right-6 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-16 h-1.5 bg-[#05080a] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.15)]" />
+            ))}
+          </div>
 
-          {/* 左锁止卡扣 */}
+          {/* 左侧重型物理锁扣 */}
           <motion.div 
-            className="z-10 w-12 h-40 bg-[#0a0e12] border border-[#2a3642] flex flex-col justify-between py-6 items-center rounded-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]"
+            className="z-20 w-16 h-56 bg-gradient-to-r from-[#0d1117] to-[#161d26] border border-[#3a4652] flex flex-col justify-between py-8 items-center rounded-sm shadow-[inset_0_0_25px_rgba(0,0,0,0.9),_5px_0_15px_rgba(0,0,0,0.6)] relative"
             initial={{ x: 0 }}
-            animate={{ x: -16 }}
-            transition={{ delay: 2.1, duration: 0.3, ease: "backIn" }}
+            animate={{ x: -28 }}
+            transition={{ delay: 2.1, duration: 0.4, ease: lockEasing }}
           >
-            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
-            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
+            {/* 锁舌结构 */}
+            <div className="w-10 h-6 bg-[#1e2630] rounded-sm border border-[#4a5662] shadow-[0_3px_5px_rgba(0,0,0,0.6),_inset_0_1px_1px_rgba(255,255,255,0.1)] flex items-center justify-center">
+              <div className="w-6 h-1 bg-[#0a0e12] rounded-full" />
+            </div>
+            <div className="w-10 h-6 bg-[#1e2630] rounded-sm border border-[#4a5662] shadow-[0_3px_5px_rgba(0,0,0,0.6),_inset_0_1px_1px_rgba(255,255,255,0.1)] flex items-center justify-center">
+              <div className="w-6 h-1 bg-[#0a0e12] rounded-full" />
+            </div>
           </motion.div>
 
-          {/* 状态指示灯左半段 */}
-          <div className="absolute top-1/2 right-0 w-24 h-1.5 -translate-y-1/2 bg-[#05080a] overflow-hidden z-10 border-y border-l border-[#2a3642]/50 rounded-l-sm">
+          {/* 状态指示灯左半段 (从无到充能，最后变色) */}
+          <div className="absolute top-1/2 right-0 w-32 h-2 -translate-y-1/2 bg-[#05080a] overflow-hidden z-10 border-y border-l border-[#2a3642]/50 rounded-l-sm shadow-[inset_0_0_8px_rgba(0,0,0,1)]">
              <motion.div 
-               className="w-full h-full bg-[#00f0ff] shadow-[0_0_12px_#00f0ff]"
-               initial={{ x: "-100%" }}
-               animate={{ x: "0%" }}
-               transition={{ delay: 1.8, duration: 0.1, ease: "easeOut" }}
+               className="w-full h-full bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]"
+               initial={{ x: "-100%", backgroundColor: "#00f0ff" }}
+               animate={{ 
+                 x: ["-100%", "0%", "0%"],
+                 backgroundColor: ["#00f0ff", "#00f0ff", "#ffb703"],
+                 boxShadow: ["0 0 15px #00f0ff", "0 0 15px #00f0ff", "0 0 20px #ffb703"]
+               }}
+               transition={{ times: [0, 0.8, 1], delay: 1.8, duration: 0.6, ease: "easeOut" }}
              />
           </div>
         </div>
       </motion.div>
 
-      {/* 右半边门与系统背景 */}
+      {/* ================= 右半边门与系统背景 ================= */}
       <motion.div
-        className="relative w-1/2 h-full bg-[#0a0e12] z-10 overflow-hidden flex justify-start items-center border-l border-[#111820]"
+        className="relative w-1/2 h-full bg-[#0a0e12] z-10 overflow-hidden flex justify-start items-center border-l border-[#00f0ff]/20 shadow-[-20px_0_50px_rgba(0,0,0,0.8)]"
         initial={{ x: 0 }}
         animate={{ x: "100%" }}
-        transition={{ delay: 2.5, duration: 0.7, ease: mechanicalEasing }}
+        transition={{ delay: 2.5, duration: 0.8, ease: mechanicalEasing }}
       >
         {/* PCB 底纹 (极暗呼吸) */}
         <motion.div 
           className="absolute inset-0 opacity-[0.03]"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.05, 0.02, 0.05] }}
+          animate={{ opacity: [0, 0.08, 0.02, 0.06] }}
           transition={{ duration: 0.8, repeat: 3, repeatType: "reverse", delay: 0.2 }}
         >
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <pattern id="pcb2" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 30 L 30 30 L 30 60 M 30 0 L 30 30 L 0 30" fill="none" stroke="#ffffff" strokeWidth="1"/>
-              <circle cx="30" cy="30" r="2" fill="#ffffff" />
+            <pattern id="pcb2" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+              <path d="M 80 40 L 60 40 L 40 20 L 40 0 M 40 80 L 40 60 L 20 40 L 0 40" fill="none" stroke="#ffffff" strokeWidth="1"/>
+              <circle cx="60" cy="40" r="2" fill="#ffffff" />
+              <circle cx="20" cy="40" r="2" fill="#ffffff" />
             </pattern>
             <rect width="100%" height="100%" fill="url(#pcb2)" />
           </svg>
         </motion.div>
 
-        {/* 右半机械门体 */}
-        <div className="relative w-[300px] h-[480px] bg-[#11161d] border-y border-r border-[#2a3642] rounded-r-lg shadow-[30px_0_60px_rgba(0,0,0,0.8)_inset] flex flex-col justify-center items-start pl-2 overflow-hidden">
-          {/* 表面金属纹理与接缝 */}
-          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,#ffffff_2%,transparent_2%),linear-gradient(0deg,transparent_98%,#ffffff_98%)] bg-[size:40px_40px]" />
-          <div className="absolute top-10 left-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
-          <div className="absolute bottom-10 left-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
+        {/* 能量传输线 (右侧 -> 中央) */}
+        <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-90" style={{ transform: "scaleX(-1)" }}>
+          <defs>
+            <filter id="cyanGlow2" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <motion.path
+            d="M -100 250 L 350 250 L 450 400 L 1000 400"
+            fill="none"
+            stroke="url(#lineGradL)"
+            strokeWidth="3"
+            vectorEffect="non-scaling-stroke"
+            filter="url(#cyanGlow2)"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+            transition={{ delay: 0.7, duration: 1.1, ease: "circIn" }}
+          />
+          <motion.path
+            d="M -100 750 L 400 750 L 500 600 L 1000 600"
+            fill="none"
+            stroke="url(#lineGradL)"
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+            filter="url(#cyanGlow2)"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+            transition={{ delay: 1.0, duration: 0.9, ease: "circIn" }}
+          />
+        </svg>
 
-          {/* 右锁止卡扣 */}
+        {/* 右半中央机械门体 */}
+        <div className="relative w-[380px] h-[65vh] bg-gradient-to-bl from-[#1a212a] to-[#0d1117] border-y border-r border-[#3a4652] rounded-r-2xl shadow-[40px_0_80px_rgba(0,0,0,0.95)_inset,_-10px_0_30px_rgba(0,240,255,0.05)] flex flex-col justify-center items-start pl-2 overflow-hidden">
+          {/* 表面装甲接缝 */}
+          <div className="absolute inset-0 opacity-10 bg-[linear-gradient(90deg,#fff_2%,transparent_2%),linear-gradient(0deg,transparent_98%,#fff_98%)] bg-[size:60px_60px]" />
+          <div className="absolute top-0 left-12 w-[1px] h-full bg-gradient-to-b from-transparent via-[#ffffff15] to-transparent" />
+          
+          {/* 装饰性散热口 */}
+          <div className="absolute top-16 left-6 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-16 h-1.5 bg-[#05080a] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.15)]" />
+            ))}
+          </div>
+          <div className="absolute bottom-16 left-6 space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-16 h-1.5 bg-[#05080a] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.15)]" />
+            ))}
+          </div>
+
+          {/* 右侧重型物理锁扣 */}
           <motion.div 
-            className="z-10 w-12 h-40 bg-[#0a0e12] border border-[#2a3642] flex flex-col justify-between py-6 items-center rounded-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]"
+            className="z-20 w-16 h-56 bg-gradient-to-l from-[#0d1117] to-[#161d26] border border-[#3a4652] flex flex-col justify-between py-8 items-center rounded-sm shadow-[inset_0_0_25px_rgba(0,0,0,0.9),_-5px_0_15px_rgba(0,0,0,0.6)] relative"
             initial={{ x: 0 }}
-            animate={{ x: 16 }}
-            transition={{ delay: 2.1, duration: 0.3, ease: "backIn" }}
+            animate={{ x: 28 }}
+            transition={{ delay: 2.1, duration: 0.4, ease: lockEasing }}
           >
-            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
-            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
+            <div className="w-10 h-6 bg-[#1e2630] rounded-sm border border-[#4a5662] shadow-[0_3px_5px_rgba(0,0,0,0.6),_inset_0_1px_1px_rgba(255,255,255,0.1)] flex items-center justify-center">
+              <div className="w-6 h-1 bg-[#0a0e12] rounded-full" />
+            </div>
+            <div className="w-10 h-6 bg-[#1e2630] rounded-sm border border-[#4a5662] shadow-[0_3px_5px_rgba(0,0,0,0.6),_inset_0_1px_1px_rgba(255,255,255,0.1)] flex items-center justify-center">
+              <div className="w-6 h-1 bg-[#0a0e12] rounded-full" />
+            </div>
           </motion.div>
 
-          {/* 状态指示灯右半段 (最终变琥珀金表示解锁) */}
-          <div className="absolute top-1/2 left-0 w-24 h-1.5 -translate-y-1/2 bg-[#05080a] overflow-hidden z-10 border-y border-r border-[#2a3642]/50 rounded-r-sm">
+          {/* 状态指示灯右半段 */}
+          <div className="absolute top-1/2 left-0 w-32 h-2 -translate-y-1/2 bg-[#05080a] overflow-hidden z-10 border-y border-r border-[#2a3642]/50 rounded-r-sm shadow-[inset_0_0_8px_rgba(0,0,0,1)]">
              <motion.div 
-               className="w-full h-full bg-[#ffb703] shadow-[0_0_12px_#ffb703]"
-               initial={{ x: "100%" }}
-               animate={{ x: "0%" }}
-               transition={{ delay: 2.3, duration: 0.1, ease: "easeOut" }}
+               className="w-full h-full bg-[#00f0ff] shadow-[0_0_15px_#00f0ff]"
+               initial={{ x: "100%", backgroundColor: "#00f0ff" }}
+               animate={{ 
+                 x: ["100%", "0%", "0%"],
+                 backgroundColor: ["#00f0ff", "#00f0ff", "#ffb703"],
+                 boxShadow: ["0 0 15px #00f0ff", "0 0 15px #00f0ff", "0 0 20px #ffb703"]
+               }}
+               transition={{ times: [0, 0.8, 1], delay: 1.8, duration: 0.6, ease: "easeOut" }}
              />
           </div>
         </div>
 
-        {/* 锁止接通时的能量爆点 */}
+        {/* 锁止接通时的能量高频频闪爆点 (强化能量注入感) */}
         <motion.div
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-48 bg-[#00f0ff] blur-xl mix-blend-screen z-20 pointer-events-none"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-64 bg-[#00f0ff] blur-2xl mix-blend-screen z-30 pointer-events-none"
           initial={{ opacity: 0, scaleY: 0 }}
-          animate={{ opacity: [0, 1, 0], scaleY: [0, 1.2, 2] }}
-          transition={{ delay: 1.8, duration: 0.5, ease: "easeOut" }}
+          animate={{ opacity: [0, 1, 0.2, 1, 0], scaleY: [0, 1.2, 0.8, 1.5, 2] }}
+          transition={{ times: [0, 0.2, 0.4, 0.6, 1], delay: 1.8, duration: 0.6, ease: "easeOut" }}
         />
       </motion.div>
 
-      {/* 底部浮现的系统名称，随着开门逐渐消失 */}
+      {/* 底部系统控制台字符，带 CRT 扫描线故障感 */}
       <motion.div 
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 text-[#3a4652] font-mono text-[10px] tracking-[0.8em]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 0] }}
+        className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 text-[#00f0ff] font-mono text-[11px] tracking-[1em] mix-blend-screen"
+        initial={{ opacity: 0, filter: "blur(4px)" }}
+        animate={{ opacity: [0, 0.8, 0], filter: ["blur(4px)", "blur(0px)", "blur(2px)"] }}
         transition={{ times: [0, 0.2, 1], delay: 0.5, duration: 2.5 }}
       >
-        PROTOCOL OVERRIDE INITIATED
+        <div className="relative">
+          PROTOCOL OVERRIDE INITIATED
+          <div className="absolute inset-0 bg-[#00f0ff] mix-blend-overlay opacity-50 blur-[2px]" />
+        </div>
       </motion.div>
     </div>
   );
