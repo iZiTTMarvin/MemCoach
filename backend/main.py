@@ -363,13 +363,15 @@ def github_connection_callback(
             error_description=error_description,
         )
     except GitHubConnectionError as exc:
+        query_string = urlencode(
+            {
+                "github_connected": "0",
+                "error_code": exc.code,
+                "error_message": exc.message,
+            }
+        )
         redirect_url = (
-            f"{settings.frontend_app_url.rstrip('/')}/project-analysis?"
-            f"{urlencode({
-                'github_connected': '0',
-                'error_code': exc.code,
-                'error_message': exc.message,
-            })}"
+            f"{settings.frontend_app_url.rstrip('/')}/project-analysis?{query_string}"
         )
         return RedirectResponse(url=redirect_url, status_code=302)
     return RedirectResponse(url=payload["redirect_url"], status_code=302)

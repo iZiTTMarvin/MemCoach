@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-04-10
+- **修复**：修复 GitHub OAuth 回调错误分支在 Zeabur 部署时触发的后端启动语法错误。
+  - 将错误跳转的 query 编码改为先生成 `query_string` 再拼接 URL，避免 `f-string` 中嵌套字典字面量导致导入期 `SyntaxError`。
+  - 保持 `error_code` 与 `error_message` 的完整 URL 编码，兼容包含 `&` 等特殊字符的错误信息。
 - **文档**：继续打磨 README 首页文案与开源展示表述。
   - 强化中英文 README 的首屏介绍，突出“简历面试 + 项目分析 + 画像记忆”三大模式的整体价值。
   - 收紧模块命名与未来计划措辞，减少对 `Agent` 的泛化使用。
