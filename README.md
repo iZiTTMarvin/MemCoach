@@ -1,6 +1,8 @@
 # MemCoach - AI 面试教练系统
 
-An AI interview coach that learns you -- the more you practice, the better it knows your weaknesses.
+MemCoach 是一个面向技术求职者的 AI 面试训练平台：把简历面试、GitHub 项目分析和持久化画像记忆串成一个持续迭代的训练闭环，帮助你从“会背题”走向“会表达、会拆解、会应对追问”。
+
+
 
 [Demo](https://aari.top/) | [English Version](README.en.md)
 
@@ -8,23 +10,27 @@ An AI interview coach that learns you -- the more you practice, the better it kn
 
 ## 项目展示
 
-[首页截图 - 请在此处插入图片链接]
+![首页截图](images/首页.png)
 
-[面试训练截图 - 请在此处插入图片链接]
+![面试训练截图](images/基地.png)
 
-[项目分析截图 - 请在此处插入图片链接]
+![项目分析截图](images/项目.png)
 
-[用户画像截图 - 请在此处插入图片链接]
+![用户画像截图](images/画像.png)
 
 ---
 
+## 项目流程概览
+
+![项目流程概览](images/项目流程概览.png)
+
 ## 核心功能
 
-### 三大 AI Agent 闭环
+### 三大 AI 智能闭环
 
-**1. 项目分析 Agent**
+**1. 项目分析工作流**
 
-将 GitHub 仓库自动转化为个性化面试问题。连接 GitHub、选择仓库、配置负责范围后，AI 自动分析代码结构、生成面试问题、输出项目拆解报告。
+将 GitHub 仓库自动转化为个性化面试素材。连接 GitHub、选择仓库、配置负责范围后，系统会完成仓库解析、关键文件过滤、结构分析、问题生成与项目拆解报告输出。
 
 - GitHub OAuth 安全连接（JWT state token + 自动刷新）
 - 仓库智能过滤（源码/配置/文档）
@@ -34,15 +40,15 @@ An AI interview coach that learns you -- the more you practice, the better it kn
 
 **2. 简历面试 Agent**
 
-基于 LangGraph 状态机的完整面试流程。AI 读取简历后，模拟真实面试官行为，动态调整追问策略。
+基于 LangGraph 状态机的完整面试流程。AI 读取简历后，模拟真实面试官行为，围绕经历、项目与技术细节动态调整追问策略。
 
 - 五阶段递进：开场问候 -> 自我介绍 -> 技术问题 -> 项目深挖 -> 反问
 - 内联评估驱动，答得好快速推进，答得差深入追问
 - 四维评分：技术深度 / 项目表达 / 沟通能力 / 问题解决
 
-**3. 画像记忆 Agent（Mem0 风格）**
+**3. 画像记忆系统（Mem0 风格）**
 
-持久化的用户能力画像。每次训练后自动提取薄弱点、评估掌握度、记录思维模式，跨会话持续演进。
+持久化的用户能力画像。每次训练后自动提取薄弱点、评估掌握度、记录思维模式与表达习惯，跨会话持续演进。
 
 - 两阶段更新：LLM 提取 -> ADD/UPDATE/IMPROVE 智能决策
 - 向量语义去重（cosine similarity >= 0.75）
@@ -67,6 +73,32 @@ An AI interview coach that learns you -- the more you practice, the better it kn
 - **录音复盘**：上传录音或粘贴文字，AI 自动转写分析（Dual/Solo 双轨模式）
 - **知识库管理**：按领域维护核心知识文档和高频题库，支持 Markdown 编辑
 - **多用户隔离**：JWT 认证，数据按用户完全隔离
+
+### 未来计划
+
+**1. 项目面试 Agent 模式**
+
+当前项目分析更接近“分析工作流 + 报告生成”。下一阶段计划在此基础上新增真正的项目面试 Agent：
+
+- 保留现有“项目拆解报告 + 5 道核心问题”模式，作为静态分析入口
+- 新增“项目面试 Agent”模式，围绕仓库上下文与源码证据发起多轮追问
+- 不再只停留在问答列表，而是根据候选人的回答动态切换追问方向
+- 对项目职责、架构取舍、故障排查、性能优化、安全边界做真实面试式考察
+- 评估结果回流到画像系统，形成“项目分析 -> 项目面试 -> 画像更新”的新闭环
+
+如果做到这一步，项目分析模块就会从“LLM 驱动的分析工作流”升级为真正具有多轮追问与动态决策能力的 Agent。
+
+**2. 私有 GitHub 仓库分析**
+
+未来也计划支持用户的私有仓库分析。这在技术上完全可行，但会显著提升安全与合规要求：
+
+- 需要基于 GitHub App / OAuth token 的最小权限访问控制
+- 必须明确哪些仓库、哪些分支、哪些目录允许被分析
+- 临时拉取的代码副本需要严格生命周期管理，避免长期落盘
+- 日志、错误信息、缓存都不能泄露私有代码内容
+- 商业化后应补充审计日志、权限管理、用户侧撤销授权与数据删除能力
+
+因此，私有仓库分析不是“不能做”，而是“可以做，但必须在安全边界收紧之后再做”。
 
 ---
 
@@ -93,7 +125,7 @@ backend/
 ├── indexer.py                # 知识索引（LlamaIndex）
 ├── spaced_repetition.py       # SM-2 间隔重复调度
 ├── github_connection.py       # GitHub OAuth 连接
-├── project_analysis/           # 项目分析 Agent
+├── project_analysis/           # 项目分析工作流
 │   ├── pipeline.py            # 任务编排
 │   ├── github_source.py       # GitHub API 接入
 │   ├── filtering.py           # 文件过滤
@@ -250,4 +282,4 @@ MemCoach/
 
 ## 许可证
 
-MIT，要当毕设的改改哈，因为俺也要弄毕设嘿嘿
+MIT
