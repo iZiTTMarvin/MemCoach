@@ -13,9 +13,10 @@ export default function TechSpecs() {
   const [typedText, setTypedText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
   const [copied, setCopied] = useState(null);
+  const [showIntro, setShowIntro] = useState(true);
   const terminalRef = useRef(null);
 
-  const welcomeText = "> INITIALIZING MEMCOACH SYSTEM...\n> LOADING TECHNICAL SPECIFICATIONS...\n> ACCESS GRANTED\n> WELCOME, OPERATOR.";
+  const welcomeText = "> 正在初始化 MemCoach 系统...\n> 正在加载技术规格数据...\n> 访问权限已授权\n> 欢迎操作员。";
 
   useEffect(() => {
     let index = 0;
@@ -92,7 +93,16 @@ export default function TechSpecs() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text font-mono relative overflow-hidden selection:bg-primary/30">
+    <>
+      {/* Intro Sequence */}
+      <AnimatePresence>
+        {showIntro && (
+          <IntroSequence onComplete={() => setShowIntro(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className="min-h-screen bg-bg text-text font-mono relative overflow-hidden selection:bg-primary/30">
       {/* Dynamic Particle Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#10b98108_1px,transparent_1px),linear-gradient(to_bottom,#10b98108_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(16,185,129,0.15),transparent_50%)] pointer-events-none" />
@@ -433,6 +443,203 @@ export default function TechSpecs() {
           </div>
         </motion.div>
       </main>
+    </div>
+    </>
+  );
+}
+
+// IntroSequence Component - 「协议覆写」高级机械加载动效
+function IntroSequence({ onComplete }) {
+  useEffect(() => {
+    // 3.6s 后销毁动画层，完全露出底层页面
+    const timer = setTimeout(() => onComplete(), 3600);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  // 极具阻尼感的贝塞尔曲线，强调重量和爆发力
+  const mechanicalEasing = [0.8, 0, 0.2, 1];
+
+  return (
+    <div className="fixed inset-0 z-50 pointer-events-none flex">
+      {/* 门缝背后的极强光源（开门时的爆光剪影效果） */}
+      <motion.div 
+        className="absolute inset-0 bg-[#00f0ff] z-0 mix-blend-screen"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0, 0.8, 0] }}
+        transition={{ times: [0, 2.4/3.6, 2.5/3.6, 3.2/3.6], duration: 3.6 }}
+      />
+
+      {/* 左半边门与系统背景 */}
+      <motion.div
+        className="relative w-1/2 h-full bg-[#0a0e12] z-10 overflow-hidden flex justify-end items-center border-r border-[#111820]"
+        initial={{ x: 0 }}
+        animate={{ x: "-100%" }}
+        transition={{ delay: 2.5, duration: 0.7, ease: mechanicalEasing }}
+      >
+        {/* PCB 底纹 (极暗呼吸) */}
+        <motion.div 
+          className="absolute inset-0 opacity-[0.03]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.05, 0.02, 0.05] }}
+          transition={{ duration: 0.8, repeat: 3, repeatType: "reverse" }}
+        >
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="pcb" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 0 30 L 30 30 L 30 60 M 30 0 L 30 30 L 60 30" fill="none" stroke="#ffffff" strokeWidth="1"/>
+              <circle cx="30" cy="30" r="2" fill="#ffffff" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#pcb)" />
+          </svg>
+        </motion.div>
+
+        {/* 能量传输线 (从极左侧到中央大门，利用 viewBox 拉伸适应) */}
+        <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="absolute inset-0 w-full h-full opacity-80">
+          <defs>
+            <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {/* 主干线 1 */}
+          <motion.path
+            d="M 0 300 L 600 300 L 700 450 L 1000 450"
+            fill="none"
+            stroke="#00f0ff"
+            strokeWidth="3"
+            vectorEffect="non-scaling-stroke"
+            filter="url(#cyanGlow)"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+            transition={{ delay: 0.8, duration: 1.2, ease: "linear" }}
+          />
+          {/* 主干线 2 */}
+          <motion.path
+            d="M 0 700 L 400 700 L 500 550 L 1000 550"
+            fill="none"
+            stroke="#00f0ff"
+            strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
+            filter="url(#cyanGlow)"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 1, 0] }}
+            transition={{ delay: 1.0, duration: 1.0, ease: "linear" }}
+          />
+          {/* 细节点缀线 */}
+          <motion.path
+            d="M 0 500 L 800 500 L 850 480 L 1000 480"
+            fill="none"
+            stroke="#00f0ff"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: [0, 0.8, 0] }}
+            transition={{ delay: 1.2, duration: 0.8, ease: "linear" }}
+          />
+        </svg>
+
+        {/* 左半机械门体 */}
+        <div className="relative w-[300px] h-[480px] bg-[#11161d] border-y border-l border-[#2a3642] rounded-l-lg shadow-[-30px_0_60px_rgba(0,0,0,0.8)_inset] flex flex-col justify-center items-end pr-2 overflow-hidden">
+          {/* 表面金属纹理与接缝 */}
+          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,transparent_98%,#ffffff_98%),linear-gradient(0deg,transparent_98%,#ffffff_98%)] bg-[size:40px_40px]" />
+          <div className="absolute top-10 right-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
+          <div className="absolute bottom-10 right-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
+
+          {/* 左锁止卡扣 */}
+          <motion.div 
+            className="z-10 w-12 h-40 bg-[#0a0e12] border border-[#2a3642] flex flex-col justify-between py-6 items-center rounded-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]"
+            initial={{ x: 0 }}
+            animate={{ x: -16 }}
+            transition={{ delay: 2.1, duration: 0.3, ease: "backIn" }}
+          >
+            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
+            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
+          </motion.div>
+
+          {/* 状态指示灯左半段 */}
+          <div className="absolute top-1/2 right-0 w-24 h-1.5 -translate-y-1/2 bg-[#05080a] overflow-hidden z-10 border-y border-l border-[#2a3642]/50 rounded-l-sm">
+             <motion.div 
+               className="w-full h-full bg-[#00f0ff] shadow-[0_0_12px_#00f0ff]"
+               initial={{ x: "-100%" }}
+               animate={{ x: "0%" }}
+               transition={{ delay: 1.8, duration: 0.1, ease: "easeOut" }}
+             />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* 右半边门与系统背景 */}
+      <motion.div
+        className="relative w-1/2 h-full bg-[#0a0e12] z-10 overflow-hidden flex justify-start items-center border-l border-[#111820]"
+        initial={{ x: 0 }}
+        animate={{ x: "100%" }}
+        transition={{ delay: 2.5, duration: 0.7, ease: mechanicalEasing }}
+      >
+        {/* PCB 底纹 (极暗呼吸) */}
+        <motion.div 
+          className="absolute inset-0 opacity-[0.03]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.05, 0.02, 0.05] }}
+          transition={{ duration: 0.8, repeat: 3, repeatType: "reverse", delay: 0.2 }}
+        >
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <pattern id="pcb2" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 60 30 L 30 30 L 30 60 M 30 0 L 30 30 L 0 30" fill="none" stroke="#ffffff" strokeWidth="1"/>
+              <circle cx="30" cy="30" r="2" fill="#ffffff" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#pcb2)" />
+          </svg>
+        </motion.div>
+
+        {/* 右半机械门体 */}
+        <div className="relative w-[300px] h-[480px] bg-[#11161d] border-y border-r border-[#2a3642] rounded-r-lg shadow-[30px_0_60px_rgba(0,0,0,0.8)_inset] flex flex-col justify-center items-start pl-2 overflow-hidden">
+          {/* 表面金属纹理与接缝 */}
+          <div className="absolute inset-0 opacity-20 bg-[linear-gradient(90deg,#ffffff_2%,transparent_2%),linear-gradient(0deg,transparent_98%,#ffffff_98%)] bg-[size:40px_40px]" />
+          <div className="absolute top-10 left-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
+          <div className="absolute bottom-10 left-4 w-12 h-1 bg-[#0a0e12] rounded-full shadow-[0_1px_1px_rgba(255,255,255,0.1)]" />
+
+          {/* 右锁止卡扣 */}
+          <motion.div 
+            className="z-10 w-12 h-40 bg-[#0a0e12] border border-[#2a3642] flex flex-col justify-between py-6 items-center rounded-sm shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]"
+            initial={{ x: 0 }}
+            animate={{ x: 16 }}
+            transition={{ delay: 2.1, duration: 0.3, ease: "backIn" }}
+          >
+            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
+            <div className="w-6 h-3 bg-[#1e2630] rounded-sm border border-[#3a4652]" />
+          </motion.div>
+
+          {/* 状态指示灯右半段 (最终变琥珀金表示解锁) */}
+          <div className="absolute top-1/2 left-0 w-24 h-1.5 -translate-y-1/2 bg-[#05080a] overflow-hidden z-10 border-y border-r border-[#2a3642]/50 rounded-r-sm">
+             <motion.div 
+               className="w-full h-full bg-[#ffb703] shadow-[0_0_12px_#ffb703]"
+               initial={{ x: "100%" }}
+               animate={{ x: "0%" }}
+               transition={{ delay: 2.3, duration: 0.1, ease: "easeOut" }}
+             />
+          </div>
+        </div>
+
+        {/* 锁止接通时的能量爆点 */}
+        <motion.div
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-48 bg-[#00f0ff] blur-xl mix-blend-screen z-20 pointer-events-none"
+          initial={{ opacity: 0, scaleY: 0 }}
+          animate={{ opacity: [0, 1, 0], scaleY: [0, 1.2, 2] }}
+          transition={{ delay: 1.8, duration: 0.5, ease: "easeOut" }}
+        />
+      </motion.div>
+
+      {/* 底部浮现的系统名称，随着开门逐渐消失 */}
+      <motion.div 
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 text-[#3a4652] font-mono text-[10px] tracking-[0.8em]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ times: [0, 0.2, 1], delay: 0.5, duration: 2.5 }}
+      >
+        PROTOCOL OVERRIDE INITIATED
+      </motion.div>
     </div>
   );
 }
