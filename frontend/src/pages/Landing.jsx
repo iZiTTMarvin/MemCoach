@@ -3,6 +3,7 @@ import { Sun, Moon, ArrowRight, Terminal, Cpu, Radio, Activity, ShieldAlert, Fin
 import { useState, useEffect } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
+import BrandMark from "../components/BrandMark";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function Landing() {
         <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate("/")}>
           <div className="w-10 h-10 rounded-none border border-primary/40 bg-card/60 flex items-center justify-center relative overflow-hidden group-hover:border-primary transition-colors">
             <div className="absolute inset-0 bg-primary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <Terminal size={20} className="text-primary relative z-10" />
+            <BrandMark className="w-5 h-5 relative z-10" />
           </div>
           <span className="text-xl font-mono font-bold tracking-widest text-text group-hover:text-primary transition-colors">
             MEMCOACH<span className="text-accent animate-pulse">_</span>
@@ -250,7 +251,7 @@ export default function Landing() {
       
       {/* ── Footer ── */}
       <footer className="relative z-10 border-t border-primary/20 bg-bg py-8 flex flex-col items-center">
-        <div className="text-primary mb-2"><Terminal size={24} /></div>
+        <div className="mb-2"><BrandMark className="w-6 h-6" /></div>
         <div className="font-mono text-xs text-dim uppercase tracking-widest">
           MemCoach 核心协议 // {new Date().getFullYear()} // 安全加密信道
         </div>

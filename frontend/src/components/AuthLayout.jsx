@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Terminal } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import BrandMark from "./BrandMark";
 
 /**
  * 认证页面共享布局
  *
- * 提供统一的深色科幻终端风格背景、Logo 区域和返回首页导航，
+ * 提供统一的深色科幻背景、品牌图标区域和返回首页导航，
  * 供 Login / Register / ForgotPassword / VerifyEmail 等认证页面复用。
  *
  * @param {object} props
@@ -45,7 +46,7 @@ export default function AuthLayout({ children, title, subtitle }) {
         <div className="flex items-center gap-3 mb-8">
           <div className="w-11 h-11 rounded-none border border-primary/40 bg-card/60 flex items-center justify-center relative overflow-hidden">
             <div className="absolute inset-0 bg-primary/20" />
-            <Terminal size={22} className="text-primary relative z-10" />
+            <BrandMark className="w-[22px] h-[22px] relative z-10" />
           </div>
           <div>
             {title && (
