@@ -20,6 +20,7 @@ import ProjectAnalysis from "./pages/ProjectAnalysis";
 import ProjectAnalysisResult from "./pages/ProjectAnalysisResult";
 import NotFound from "./pages/NotFound";
 import Guide from "./pages/Guide";
+import TechSpecs from "./pages/TechSpecs";
 
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
@@ -71,6 +72,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<AuthPage element={<ForgotPassword />} />} />
       <Route path="/verify-email" element={<AuthPage element={<VerifyEmail />} />} />
       <Route path="/guide" element={<Guide />} />
+      <Route path="/tech-specs" element={<TechSpecs />} />
       <Route
         path="/*"
         element={

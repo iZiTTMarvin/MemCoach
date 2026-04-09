@@ -94,7 +94,10 @@ export default function Landing() {
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-bg" />
             </button>
 
-            <button className="px-8 py-4 font-mono text-sm text-dim hover:text-primary transition-colors flex items-center gap-2 group">
+            <button 
+              onClick={() => navigate("/tech-specs")}
+              className="px-8 py-4 font-mono text-sm text-dim hover:text-primary transition-colors flex items-center gap-2 group"
+            >
               <Activity size={18} className="group-hover:animate-pulse" />
               查看技术规格
             </button>
