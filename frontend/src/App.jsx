@@ -4,6 +4,9 @@ import Sidebar from "./components/Sidebar";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 import Home from "./pages/Home";
 import Interview from "./pages/Interview";
 import Review from "./pages/Review";
@@ -36,11 +39,11 @@ function PublicHome() {
   return <Landing />;
 }
 
-function AuthPage() {
+function AuthPage({ element }) {
   const { token, loading } = useAuth();
   if (loading) return null;
   if (token) return <Navigate to="/" replace />;
-  return <Login />;
+  return element;
 }
 
 function AppShell({ children }) {
@@ -62,7 +65,10 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<PublicHome />} />
-      <Route path="/login" element={<AuthPage />} />
+      <Route path="/login" element={<AuthPage element={<Login />} />} />
+      <Route path="/register" element={<AuthPage element={<Register />} />} />
+      <Route path="/forgot-password" element={<AuthPage element={<ForgotPassword />} />} />
+      <Route path="/verify-email" element={<AuthPage element={<VerifyEmail />} />} />
       <Route
         path="/*"
         element={

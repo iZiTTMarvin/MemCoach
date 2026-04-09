@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     default_email: str = "xuhaochen0212@qq.com"   # 默认管理员邮箱
     default_password: str = "asd2528836683"            # 默认管理员密码
     default_name: str = "xhc"                   # 默认管理员名称
-    allow_registration: bool = False              # 是否允许公开注册
+    allow_registration: bool = True               # 是否允许公开注册
 
     # ==================== GitHub App 配置 ====================
     github_app_client_id: str = ""           # GitHub App Client ID
