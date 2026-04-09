@@ -19,6 +19,7 @@ import RecordingAnalysis from "./pages/RecordingAnalysis";
 import ProjectAnalysis from "./pages/ProjectAnalysis";
 import ProjectAnalysisResult from "./pages/ProjectAnalysisResult";
 import NotFound from "./pages/NotFound";
+import Guide from "./pages/Guide";
 
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
@@ -69,6 +70,7 @@ function AppRoutes() {
       <Route path="/register" element={<AuthPage element={<Register />} />} />
       <Route path="/forgot-password" element={<AuthPage element={<ForgotPassword />} />} />
       <Route path="/verify-email" element={<AuthPage element={<VerifyEmail />} />} />
+      <Route path="/guide" element={<Guide />} />
       <Route
         path="/*"
         element={
@@ -85,6 +87,7 @@ function AppRoutes() {
                 <Route path="/recording" element={<RecordingAnalysis />} />
                 <Route path="/project-analysis" element={<ProjectAnalysis />} />
                 <Route path="/project-analysis/:analysisId/result" element={<ProjectAnalysisResult />} />
+                <Route path="/guide" element={<Guide />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AppShell>

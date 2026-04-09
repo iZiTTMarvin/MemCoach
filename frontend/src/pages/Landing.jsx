@@ -1,19 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Sun, Moon, ArrowRight, Terminal, Cpu, Radio, Activity, ShieldAlert, Fingerprint, Target } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ArrowRight, Terminal, Cpu, Radio, Activity, ShieldAlert, Fingerprint, Target, BookOpen } from "lucide-react";
 // eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import BrandMark from "../components/BrandMark";
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
@@ -43,9 +35,10 @@ export default function Landing() {
         <div className="flex items-center gap-4">
           <button
             className="w-10 h-10 rounded-none bg-transparent border border-border flex items-center justify-center transition-all hover:bg-primary/10 hover:border-primary text-dim hover:text-primary"
-            onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
+            onClick={() => navigate("/guide", { state: { from: "landing" } })}
+            title="使用说明"
           >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            <BookOpen size={18} />
           </button>
           <button
             onClick={() => navigate("/login")}

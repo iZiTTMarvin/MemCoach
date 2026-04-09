@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home, User, BookOpen, GitFork, Clock, Mic,
-  Sun, Moon, LogOut, Menu, X, FolderGit2,
-  PanelLeftClose, PanelLeftOpen
+  LogOut, Menu, X, FolderGit2,
+  PanelLeftClose, PanelLeftOpen, Mail
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import BrandMark from "./BrandMark";
@@ -22,14 +22,8 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
   const [open, setOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem("sidebar_collapsed") === "true");
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
 
   useEffect(() => {
     localStorage.setItem("sidebar_collapsed", isCollapsed);
@@ -41,7 +35,6 @@ export default function Sidebar() {
     handleClose();
   }, [location.pathname]);
 
-  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
   const isActive = (path) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
@@ -118,22 +111,28 @@ export default function Sidebar() {
 
       {/* Bottom section */}
       <div className={`px-4 pb-6 pt-4 border-t border-primary/10 mt-auto shrink-0 space-y-2 bg-gradient-to-t from-bg-subtle/80 to-transparent ${isCollapsed ? "flex flex-col items-center" : ""}`}>
-        {/* Theme toggle */}
+        {/* 使用说明 */}
         <button
-          onClick={toggleTheme}
-          title={isCollapsed ? (theme === "dark" ? "浅色模式" : "深空模式") : undefined}
+          onClick={() => navigate("/guide", { state: { from: "sidebar" } })}
+          title={isCollapsed ? "使用说明" : undefined}
           className={`flex items-center py-2.5 transition-all group border border-transparent hover:border-primary/30 hover:bg-hover/50
             ${isCollapsed ? "justify-center px-0 w-10 h-10 rounded-md" : "gap-3 w-full px-4 text-sm text-dim uppercase tracking-wider hover:text-text"}`}
         >
-          <div className="relative shrink-0">
-            {theme === "dark" ? (
-              <Sun size={isCollapsed ? 18 : 16} className="group-hover:text-accent transition-colors" />
-            ) : (
-              <Moon size={isCollapsed ? 18 : 16} className="group-hover:text-primary transition-colors" />
-            )}
-          </div>
-          {!isCollapsed && (theme === "dark" ? "浅色模式" : "深空模式")}
+          <BookOpen size={isCollapsed ? 18 : 16} className="shrink-0 group-hover:text-primary transition-colors" />
+          {!isCollapsed && "使用说明"}
         </button>
+
+        {/* 用户邮箱 */}
+        {user && (
+          <div
+            title={isCollapsed ? user.email : undefined}
+            className={`flex items-center py-2.5 border border-transparent
+              ${isCollapsed ? "justify-center px-0 w-10 h-10 rounded-md" : "gap-3 w-full px-4 text-sm text-dim tracking-wider"}`}
+          >
+            <Mail size={isCollapsed ? 18 : 16} className="shrink-0 text-primary/60" />
+            {!isCollapsed && <span className="truncate flex-1 text-left text-xs">{user.email}</span>}
+          </div>
+        )}
 
         {/* User + logout */}
         {user && (

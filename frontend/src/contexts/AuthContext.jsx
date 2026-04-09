@@ -20,11 +20,13 @@ export function AuthProvider({ children }) {
     let isMounted = true;
     if (token) {
       getProfile()
-        .then((data) => {
+        .then((profileData) => {
           if (!isMounted) return;
-          if (data) {
-            setUser(data);
-            localStorage.setItem("user", JSON.stringify(data));
+          if (profileData) {
+            // 合并：画像数据 + localStorage 中登录时存储的身份信息（email, name, id）
+            const stored = localStorage.getItem("user");
+            const authInfo = stored ? JSON.parse(stored) : {};
+            setUser({ ...profileData, ...authInfo });
           } else {
             const stored = localStorage.getItem("user");
             if (stored) setUser(JSON.parse(stored));
