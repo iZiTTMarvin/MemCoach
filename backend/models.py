@@ -79,6 +79,7 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     name: str = ""
+    access_code: str = ""
 
 
 class LoginRequest(BaseModel):

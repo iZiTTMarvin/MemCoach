@@ -13,9 +13,11 @@ import AuthLayout from "../components/AuthLayout";
  */
 export default function Register() {
   const [allowReg, setAllowReg] = useState(null); // null = 加载中
+  const [accessCodeRequired, setAccessCodeRequired] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [accessCode, setAccessCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,7 @@ export default function Register() {
       .then((r) => r.json())
       .then((d) => {
         setAllowReg(d.allow_registration);
+        setAccessCodeRequired(Boolean(d.registration_access_code_required));
         // 注册关闭时优雅重定向到登录页
         if (!d.allow_registration) {
           navigate("/login", { replace: true });
@@ -35,6 +38,7 @@ export default function Register() {
       .catch(() => {
         // 网络错误时不重定向，允许用户看到注册页（提交时自然会报错）
         setAllowReg(true);
+        setAccessCodeRequired(true);
       });
   }, [navigate]);
 
@@ -46,13 +50,17 @@ export default function Register() {
       setError("密码至少 6 个字符");
       return;
     }
+    if (accessCodeRequired && !accessCode.trim()) {
+      setError("请输入激活码");
+      return;
+    }
 
     setLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, access_code: accessCode }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -136,6 +144,30 @@ export default function Register() {
               还需要 {6 - password.length} 个字符
             </p>
           )}
+        </div>
+
+        {/* 激活码 */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-sm text-dim font-mono">激活码</label>
+            {accessCodeRequired && (
+              <span className="text-[10px] text-primary/70 font-mono uppercase tracking-wider">必填</span>
+            )}
+          </div>
+          <input
+            type="text"
+            placeholder={accessCodeRequired ? "输入激活码" : "当前无需激活码"}
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value)}
+            required={accessCodeRequired}
+            autoComplete="off"
+            className="w-full px-3.5 py-2.5 rounded-none bg-card border border-border text-text text-sm
+                       focus:outline-none focus:border-primary focus:shadow-[0_0_8px_rgba(16,185,129,0.15)]
+                       transition-all placeholder:text-dim/40 font-mono"
+          />
+          <p className="mt-1 text-xs text-primary/70 font-mono">
+            {accessCodeRequired ? "当前注册需要激活码，请向管理员获取。" : "当前实例未启用激活码校验。"}
+          </p>
         </div>
 
         {/* 错误提示 */}

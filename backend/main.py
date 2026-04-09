@@ -270,16 +270,16 @@ def _evaluate_project_practice_answers(questions: list[dict], answers: list[dict
 
 @app.on_event("startup")
 def preload_models():
-    """启动时预加载 bge-m3 embedding model + 初始化向量存储"""
+    """启动时预加载云端 embedding client 并初始化存储。"""
     from backend.llm_provider import get_embedding, get_llama_llm
     from backend.indexer import _init_llama_settings
     from backend.vector_memory import init_memory_table
     import logging
     logger = logging.getLogger("uvicorn")
-    logger.info("Pre-loading bge-m3 embedding model...")
+    logger.info("Pre-loading cloud embedding client...")
     get_embedding()
     _init_llama_settings()
-    logger.info("Embedding model ready.")
+    logger.info("Embedding client ready.")
 
     # Init tables + default user
     init_memory_table()
@@ -294,13 +294,16 @@ def preload_models():
 @router.get("/auth/config")
 def auth_config():
     """获取注册是否开放的配置"""
-    return {"allow_registration": settings.allow_registration}
+    return {
+        "allow_registration": settings.allow_registration,
+        "registration_access_code_required": bool(settings.registration_access_code.strip()),
+    }
 
 
 @router.post("/auth/register")
 def register(req: RegisterRequest):
     """用户注册"""
-    user = create_user(req.email, req.password, req.name)
+    user = create_user(req.email, req.password, req.name, req.access_code)
     token = create_token(user["id"])
     return {"token": token, "user": user}
 

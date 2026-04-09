@@ -41,21 +41,21 @@ def get_llama_llm():
 
 
 def get_embedding():
-    """获取 Embedding 模型（单例）。有 embedding_api_base 则用 API 模式，否则用本地 HuggingFace。"""
+    """获取云端 Embedding 模型（单例），始终走 OpenAI 兼容 API。"""
     global _embedding_instance
     if _embedding_instance is None:
-        if settings.embedding_api_base:
-            from llama_index.embeddings.openai import OpenAIEmbedding
-            _embedding_instance = OpenAIEmbedding(
-                model_name=settings.embedding_model,
-                api_base=settings.embedding_api_base,
-                api_key=settings.embedding_api_key,
+        api_base = settings.resolved_embedding_api_base
+        api_key = settings.resolved_embedding_api_key
+        if not api_base or not api_key:
+            raise RuntimeError(
+                "Embedding cloud API not configured. "
+                "Set EMBEDDING_API_BASE / EMBEDDING_API_KEY or reuse API_BASE / API_KEY."
             )
-        else:
-            from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-            local_path = settings.base_dir / "data" / "models" / "bge-m3"
-            if local_path.exists():
-                _embedding_instance = HuggingFaceEmbedding(model_name=str(local_path))
-            else:
-                _embedding_instance = HuggingFaceEmbedding(model_name=settings.embedding_model)
+
+        from llama_index.embeddings.openai import OpenAIEmbedding
+        _embedding_instance = OpenAIEmbedding(
+            model_name=settings.embedding_model,
+            api_base=api_base,
+            api_key=api_key,
+        )
     return _embedding_instance

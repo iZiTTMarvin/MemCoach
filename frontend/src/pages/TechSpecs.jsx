@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+// `motion` 在 JSX 成员表达式中会被当前 lint 规则误报为未使用，这里做局部豁免。
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Terminal, Cpu, Database, Shield, Zap, 
   Globe, Layers, Code, Server, Lock, 

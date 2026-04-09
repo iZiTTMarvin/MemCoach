@@ -1,14 +1,21 @@
 FROM node:22-alpine AS build
+
 WORKDIR /app
-COPY package.json package-lock.json* ./
+
+COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
-COPY . .
+
+COPY frontend/ .
 RUN npm run build
 
 FROM nginx:alpine
+
 ENV PORT=80
 ENV API_UPSTREAM=backend:8000
-COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+
+COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
+
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]

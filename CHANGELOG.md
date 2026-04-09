@@ -16,6 +16,14 @@
   - Sidebar 底部新增当前登录用户邮箱显示（展开态显示完整邮箱，折叠态 tooltip 提示）。
 
 ## 2026-04-09
+- **认证**：新增激活码注册流程，默认显示注册入口并由后端校验激活码。
+  - 注册接口新增 `access_code` 字段与 `REGISTRATION_ACCESS_CODE` 环境变量，支持通过 `.env` / Zeabur 环境变量控制激活码。
+  - 登录页与注册页同步展示“注册需要激活码”状态，注册表单新增激活码输入框。
+  - 补充 Zeabur AI 部署提示词，列全前后端分离部署所需环境变量。
+- **部署**：补齐 Zeabur 前后端分离部署所需配置，并收紧生产默认值。
+  - 去除后端危险默认账号，默认不再自动创建管理员账户；Embedding 改为仅支持云端 API，不再回退到本地模型下载。
+  - 补全 `.env.example`、新增 Zeabur 专用 `Dockerfile.backend` / `Dockerfile.frontend` 与 `zbpack.*.json`。
+  - 前端 Nginx 反代改为运行时注入 `API_UPSTREAM`，同时新增 `deploy/zeabur/` 部署说明与环境变量示例。
 - **品牌**：重做 MemCoach 网站图标并统一前端品牌位视觉。
   - 新增 `BrandMark` 品牌图形组件，将 M 形增长路径与记忆节点图谱融合，用于导航、认证页与落地页品牌位。
   - 重写 `frontend/public/favicon.svg`，并将前端入口从旧 `logo.png` 切换为 SVG favicon，统一为深色科幻绿系视觉语言。

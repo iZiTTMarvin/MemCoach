@@ -30,11 +30,9 @@ class Settings(BaseSettings):
     temperature: float = 0.7     # 生成温度，0-1 之间，越高越随机
 
     # ==================== Embedding 配置 ====================
-    # 向量嵌入模型，支持两种模式：
-    # 1. API 模式（OpenAI 兼容，如 SiliconFlow）
-    # 2. 本地模式（HuggingFace）
-    embedding_api_base: str = ""   # API 模式地址，如 https://api.siliconflow.cn/v1；留空则使用本地模式
-    embedding_api_key: str = ""    # 嵌入 API 密钥
+    # 向量嵌入模型默认使用硅基流动 OpenAI 兼容接口
+    embedding_api_base: str = "https://api.siliconflow.cn/v1"   # 默认硅基流动 embeddings API
+    embedding_api_key: str = ""    # 嵌入 API 密钥；留空则回退到主 LLM API Key
     embedding_model: str = "BAAI/bge-m3"  # 嵌入模型名称
 
     # ==================== ASR 配置 ====================
@@ -57,10 +55,11 @@ class Settings(BaseSettings):
 
     # ==================== 认证配置 ====================
     jwt_secret: str = "change-me-in-production"   # JWT 密钥，生产环境必须修改
-    default_email: str = "xuhaochen0212@qq.com"   # 默认管理员邮箱
-    default_password: str = "asd2528836683"            # 默认管理员密码
-    default_name: str = "xhc"                   # 默认管理员名称
-    allow_registration: bool = True               # 是否允许公开注册
+    default_email: str = ""                       # 默认管理员邮箱；留空则不自动创建默认用户
+    default_password: str = ""                    # 默认管理员密码；留空则不自动创建默认用户
+    default_name: str = ""                        # 默认管理员名称
+    allow_registration: bool = False              # 是否允许公开注册
+    registration_access_code: str = ""            # 注册激活码；留空则不校验激活码
 
     # ==================== GitHub App 配置 ====================
     github_app_client_id: str = ""           # GitHub App Client ID
@@ -73,6 +72,26 @@ class Settings(BaseSettings):
     # ==================== 面试配置 ====================
     max_questions_per_phase: int = 5   # 每个面试阶段的最大题目数
     max_drill_questions: int = 15     # 专项训练的最大题目数
+
+    @property
+    def resolved_embedding_api_base(self) -> str:
+        """
+        获取最终用于 embedding 的云端 API 地址。
+
+        Returns:
+            str: 优先使用显式 embedding API，否则使用默认硅基流动地址
+        """
+        return self.embedding_api_base.strip() or "https://api.siliconflow.cn/v1"
+
+    @property
+    def resolved_embedding_api_key(self) -> str:
+        """
+        获取最终用于 embedding 的云端 API Key。
+
+        Returns:
+            str: 优先使用独立 embedding API Key，否则回退到主 LLM API Key
+        """
+        return self.embedding_api_key.strip() or self.api_key.strip()
 
     def user_data_dir(self, user_id: str) -> Path:
         """

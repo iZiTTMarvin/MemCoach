@@ -151,23 +151,25 @@ export default function Guide() {
             <h2 className="font-mono text-primary text-sm tracking-widest mb-3 uppercase">核心_功能模块</h2>
             <h3 className="text-2xl md:text-3xl font-display font-bold text-text mb-8">八大核心能力</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {features.map(({ icon: Icon, title, desc, color }) => (
+              {features.map((feature) => {
+                const FeatureIcon = feature.icon;
+                return (
                 <div
-                  key={title}
+                  key={feature.title}
                   className="group bg-card border border-border/50 p-6 hover:border-primary/50 transition-colors relative overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-primary transition-colors" />
                   <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 shrink-0 ${color === "accent" ? "bg-accent/10 border-accent/30 text-accent" : "bg-primary/10 border-primary/30 text-primary"} border flex items-center justify-center`}>
-                      <Icon size={20} />
+                    <div className={`w-10 h-10 shrink-0 ${feature.color === "accent" ? "bg-accent/10 border-accent/30 text-accent" : "bg-primary/10 border-primary/30 text-primary"} border flex items-center justify-center`}>
+                      <FeatureIcon size={20} />
                     </div>
                     <div>
-                      <h4 className="font-display font-semibold text-text mb-1">{title}</h4>
-                      <p className="text-dim text-sm leading-relaxed">{desc}</p>
+                      <h4 className="font-display font-semibold text-text mb-1">{feature.title}</h4>
+                      <p className="text-dim text-sm leading-relaxed">{feature.desc}</p>
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </section>
 

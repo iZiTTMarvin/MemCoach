@@ -12,6 +12,7 @@ import AuthLayout from "../components/AuthLayout";
  */
 export default function Login() {
   const [allowReg, setAllowReg] = useState(null);
+  const [accessCodeRequired, setAccessCodeRequired] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,8 +24,14 @@ export default function Login() {
   useEffect(() => {
     fetch("/api/auth/config")
       .then((r) => r.json())
-      .then((d) => setAllowReg(d.allow_registration))
-      .catch(() => setAllowReg(true));
+      .then((d) => {
+        setAllowReg(d.allow_registration);
+        setAccessCodeRequired(Boolean(d.registration_access_code_required));
+      })
+      .catch(() => {
+        setAllowReg(true);
+        setAccessCodeRequired(true);
+      });
   }, []);
 
   async function handleSubmit(e) {
@@ -165,6 +172,9 @@ export default function Login() {
           >
             立即注册
           </Link>
+          {accessCodeRequired && (
+            <p className="mt-2 text-xs text-primary/70 font-mono">注册需要激活码</p>
+          )}
         </div>
       )}
     </AuthLayout>

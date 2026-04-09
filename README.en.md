@@ -1,191 +1,112 @@
-<p align="right">
-  <a href="README.md">中文</a>
-</p>
+# MemCoach - AI Interview Coach System
 
-<p align="center">
-  <img src="images/logo.png" alt="MemCoach" width="360" />
-</p>
+An AI interview coach that learns you -- the more you practice, the better it knows your weaknesses.
 
-<p align="center">
-  <b>An AI interview coach that learns you.</b>
-</p>
+[Demo](https://aari.top/) | [Chinese Version](README.md)
 
-<p align="center">
-  <a href="#quick-start">Quick Start</a> · <a href="#screenshots">Screenshots</a> · <a href="#architecture">Architecture</a> · <a href="LICENSE">MIT License</a>
-</p>
+---
 
-Traditional interview tools are stateless — every session starts from scratch with no knowledge of your weak spots or growth trajectory.
+## Project Showcase
 
-MemCoach builds a **persistent candidate profile system**. After each session, it automatically extracts weaknesses, evaluates mastery levels, and records thinking patterns to form a continuously evolving personal profile. The next time it generates questions, the AI interviewer targets your weak spots based on your profile — the more you practice, the better it knows you, and training efficiency grows exponentially.
+[Homepage screenshot - Insert image link here]
 
-## Why MemCoach
+[Interview training screenshot - Insert image link here]
 
-| Traditional Tools | MemCoach |
-|---|---|
-| Stateless, starts from zero every time | Long-term memory, tracks growth over time |
-| Fixed question bank, random selection | Profile-based, precisely targets weak spots |
-| No feedback loop after practice | Per-question scoring + mastery quantification + profile updates |
-| No sense of where you stand | 0-100 mastery score with data-driven skill visualization |
+[Project analysis screenshot - Insert image link here]
 
-## Screenshots
+[User profile screenshot - Insert image link here]
 
-### Home — Choose Training Mode & Domain
+---
 
-<p align="center">
-  <img src="images/home.png" width="400" />
-</p>
+## Core Features
 
-Two modes: resume mock interview and focused drill, covering 12 technical domains.
+### Three AI Agent Loops
 
-### Focused Drill — Personalized Questions & Answers
+**1. Project Analysis Agent (Industry First)**
 
-<p align="center">
-  <img src="images/drill.png" alt="Focused drill interface" width="400" />
-</p>
+Transform GitHub repositories into personalized interview questions automatically. Connect to GitHub, select a repository, configure your scope, and AI will analyze the code structure, generate interview questions, and output a project breakdown report.
 
-Each question is tagged with sub-domain and difficulty level. Answer one by one or skip.
+- GitHub OAuth secure connection (JWT state token + auto-refresh)
+- Intelligent file filtering (source code / config / documentation)
+- 5 core questions (module boundaries, design decisions, troubleshooting, tech stack, refactoring)
+- Evidence-driven questions with source code references
+- One-click conversion to focused training
 
-### Session Review — Per-Question Scoring & Feedback
+**2. Resume Interview Agent**
 
-<p align="center">
-  <img src="images/review.png" width="400" />
-</p>
+Complete interview flow powered by LangGraph state machine. After reading your resume, AI simulates real interviewer behavior and dynamically adjusts follow-up strategies.
 
-Overall evaluation + weakness/highlight extraction + expandable per-question scoring and comments.
+- Five-phase progression: greeting -> self-introduction -> technical -> project deep-dive -> Q&A
+- Inline evaluation-driven: advance quickly for good answers, dig deeper for weak ones
+- Four-dimension scoring: technical depth / project articulation / communication / problem solving
 
-### Profile — A Continuously Evolving Skill Portfolio
+**3. Profile Memory Agent (Mem0-Style)**
 
-<p align="center">
-  <img src="images/profile-overview.png" width="400" />
-  <img src="images/profile-analysis.png" width="400" />
-</p>
+Persistent user capability profile. After each training session, automatically extracts weak points, evaluates mastery levels, and records thinking patterns -- evolving continuously across sessions.
 
-Practice stats (average scores by mode), growth trends, domain mastery, areas to improve / strengths (collapsible), thinking patterns, and communication style suggestions.
+- Two-phase update: LLM extraction -> ADD/UPDATE/IMPROVE intelligent decisions
+- Vector semantic deduplication (cosine similarity >= 0.75)
+- Deterministic mastery algorithm
 
-### Resume Interview Review — Dimensional Scoring & Deep Feedback
+### Adaptive Learning Engine
 
-<p align="center">
-  <img src="images/resume-review.png" width="400" />
-</p>
+**Three-Layer Context Fusion for Question Generation**
 
-After a resume interview, structured scoring across four dimensions — technical depth, project articulation, communication skills, and problem solving — with an LLM-generated review report.
+- Layer 1: Session context (knowledge base retrieval + FAQ + history deduplication)
+- Layer 2: Topic profile (mastery 0-100 + historical weak points)
+- Layer 3: Global profile (cross-domain traits + communication style)
 
-### History — All Sessions at a Glance
+**SM-2 Spaced Repetition Algorithm**
 
-<p align="center">
-  <img src="images/history.png" width="400" />
-</p>
+- Correct answer -> interval extends (1 day -> 3 days -> 7 days -> 14 days...)
+- Wrong answer -> interval resets to 1 day
+- Due weak points prioritized for questions, scientific review scheduling
 
-Filter by mode and domain to view scores and details for each session.
+### Other Features
 
-### Topic Review — Growth Trajectory & Training Analysis
+- **Recording Review**: Upload recording or paste text, AI auto-transcribes and analyzes (Dual/Solo dual-track mode)
+- **Knowledge Base Management**: Maintain core knowledge documents and FAQ banks by domain, Markdown editing supported
+- **Multi-User Isolation**: JWT authentication, complete data isolation per user
 
-<p align="center">
-  <img src="images/topic-review-1.png" width="400" />
-  <img src="images/topic-review-2.png" width="400" />
-</p>
-
-Per-domain mastery score (0-100), LLM-generated training review (progress trajectory · persistent weaknesses · overcome difficulties · next steps), and full training history.
-
-### Knowledge Base — Editable Domain Knowledge Documents
-
-<p align="center">
-  <img src="images/knowledge.png" alt="Knowledge base management" width="400" />
-</p>
-
-Each domain maintains its own core knowledge base and frequently asked questions, with Markdown editing support.
-
-### Mobile Responsive
-
-Fully responsive design for seamless training on mobile devices.
-
-<p align="center">
-  <img src="images/mobile-home.png" alt="Mobile home" width="200" />
-  <img src="images/mobile-profile.png" alt="Mobile profile" width="200" />
-  <img src="images/mobile-history.png" alt="Mobile history" width="200" />
-</p>
-
-Hamburger menu navigation, adaptive card stacking, collapsible sidebar, and more — built with Tailwind CSS v4 mobile-first responsive layout.
+---
 
 ## Architecture
 
-### Three-Layer Information Fusion for Question Generation
+### Tech Stack
 
-MemCoach doesn't randomly pick questions — it fuses three layers of information to make every question count:
+| Layer | Technology |
+|-------|------------|
+| Backend | FastAPI, LangChain, LangGraph, LlamaIndex |
+| Frontend | React 19, React Router v7, Vite, Tailwind CSS v4 |
+| Database | SQLite + aiosqlite (async) |
+| Vector Storage | bge-m3 embeddings (1024 dimensions) |
+| Auth | JWT + bcrypt |
+| LLM | Any OpenAI-compatible endpoint |
 
-```
-┌─────────────────────────────────────────────────┐
-│  Layer 3: Global Profile                        │
-│  Communication style · Thinking patterns ·      │
-│  Cross-domain skill traits                      │
-├─────────────────────────────────────────────────┤
-│  Layer 2: Topic Profile                         │
-│  Mastery 0-100 · Domain weaknesses ·            │
-│  Historical training insights                   │
-├─────────────────────────────────────────────────┤
-│  Layer 1: Session Context                       │
-│  Knowledge base retrieval · FAQ bank ·          │
-│  Recently practiced questions (deduplication)   │
-└─────────────────────────────────────────────────┘
-                    ↓ Fused injection
-        AI interviewer generates 10 personalized questions
-```
-
-- **Mastery determines question type**: 0-30 focuses on concept understanding and comparison, 30-60 balances deep concepts with scenario application, 60-100 goes straight to system design and trade-off analysis
-- **Weaknesses determine direction**: First 3 questions precisely target historical weak spots, then gradually expand to new topics
-- **History prevents repetition**: Semantic search over the last 20 questions to avoid duplicates
-- **Knowledge base ensures accuracy**: Vector retrieval of domain knowledge documents provides factual grounding for questions
-
-### Training → Evaluation → Profile Update Loop
-
-Each training session isn't just practice — it's a complete feedback loop:
+### Core Modules
 
 ```
-Answer questions → Batch evaluation (per-question scoring + weakness extraction)
-    → Mastery algorithm update (difficulty-weighted scoring)
-    → LLM profile update (Mem0-style: ADD / UPDATE / IMPROVE)
-    → Vector memory indexing (semantic retrieval of historical insights)
-    → More precise questions next time
+backend/
+├── main.py                    # FastAPI entry, 50+ API routes
+├── memory.py                  # Profile engine (Mem0-style)
+├── vector_memory.py           # Vector memory (SQLite + bge-m3)
+├── indexer.py                # Knowledge indexing (LlamaIndex)
+├── spaced_repetition.py       # SM-2 spaced repetition
+├── github_connection.py       # GitHub OAuth
+├── project_analysis/           # Project Analysis Agent
+│   ├── pipeline.py            # Task orchestration
+│   ├── github_source.py       # GitHub API
+│   ├── filtering.py           # File filtering
+│   └── repo_selection.py      # Repository selection
+├── graphs/
+│   ├── resume_interview.py    # Resume interview (LangGraph)
+│   └── topic_drill.py        # Focused training
+└── storage/
+    ├── sessions.py            # Session persistence
+    └── project_analyses.py    # Project analysis persistence
 ```
 
-### Three-Layer Display Architecture
-
-| Layer | Page | Focus |
-|-------|------|-------|
-| Session Review | Training Review | Per-question scoring and improvement suggestions for this session |
-| Topic Detail | Domain Detail | Growth trends and review narrative for a single domain |
-| Profile | Personal Profile | Global structured data: cross-domain strengths/weaknesses, thinking patterns, skill radar |
-
-## Core Capabilities
-
-**Persistent Memory** — A long-term memory system based on Mem0 architecture. Not a simple append — it uses LLM-driven intelligent updates: ADD (new), UPDATE (revise), and IMPROVE (mark progress) operations on weaknesses, with cosine similarity deduplication to keep profiles refined and compact.
-
-**Adaptive Question Engine** — A personalized question engine fusing three layers of information. Each question considers global profile, domain mastery, knowledge base retrieval, FAQ bank, and historical deduplication — not simple random selection.
-
-**Algorithmic Mastery Scoring** — A deterministic mastery scoring algorithm. `contribution = (difficulty/5) × (score/10)`, merged with historical scores weighted by answer coverage, ensuring assessment consistency without relying on subjective LLM judgment.
-
-**RAG-Powered Knowledge** — Dual knowledge retrieval: LlamaIndex-indexed domain knowledge documents + bge-m3 vector retrieval of historical training insights, providing factual grounding for question generation and scoring.
-
-## Two Training Modes
-
-### Resume Mock Interview
-
-The AI interviewer reads your resume and drives a complete interview flow via a LangGraph state machine: self-introduction → technical questions → project deep-dive → Q&A. It dynamically follows up based on your answers, adjusting its questioning strategy with your personal profile, simulating the pressure and pace of a real interview.
-
-### Focused Drill
-
-Pick a domain, and the system fuses three layers of context to generate 10 personalized interview questions. After answering, batch evaluation provides per-question scoring, comments, and improvement suggestions, while automatically updating mastery and profile to form a complete training loop.
-
-## Supported Domains
-
-| Domain | | Domain | | Domain |
-|--------|---|--------|---|--------|
-| 🐍 Python Core | | 🧠 LLM Fundamentals | | 🤖 Agent Architecture |
-| 📚 RAG | | 🔧 Function Calling | | 🔌 MCP |
-| 🔗 LangChain / LangGraph | | ✍️ Prompt Engineering | | 🗄️ Databases & Middleware |
-| 💾 Memory Management | | ⚙️ Backend Fundamentals | | 🧮 Algorithms & Data Structures |
-
-Domains can be freely added or removed via the frontend. Knowledge bases support Markdown editing.
+---
 
 ## Quick Start
 
@@ -195,86 +116,137 @@ Domains can be freely added or removed via the frontend. Knowledge bases support
 cp .env.example .env
 ```
 
-Edit `.env` with your LLM API credentials (any OpenAI-compatible endpoint):
+Edit `.env` with your LLM API credentials:
 
 ```env
+# LLM Configuration (any OpenAI-compatible endpoint)
 API_BASE=https://your-llm-api-base/v1
 API_KEY=sk-your-api-key
 MODEL=your-model-name
 
-# Optional: Embedding model API (leave empty to use local HuggingFace bge-m3)
-EMBEDDING_API_BASE=
+# Embeddings default to SiliconFlow BAAI/bge-m3
+# Docs:
+# https://docs.siliconflow.cn/cn/api-reference/chat-completions/chat-completions
+# https://docs.siliconflow.cn/cn/api-reference/embeddings/create-embeddings
+EMBEDDING_API_BASE=https://api.siliconflow.cn/v1
 EMBEDDING_API_KEY=
 EMBEDDING_MODEL=BAAI/bge-m3
+
+# GitHub OAuth (required for Project Analysis)
+GITHUB_APP_CLIENT_ID=
+GITHUB_APP_CLIENT_SECRET=
+GITHUB_OAUTH_STATE_SECRET=
+
+# Auth Configuration
+JWT_SECRET=change-me-in-production
+DEFAULT_EMAIL=
+DEFAULT_PASSWORD=
+ALLOW_REGISTRATION=true
+REGISTRATION_ACCESS_CODE=xuhaochen
 ```
 
-### 2a. Docker (Recommended)
+### 2. Docker (Recommended)
 
 ```bash
 docker compose up --build
 ```
 
-Visit `http://localhost` to start. API requests are automatically proxied via Nginx.
+Visit `http://localhost`.
 
-### 2b. Manual Setup
+### 3. Manual Setup
 
 ```bash
+# Backend
 pip install -r requirements.txt
 uvicorn backend.main:app --reload --port 8000
+
+# Frontend
+cd frontend && npm install && npm run dev
 ```
 
-### 3. Start Frontend
+Visit `http://localhost:5173`.
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### 4. Zeabur Deployment (Recommended for Production)
 
-Open `http://localhost:5173` to start training (or `http://localhost` if using Docker).
+This repository now includes Zeabur-specific deployment entrypoints while keeping the original local Docker files:
+
+- Backend: `Dockerfile.backend`
+- Frontend: `Dockerfile.frontend`
+
+Recommended setup:
+
+1. Create a `backend` service in Zeabur using `Dockerfile.backend`
+2. Mount a persistent volume to `/app/data`
+3. Create a `frontend` service in Zeabur using `Dockerfile.frontend`
+4. Set `API_UPSTREAM=<backend private hostname>:8000` on the frontend service
+
+If you want to preserve existing local accounts and history, including `xuhaochen0212@qq.com`, you must import the following into the mounted backend volume:
+
+- `data/interviews.db`
+- `data/users/`
+
+See:
+
+- `deploy/zeabur/README.md`
+- `deploy/zeabur/backend.env.example`
+- `deploy/zeabur/frontend.env.example`
+- `deploy/zeabur/AI_PROMPT.zh-CN.md`
+
+### 5. Vercel Deployment Note
+
+Full-stack Vercel deployment is **not recommended** for the current architecture.
+
+The issue is not FastAPI support itself. The actual blocker is that this project depends on:
+
+- local SQLite persistence: `data/interviews.db`
+- local persistent user files: `data/users/`
+
+According to Vercel's official runtime docs, Vercel Functions use a read-only filesystem with only writable `/tmp` scratch space, which is not suitable for this project's persistence model.
+
+If you only want to deploy the frontend to Vercel, that is still feasible:
+
+- deploy the frontend to Vercel
+- keep the backend on Zeabur or another platform with persistent storage
+- then point frontend requests to your backend public URL
+
+For the current architecture, I intentionally do not provide a misleading "full-stack Vercel" tutorial.
+
+---
 
 ## Project Structure
 
 ```
 MemCoach/
 ├── backend/
-│   ├── main.py              # FastAPI entry, API routes
-│   ├── memory.py            # Profile management (Mem0-style)
-│   ├── vector_memory.py     # Vector memory (SQLite + bge-m3)
-│   ├── indexer.py           # Knowledge base indexing (LlamaIndex)
-│   ├── llm_provider.py      # LLM provider layer
-│   ├── graphs/
-│   │   ├── resume_interview.py  # Resume interview flow (LangGraph)
-│   │   └── topic_drill.py       # Focused drill: question generation & evaluation
-│   ├── prompts/
-│   │   └── interviewer.py       # System prompts
-│   └── storage/
-│       └── sessions.py          # Session persistence (SQLite)
+│   ├── main.py                 # FastAPI entry
+│   ├── auth.py                 # JWT authentication
+│   ├── memory.py               # Profile engine
+│   ├── vector_memory.py        # Vector memory
+│   ├── indexer.py              # Knowledge indexing
+│   ├── spaced_repetition.py    # SM-2 algorithm
+│   ├── github_connection.py     # GitHub OAuth
+│   ├── project_analysis/        # Project Analysis Agent
+│   ├── graphs/                  # LangGraph state machines
+│   ├── prompts/                 # System prompts
+│   └── storage/                # SQLite persistence
 ├── frontend/
 │   └── src/
-│       ├── pages/           # Home, interview, review, profile, knowledge base, etc.
-│       ├── components/      # Shared components
-│       └── api/             # API layer
-├── data/
-│   ├── topics.json          # Domain configuration
-│   ├── knowledge/           # Per-domain knowledge documents
-│   ├── resume/              # Resume files (.gitignore)
-│   └── user_profile/        # User profiles (.gitignore)
-├── docker-compose.yml      # Docker deployment
-├── backend/Dockerfile      # Backend image
-├── frontend/Dockerfile     # Frontend image (Node build → Nginx)
+│       ├── App.jsx             # Routing
+│       ├── contexts/            # React Context
+│       ├── components/          # Shared components
+│       ├── pages/               # Page components
+│       └── api/                # API clients
+├── data/users/{user_id}/       # User data isolation
+│   ├── profile/               # User profile
+│   ├── resume/                # Resume files
+│   ├── knowledge/              # Domain knowledge base
+│   └── topics.json             # Topic configuration
+├── docker-compose.yml
 ├── .env.example
-├── requirements.txt
-└── clear_data.sh           # Data cleanup script
+└── requirements.txt
 ```
 
-## Tech Stack
-
-**Backend**: FastAPI · LangChain · LangGraph · LlamaIndex · SQLite · sentence-transformers (bge-m3)
-
-**Frontend**: React 19 · React Router v7 · Vite · Tailwind CSS v4 (responsive mobile-first design)
-
-**LLM**: Any OpenAI-compatible endpoint (local deployment or cloud API)
+---
 
 ## License
 

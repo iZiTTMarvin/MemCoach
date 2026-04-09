@@ -105,13 +105,17 @@ def ensure_default_user():
     用于系统初始化时自动创建管理员账户。
     """
     email = settings.default_email.lower().strip()
+    password = settings.default_password
+    if not email or not password:
+        logger.info("Default user bootstrap skipped: DEFAULT_EMAIL / DEFAULT_PASSWORD not configured.")
+        return
     conn = _get_conn()
     existing = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
     if existing:
         conn.close()
         return
     uid = uuid.uuid4().hex[:8]
-    hashed = _hash_password(settings.default_password)
+    hashed = _hash_password(password)
     conn.execute(
         "INSERT INTO users (id, email, password, name) VALUES (?, ?, ?, ?)",
         (uid, email, hashed, settings.default_name),
@@ -121,7 +125,7 @@ def ensure_default_user():
     logger.info(f"Default user created: {email}")
 
 
-def create_user(email: str, password: str, name: str = "") -> dict:
+def create_user(email: str, password: str, name: str = "", access_code: str = "") -> dict:
     """
     创建新用户。
 
@@ -129,15 +133,19 @@ def create_user(email: str, password: str, name: str = "") -> dict:
         email: 用户邮箱（会自动转小写并去除首尾空格）
         password: 明文密码（会自动哈希存储）
         name: 用户名称（可选，默认为空）
+        access_code: 注册激活码
 
     Returns:
         包含用户信息的字典，包含 id、email、name 字段
 
     Raises:
-        HTTPException: 如果注册被禁用（403）或邮箱已存在（409）
+        HTTPException: 如果注册被禁用（403）、激活码错误（403）或邮箱已存在（409）
     """
     if not settings.allow_registration:
         raise HTTPException(403, "Registration is disabled")
+    expected_access_code = settings.registration_access_code.strip()
+    if expected_access_code and access_code.strip() != expected_access_code:
+        raise HTTPException(403, "Access code is invalid")
     uid = uuid.uuid4().hex[:8]
     hashed = _hash_password(password)
     conn = _get_conn()
