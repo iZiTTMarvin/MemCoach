@@ -4,6 +4,9 @@
 - **修复**：修复 GitHub OAuth 回调错误分支在 Zeabur 部署时触发的后端启动语法错误。
   - 将错误跳转的 query 编码改为先生成 `query_string` 再拼接 URL，避免 `f-string` 中嵌套字典字面量导致导入期 `SyntaxError`。
   - 保持 `error_code` 与 `error_message` 的完整 URL 编码，兼容包含 `&` 等特殊字符的错误信息。
+- **部署**：修正 Zeabur 前端反向代理示例端口，避免 backend 已启动但 frontend 仍返回 502。
+  - 将 `deploy/zeabur/README.md`、`frontend.env.example` 与 `AI_PROMPT.zh-CN.md` 中的 `API_UPSTREAM` 示例从 `:8000` 更正为当前线上实际监听的 `:8080`。
+  - 明确要求以 Zeabur Networking 页面显示的实际私网主机名与端口为准，避免沿用过期示例导致 `/api` 反代失败。
 - **文档**：继续打磨 README 首页文案与开源展示表述。
   - 强化中英文 README 的首屏介绍，突出“简历面试 + 项目分析 + 画像记忆”三大模式的整体价值。
   - 收紧模块命名与未来计划措辞，减少对 `Agent` 的泛化使用。

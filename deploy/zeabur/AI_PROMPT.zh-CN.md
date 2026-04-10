@@ -12,7 +12,7 @@
 2. backend 使用仓库根目录的 Dockerfile.backend
 3. frontend 使用仓库根目录的 Dockerfile.frontend
 4. backend 必须挂载持久卷到 /app/data
-5. frontend 通过 Nginx 反向代理 /api 到 backend 的 Zeabur Private Hostname:8000
+5. frontend 通过 Nginx 反向代理 /api 到 backend 的 Zeabur Private Hostname:8080；如果 Zeabur Networking 页面显示的实际端口不同，则以实际端口为准
 6. 不要使用 docker-compose.yml 作为线上部署方案
 7. 如果需要填写 dockerfile name，请使用：
    - backend 服务：backend
@@ -47,7 +47,7 @@ MAX_QUESTIONS_PER_PHASE=5
 MAX_DRILL_QUESTIONS=15
 
 frontend 服务环境变量请完整设置为：
-API_UPSTREAM=<请填写 backend 服务 Networking 页面显示的 Private Hostname>:8000
+API_UPSTREAM=<请填写 backend 服务 Networking 页面显示的 Private Hostname>:8080
 
 验收要求：
 1. frontend 可通过公网域名访问
