@@ -47,7 +47,11 @@ MAX_QUESTIONS_PER_PHASE=5
 MAX_DRILL_QUESTIONS=15
 
 frontend 服务环境变量请完整设置为：
-API_UPSTREAM=<请填写 backend 服务 Networking 页面显示的 Private Hostname>:8080
+API_UPSTREAM=<请填写 backend 服务 Networking 页面显示的 Private Hostname>:8000
+
+补充说明：
+1. frontend 容器监听 8080
+2. backend 容器监听 8000
 
 验收要求：
 1. frontend 可通过公网域名访问

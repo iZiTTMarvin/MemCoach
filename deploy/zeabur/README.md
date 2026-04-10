@@ -61,6 +61,8 @@ SiliconFlow 官方文档：
 
 前端服务使用根目录的 `Dockerfile.frontend`。
 
+前端容器在 Zeabur 上监听 `8080` 端口。
+
 核心环境变量只有一个：
 
 - `API_UPSTREAM`
@@ -68,10 +70,10 @@ SiliconFlow 官方文档：
 它必须填写为 **Zeabur Networking 页面里 backend 服务显示的 Private Hostname + 端口**，例如：
 
 ```env
-API_UPSTREAM=backend.zeabur.internal:8080
+API_UPSTREAM=backend.zeabur.internal:8000
 ```
 
-注意：这里的 `backend.zeabur.internal` 只是示例。请以 Zeabur 控制台 Networking 页面显示的实际主机名为准；端口也请以 backend 服务实际监听端口为准，当前项目在 Zeabur 日志中的监听端口为 `8080`。
+注意：这里的 `backend.zeabur.internal` 只是示例。请以 Zeabur 控制台 Networking 页面显示的实际主机名为准；端口也请以 backend 服务实际监听端口为准。当前这套部署配置里，backend 监听 `8000`，frontend 监听 `8080`。
 
 ## 数据持久化与现有账号保留
 
