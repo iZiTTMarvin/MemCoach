@@ -59,3 +59,41 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: 完成认证 UI 多页面重构并归档 auth-ui 任务
+
+**Date**: 2026-04-12
+**Task**: 完成认证 UI 多页面重构并归档 auth-ui 任务
+
+### Summary
+
+补录 auth-ui 已完成工作，记录认证界面多页面重构结果，并同步归档任务状态。
+
+### Main Changes
+
+| 模块 | 说明 |
+|------|------|
+| Auth UI | 将认证入口从单页切换改为共享布局 + 多路由结构，拆分登录、注册、忘记密码、邮箱验证页面 |
+| Routing | 扩展前端路由，保留 `/login` 并新增 `/register`、`/forgot-password`、`/verify-email` |
+| Config | 配合 `allow_registration` 控制注册入口展示与退化路径 |
+| Archive | 已归档 `.trellis/tasks/archive/2026-04/04-08-auth-ui` |
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8072dd4` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
