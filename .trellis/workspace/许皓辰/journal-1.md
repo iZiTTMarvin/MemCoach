@@ -97,3 +97,41 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: 完成训练会话恢复、前端异常兜底与转写协议修复
+
+**Date**: 2026-04-12
+**Task**: 完成训练会话恢复、前端异常兜底与转写协议修复
+
+### Summary
+
+补录 2026-04-12 已提交工作，记录跨设备会话恢复、前端异常处理修复、转写链路兼容与对应回归测试，并同步归档 training-session-recovery 任务。
+
+### Main Changes
+
+| 模块 | 说明 |
+|------|------|
+| 会话恢复 | 后端引入 LangGraph SQLite checkpointer，扩展会话持久化字段，并提供 4 个恢复 API，支持跨设备续练与进度恢复 |
+| 前端容错 | 修复 `Review.jsx` 导入问题，补齐缺失数据兜底 UI，增强 `ErrorBoundary` 的展示与恢复路径 |
+| 转写链路 | 对七牛测试域名自动补齐 `http://` 协议，修复 `main.py` 中 logger 作用域问题，避免转写链路异常 |
+| 回归验证 | 新增 14 个会话恢复场景测试与 transcribe 协议兼容测试，并已归档 `.trellis/tasks/archive/2026-04/04-12-training-session-recovery` |
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5fe31eb` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
