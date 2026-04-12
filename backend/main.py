@@ -1,7 +1,10 @@
 """FastAPI 入口 — 面试模拟系统 API."""
 # 核心依赖: FastAPI, LangChain, LangGraph, LlamaIndex, bge-m3 embeddings
+import logging
 import uuid
 from datetime import datetime
+
+logger = logging.getLogger("uvicorn")
 from urllib.parse import urlencode
 
 from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, UploadFile, File, Form, Depends
@@ -14,7 +17,7 @@ from pydantic import BaseModel, Field
 from backend.models import (
     StartInterviewRequest, ChatRequest, EndDrillRequest,
     RecordingAnalyzeRequest, RegisterRequest, LoginRequest, GitHubConnectStartRequest,
-    InterviewMode, InterviewPhase,
+    InterviewMode, InterviewPhase, SessionStatus,
 )
 from backend.graphs.resume_interview import compile_resume_interview
 from backend.graphs.topic_drill import (
@@ -28,6 +31,8 @@ from backend.storage.sessions import (
     create_session, append_message, save_review, save_drill_answers,
     get_session, list_sessions, list_sessions_by_topic,
     delete_session, list_distinct_topics,
+    get_active_session_by_mode, list_active_sessions,
+    abandon_session, complete_session, update_progress, touch_activity,
 )
 from backend.graph import build_graph
 from backend.auth import (
@@ -274,8 +279,6 @@ def preload_models():
     from backend.llm_provider import get_embedding, get_llama_llm
     from backend.indexer import _init_llama_settings
     from backend.vector_memory import init_memory_table
-    import logging
-    logger = logging.getLogger("uvicorn")
     logger.info("Pre-loading cloud embedding client...")
     get_embedding()
     _init_llama_settings()
@@ -496,6 +499,7 @@ async def transcribe(file: UploadFile = File(...), user_id: str = Depends(get_cu
         text = transcribe_audio(audio_bytes, suffix=suffix)
         return {"text": text}
     except Exception as e:
+        logger.exception("Transcription failed")
         raise HTTPException(500, f"Transcription failed: {e}")
 
 
@@ -519,6 +523,7 @@ async def recording_transcribe(
         text = transcribe_audio(audio_bytes, suffix=suffix)
         return {"transcript": text, "segments": []}
     except Exception as e:
+        logger.exception("Recording transcription failed")
         raise HTTPException(500, f"Transcription failed: {e}")
 
 
@@ -885,7 +890,31 @@ async def generate_retrospective(topic: str, user_id: str = Depends(get_current_
 
 @router.post("/interview/start")
 async def start_interview(req: StartInterviewRequest, user_id: str = Depends(get_current_user)):
-    """启动新的面试会话"""
+    """启动新的面试会话（同模式存在 active 会话时直接返回旧会话）"""
+
+    # ── 检查是否已有同模式的 active 会话 ──
+    existing = get_active_session_by_mode(req.mode.value, user_id=user_id)
+    if existing:
+        session_id = existing["session_id"]
+        # 确保内存中有对应条目（服务重启后需重建）
+        if req.mode == InterviewMode.TOPIC_DRILL:
+            if session_id not in _drill_sessions:
+                _drill_sessions[session_id] = {
+                    "topic": existing.get("topic"),
+                    "questions": existing.get("questions", []),
+                    "user_id": user_id,
+                }
+        else:
+            if session_id not in _graphs:
+                _rebuild_resume_graph(session_id, user_id, existing)
+        return {
+            "session_id": session_id,
+            "mode": existing["mode"],
+            "topic": existing.get("topic"),
+            "status": "active",
+            "resumed": True,
+        }
+
     session_id = str(uuid.uuid4())[:8]
 
     if req.mode == InterviewMode.TOPIC_DRILL:
@@ -899,6 +928,9 @@ async def start_interview(req: StartInterviewRequest, user_id: str = Depends(get
         except RuntimeError as e:
             raise HTTPException(500, str(e))
         create_session(session_id, req.mode.value, req.topic, questions=questions, user_id=user_id)
+        # 初始进度快照
+        progress = {"answers": {}, "current_index": 0}
+        update_progress(session_id, progress, user_id=user_id)
         _drill_sessions[session_id] = {"topic": req.topic, "questions": questions, "user_id": user_id}
 
         return {
@@ -937,11 +969,31 @@ async def start_interview(req: StartInterviewRequest, user_id: str = Depends(get
         }
 
 
+def _rebuild_resume_graph(session_id: str, user_id: str, session_data: dict):
+    """服务重启后根据 session_id 重建 resume 图的内存引用。
+    LangGraph SQLite checkpointer 已持久化了完整状态，
+    只需重新 compile 并用同一 thread_id 即可恢复。
+    """
+    graph = compile_resume_interview(user_id)
+    config = {"configurable": {"thread_id": session_id}}
+    _graphs[session_id] = {
+        "graph": graph, "config": config,
+        "mode": InterviewMode.RESUME,
+        "topic": session_data.get("topic"),
+        "user_id": user_id,
+    }
+
+
 @router.post("/interview/chat")
 async def chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
     """发送用户回答，获取下一轮面试官响应（仅简历模式）"""
+    # 内存中不存在时尝试从 SQLite 恢复
     if req.session_id not in _graphs:
-        raise HTTPException(404, "Session not found. It may have expired (in-memory only).")
+        session = get_session(req.session_id, user_id=user_id)
+        if session and session.get("status") == "active" and session.get("mode") == "resume":
+            _rebuild_resume_graph(req.session_id, user_id, session)
+        else:
+            raise HTTPException(404, "Session not found or not active.")
 
     entry = _graphs[req.session_id]
     if entry.get("user_id") != user_id:
@@ -968,6 +1020,7 @@ async def chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
             break
 
     append_message(req.session_id, "assistant", ai_message, user_id=user_id)
+    touch_activity(req.session_id, user_id=user_id)
 
     return {
         "session_id": req.session_id,
@@ -995,6 +1048,7 @@ async def end_interview(session_id: str, body: EndDrillRequest = None,
             save_drill_answers(session_id, answers, user_id=user_id)
             scores, overall, review = _evaluate_project_practice_answers(questions, answers)
             save_review(session_id, review, scores, overall.get("new_weak_points", []), overall, user_id=user_id)
+            complete_session(session_id, user_id=user_id)
             del _drill_sessions[session_id]
             return {
                 "session_id": session_id,
@@ -1034,6 +1088,7 @@ async def end_interview(session_id: str, body: EndDrillRequest = None,
         # Update profile (1 LLM call via Mem0 pipeline — uses overall data)
         await _update_drill_profile(topic, overall, scores, len(questions), user_id)
 
+        complete_session(session_id, user_id=user_id)
         del _drill_sessions[session_id]
 
         return {
@@ -1044,9 +1099,47 @@ async def end_interview(session_id: str, body: EndDrillRequest = None,
             "overall": overall,
         }
 
+    # ── Drill 会话不在内存中，尝试从 SQLite 恢复 ──
+    session = get_session(session_id, user_id=user_id)
+    if session and session.get("status") == "active" and session.get("mode") == "topic_drill":
+        _drill_sessions[session_id] = {
+            "topic": session.get("topic"),
+            "questions": session.get("questions", []),
+            "user_id": user_id,
+        }
+        entry = _drill_sessions[session_id]
+        topic = entry["topic"]
+        questions = entry["questions"]
+        answers = body.answers if body and body.answers else []
+
+        save_drill_answers(session_id, answers, user_id=user_id)
+        eval_result = evaluate_drill_answers(topic, questions, answers, user_id)
+        scores = eval_result.get("scores", [])
+        overall = eval_result.get("overall", {})
+        q_diff = {q["id"]: q.get("difficulty", 3) for q in questions}
+        for s in scores:
+            s.setdefault("difficulty", q_diff.get(s.get("question_id"), 3))
+        review = _format_drill_review(questions, answers, scores, overall)
+        save_review(session_id, review, scores, overall.get("new_weak_points", []), overall, user_id=user_id)
+        await _update_drill_profile(topic, overall, scores, len(questions), user_id)
+        complete_session(session_id, user_id=user_id)
+        del _drill_sessions[session_id]
+        return {
+            "session_id": session_id,
+            "mode": "topic_drill",
+            "review": review,
+            "scores": scores,
+            "overall": overall,
+        }
+
     # ── Resume mode: existing flow ──
     if session_id not in _graphs:
-        raise HTTPException(404, "Session not found.")
+        # 尝试从 SQLite 恢复
+        rs = get_session(session_id, user_id=user_id) if not session else session
+        if rs and rs.get("status") == "active" and rs.get("mode") == "resume":
+            _rebuild_resume_graph(session_id, user_id, rs)
+        else:
+            raise HTTPException(404, "Session not found.")
 
     entry = _graphs[session_id]
     if entry.get("user_id") != user_id:
@@ -1087,6 +1180,7 @@ async def end_interview(session_id: str, body: EndDrillRequest = None,
         resume_overall["avg_score"] = extraction["avg_score"]
     save_review(session_id, review, scores, weak_points, overall=resume_overall, user_id=user_id)
 
+    complete_session(session_id, user_id=user_id)
     del _graphs[session_id]
 
     return {
@@ -1360,6 +1454,72 @@ async def generate_reference_answer(body: dict, user_id: str = Depends(get_curre
     llm = get_langchain_llm()
     resp = llm.invoke([HumanMessage(content=prompt)])
     return {"reference_answer": resp.content.strip()}
+
+
+# ── 会话恢复与生命周期端点 ──
+
+@router.get("/interview/active")
+async def get_active_sessions(user_id: str = Depends(get_current_user)):
+    """获取当前用户所有进行中会话（供首页展示"继续训练"）"""
+    return list_active_sessions(user_id=user_id)
+
+
+@router.get("/interview/session/{session_id}")
+async def get_session_detail(session_id: str, user_id: str = Depends(get_current_user)):
+    """获取会话详情（恢复 payload），供训练页初始化"""
+    session = get_session(session_id, user_id=user_id)
+    if not session:
+        raise HTTPException(404, "Session not found.")
+    # resume 模式：从 LangGraph checkpointer 获取对话历史
+    if session.get("mode") == "resume" and session.get("status") == "active":
+        try:
+            if session_id not in _graphs:
+                _rebuild_resume_graph(session_id, user_id, session)
+            entry = _graphs.get(session_id)
+            if entry:
+                state = entry["graph"].get_state(entry["config"])
+                messages = state.values.get("messages", [])
+                # 将 LangGraph 消息转为可序列化列表
+                chat_messages = []
+                for m in messages:
+                    role = "assistant" if isinstance(m, AIMessage) else "user"
+                    chat_messages.append({"role": role, "content": m.content})
+                session["chat_messages"] = chat_messages
+                session["phase"] = state.values.get("phase", "")
+                session["is_finished"] = state.values.get("is_finished", False)
+        except Exception:
+            # checkpointer 损坏时退化为 transcript
+            session["chat_messages"] = session.get("transcript", [])
+    return session
+
+
+@router.post("/interview/session/{session_id}/abandon")
+async def abandon_session_endpoint(session_id: str, user_id: str = Depends(get_current_user)):
+    """将进行中会话标记为 abandoned"""
+    success = abandon_session(session_id, user_id=user_id)
+    if not success:
+        raise HTTPException(404, "Active session not found.")
+    # 清理内存中的图引用
+    _graphs.pop(session_id, None)
+    _drill_sessions.pop(session_id, None)
+    return {"ok": True, "session_id": session_id, "status": "abandoned"}
+
+
+@router.post("/interview/session/{session_id}/drill-progress")
+async def update_drill_progress(session_id: str, body: dict,
+                                user_id: str = Depends(get_current_user)):
+    """更新专项训练进度快照（每次答题/跳题后前端调用）"""
+    session = get_session(session_id, user_id=user_id)
+    if not session:
+        raise HTTPException(404, "Session not found.")
+    if session.get("status") != "active" or session.get("mode") != "topic_drill":
+        raise HTTPException(400, "Session is not an active drill session.")
+    payload = {
+        "answers": body.get("answers", {}),
+        "current_index": body.get("current_index", 0),
+    }
+    update_progress(session_id, payload, user_id=user_id)
+    return {"ok": True}
 
 
 # ── 历史记录 ──

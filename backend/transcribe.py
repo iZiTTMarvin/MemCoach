@@ -20,6 +20,16 @@ _DASHSCOPE_SUBMIT = "https://dashscope.aliyuncs.com/api/v1/services/audio/asr/tr
 _DASHSCOPE_QUERY = "https://dashscope.aliyuncs.com/api/v1/tasks/"
 
 
+def _build_public_file_url(base_domain: str, key: str) -> str:
+    domain = (base_domain or "").strip()
+    if not domain:
+        raise RuntimeError("QINIU_DOMAIN not configured")
+    if not domain.startswith(("http://", "https://")):
+        # 七牛测试域名 (*.clouddn.com) 仅支持 HTTP，默认用 http
+        domain = f"http://{domain}"
+    return f"{domain.rstrip('/')}/{key.lstrip('/')}"
+
+
 def _upload_to_qiniu(local_path: str, suffix: str) -> str:
     """上传文件到七牛云 OSS，返回公网 URL"""
     q = QiniuAuth(settings.qiniu_access_key, settings.qiniu_secret_key)
@@ -30,7 +40,7 @@ def _upload_to_qiniu(local_path: str, suffix: str) -> str:
     if ret is None:
         raise RuntimeError(f"Qiniu upload failed: {info}")
 
-    url = f"{settings.qiniu_domain}/{ret['key']}"
+    url = _build_public_file_url(settings.qiniu_domain, ret["key"])
     logger.info(f"Uploaded to Qiniu: {url}")
     return url
 
@@ -61,6 +71,7 @@ def transcribe_audio(audio_bytes: bytes, suffix: str = ".webm") -> str:
         }
 
         resp = requests.post(_DASHSCOPE_SUBMIT, headers=headers, json=payload)
+        logger.info(f"DashScope submit status={resp.status_code}, body={resp.text[:500]}")
         if resp.status_code != 200:
             raise RuntimeError(f"Transcription submit failed: {resp.text}")
 
@@ -69,17 +80,20 @@ def transcribe_audio(audio_bytes: bytes, suffix: str = ".webm") -> str:
 
         # Step 3: Poll until completion
         query_headers = {"Authorization": f"Bearer {settings.dashscope_api_key}"}
-        for _ in range(300):
+        for poll_idx in range(300):
             time.sleep(3)
             qr = requests.get(_DASHSCOPE_QUERY + task_id, headers=query_headers)
             output = qr.json().get("output", {})
             status = output.get("task_status", "").upper()
+            logger.info(f"Poll #{poll_idx}: status={status}, output_keys={list(output.keys())}")
 
             if status == "SUCCEEDED":
+                logger.info(f"DashScope output for _extract_text: {json.dumps(output, ensure_ascii=False)[:800]}")
                 text = _extract_text(output)
                 logger.info(f"Transcription done: {len(text)} chars")
                 return text
             elif status in ("FAILED", "UNKNOWN"):
+                logger.error(f"DashScope task {status}: {json.dumps(output, ensure_ascii=False)[:500]}")
                 raise RuntimeError(f"Transcription {status}: {output.get('message', '')}")
 
         raise RuntimeError("Transcription timed out")

@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Check, Minus, Star, Terminal, Activity, ShieldAlert } from "lucide-react";
 import ChatBubble from "../components/ChatBubble";
-import { sendMessage, endInterview } from "../api/interview";
+import { sendMessage, endInterview, getSessionDetail, updateDrillProgress } from "../api/interview";
 import useVoiceInput from "../hooks/useVoiceInput";
 
 export default function Interview() {
@@ -13,8 +13,12 @@ export default function Interview() {
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const initData = location.state || {};
-  const isDrill = initData.mode === "topic_drill";
+  // 会话元数据（从后端恢复接口获取）
+  const [sessionMode, setSessionMode] = useState(null);
+  const [sessionTopic, setSessionTopic] = useState(null);
+  const [loadingSession, setLoadingSession] = useState(true);
+
+  const isDrill = sessionMode === "topic_drill";
 
   // Chat mode state (resume)
   const [messages, setMessages] = useState([]);
@@ -22,10 +26,10 @@ export default function Interview() {
   const [sending, setSending] = useState(false);
   const [finished, setFinished] = useState(false);
   const [reviewing, setReviewing] = useState(false);
-  const [progress, setProgress] = useState(initData.progress || "");
+  const [progress, setProgress] = useState("");
 
   // Drill mode state
-  const [questions] = useState(initData.questions || []);
+  const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [drillInput, setDrillInput] = useState("");
@@ -41,11 +45,50 @@ export default function Interview() {
     onResult: useCallback((text) => setInput((prev) => prev + text), []),
   });
 
+  // 从后端恢复会话状态（唯一真相源）
   useEffect(() => {
-    if (!isDrill && initData.message) {
-      setMessages([{ role: "assistant", content: initData.message }]);
+    let cancelled = false;
+    async function initSession() {
+      try {
+        const data = await getSessionDetail(sessionId);
+        if (cancelled) return;
+
+        setSessionMode(data.mode);
+        setSessionTopic(data.topic);
+
+        // 已完成或已放弃的会话直接跳转
+        if (data.status === "completed") {
+          navigate(`/review/${sessionId}`, { replace: true });
+          return;
+        }
+        if (data.status === "abandoned") {
+          navigate("/", { replace: true });
+          return;
+        }
+
+        if (data.mode === "topic_drill") {
+          // 恢复 drill 状态
+          setQuestions(data.questions || []);
+          const pp = data.progress_payload || {};
+          setAnswers(pp.answers || {});
+          setCurrentIndex(pp.current_index || 0);
+        } else {
+          // 恢复 resume 状态
+          const chatMsgs = data.chat_messages || data.transcript || [];
+          setMessages(chatMsgs);
+          if (data.is_finished) setFinished(true);
+          if (data.phase) setProgress(data.phase);
+        }
+      } catch {
+        alert("无法加载训练会话，请返回首页重试。");
+        navigate("/", { replace: true });
+      } finally {
+        if (!cancelled) setLoadingSession(false);
+      }
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    initSession();
+    return () => { cancelled = true; };
+  }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isDrill) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -63,17 +106,24 @@ export default function Interview() {
   const handleDrillSubmit = () => {
     const text = drillInput.trim();
     if (!text || !currentQ) return;
-    setAnswers((prev) => ({ ...prev, [currentQ.id]: text }));
+    const newAnswers = { ...answers, [currentQ.id]: text };
+    setAnswers(newAnswers);
     setDrillInput("");
-    if (currentIndex < totalQ - 1) setCurrentIndex((i) => i + 1);
+    const nextIndex = currentIndex < totalQ - 1 ? currentIndex + 1 : currentIndex;
+    if (currentIndex < totalQ - 1) setCurrentIndex(nextIndex);
     else setFinished(true);
+    // 持久化进度到后端
+    updateDrillProgress(sessionId, newAnswers, currentIndex < totalQ - 1 ? nextIndex : currentIndex).catch(() => {});
   };
 
   const handleSkip = () => {
     if (!currentQ) return;
     setDrillInput("");
-    if (currentIndex < totalQ - 1) setCurrentIndex((i) => i + 1);
+    const nextIndex = currentIndex < totalQ - 1 ? currentIndex + 1 : currentIndex;
+    if (currentIndex < totalQ - 1) setCurrentIndex(nextIndex);
     else setFinished(true);
+    // 持久化进度到后端
+    updateDrillProgress(sessionId, answers, currentIndex < totalQ - 1 ? nextIndex : currentIndex).catch(() => {});
   };
 
   const handlePrev = () => {
@@ -91,7 +141,7 @@ export default function Interview() {
       }));
       const data = await endInterview(sessionId, answerList);
       navigate(`/review/${sessionId}`, {
-        state: { review: data.review, scores: data.scores, overall: data.overall, questions, answers: answerList, mode: "topic_drill", topic: initData.topic },
+        state: { review: data.review, scores: data.scores, overall: data.overall, questions, answers: answerList, mode: "topic_drill", topic: sessionTopic },
       });
     } catch (err) {
       alert("评估失败: " + err.message);
@@ -151,6 +201,16 @@ export default function Interview() {
     ? { text: "专项强化模式", cls: "bg-primary/20 text-primary border-primary" }
     : { text: "全流程模拟模式", cls: "bg-accent/20 text-accent border-accent" };
 
+  // ── 加载中 ──
+  if (loadingSession) {
+    return (
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center font-mono text-text bg-bg gap-6">
+        <Activity size={48} className="text-primary animate-pulse" />
+        <span className="text-sm text-dim tracking-widest uppercase">正在恢复训练会话...</span>
+      </div>
+    );
+  }
+
   // ── Drill card mode ──
   if (isDrill) {
     return (
@@ -164,10 +224,10 @@ export default function Interview() {
               <Terminal size={16} className="text-primary" />
               <span className={`px-3 py-1 border text-xs font-bold tracking-widest uppercase ${modeBadge.cls}`}>{modeBadge.text}</span>
             </div>
-            {initData.topic && (
+            {sessionTopic && (
                <div className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
                   <span className="text-dim">领域 //</span>
-                  <span className="text-primary">{initData.topic}</span>
+                  <span className="text-primary">{sessionTopic}</span>
                </div>
             )}
             <div className="text-xs text-dim tracking-widest uppercase border-l border-primary/30 pl-5">
@@ -355,10 +415,10 @@ export default function Interview() {
              <Activity size={16} className="text-accent animate-pulse" />
             <span className={`px-3 py-1 border text-xs font-bold tracking-widest uppercase ${modeBadge.cls}`}>{modeBadge.text}</span>
           </div>
-          {initData.topic && (
+          {sessionTopic && (
              <div className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
                 <span className="text-dim">上下文 //</span>
-                <span className="text-accent">{initData.topic}</span>
+                <span className="text-accent">{sessionTopic}</span>
              </div>
           )}
           {progress && (

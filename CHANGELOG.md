@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-04-12
+- **功能**：实现训练会话可恢复、可续练、可跨端能力，补齐可靠性底座。
+  - 扩展 `sessions` 表：新增 `status`/`progress_payload`/`completed_at`/`last_activity_at` 列，支持 `active`/`completed`/`abandoned` 生命周期。
+  - Resume 模式切换为 LangGraph SQLite 持久化 checkpointer（`langgraph-checkpoint-sqlite`），后端重启后仍可通过同一 `session_id` 恢复对话。
+  - Topic Drill 模式每次答题/跳题后将进度快照（answers、current_index）落库，刷新后可恢复。
+  - 新增 4 个后端接口：`GET /interview/active`、`GET /interview/session/{id}`、`POST /interview/session/{id}/abandon`、`POST /interview/session/{id}/drill-progress`。
+  - 改造 `POST /interview/start`：同模式已有 active 会话时直接返回旧会话。
+  - 改造 `POST /interview/end`：结束时标记 `completed`；所有分支均调用 `complete_session`。
+  - `list_sessions`/`list_distinct_topics` 等 history 查询排除 `active`/`abandoned` 会话。
+- **前端**：首页新增"继续训练"面板与"放弃并重新开始"操作；训练页改为从后端恢复接口初始化，不再依赖 `location.state`。
+  - 修复 `Review.jsx` 缺失 `FileText` / `Database` 导入导致的运行时异常，避免页面直接落入全局错误边界。
+  - 为复盘页补充“当前复盘数据不可用”的兜底界面，在历史数据缺失或中断跳转时仍可返回首页或历史记录。
+  - 优化全局 `ErrorBoundary` 页面，补充更清晰的错误提示与可点击的返回入口。
+- **修复**：修复录音转写链路两处缺陷，恢复语音输入功能。
+  - `backend/transcribe.py`：裸域名自动补 `http://` 协议头（七牛测试域名 `*.clouddn.com` 仅支持 HTTP），解决 DashScope `FILE_DOWNLOAD_FAILED`。
+  - `backend/main.py`：将 `logger` 从 startup 局部作用域提升到模块级，修复 transcribe 端点 `NameError`。
+  - 新增 `tests/test_transcribe.py` 回归测试，覆盖裸域名与显式协议两种场景。
+- **测试**：新增 `tests/test_session_recovery.py`，覆盖 14 个场景（生命周期、active 发现、history 过滤、重复 start、进度恢复等）。
+- **依赖**：`requirements.txt` 新增 `langgraph-checkpoint-sqlite>=2.0.0`。
+
 ## 2026-04-10
 - **修复**：修复 GitHub OAuth 回调错误分支在 Zeabur 部署时触发的后端启动语法错误。
   - 将错误跳转的 query 编码改为先生成 `query_string` 再拼接 URL，避免 `f-string` 中嵌套字典字面量导致导入期 `SyntaxError`。

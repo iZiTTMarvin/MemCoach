@@ -1,7 +1,7 @@
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { BookOpen, Terminal, Activity, Crosshair, Zap, Award } from "lucide-react";
+import { BookOpen, Terminal, Activity, Crosshair, Zap, Award, FileText, Database } from "lucide-react";
 import { getReview, getReferenceAnswer } from "../api/interview";
 
 function getScoreColor(score) {
@@ -387,10 +387,6 @@ export default function Review() {
   const navigate = useNavigate();
 
   const stateData = location.state || {};
-  const isDrill = stateData.mode === "topic_drill";
-  const isRecording = stateData.mode === "recording";
-  const isRecordingDual = isRecording && stateData.recording_mode === "dual";
-
   const [review, setReview] = useState(stateData.review || null);
   const [scores, setScores] = useState(stateData.scores || null);
   const [overall, setOverall] = useState(stateData.overall || null);
@@ -403,10 +399,25 @@ export default function Review() {
   const [topicsCovered, setTopicsCovered] = useState(stateData.topics_covered || []);
   const [showTranscript, setShowTranscript] = useState(false);
   const [loading, setLoading] = useState(!review && !scores);
+  const [fetchError, setFetchError] = useState(null);
+
+  const resolvedMode = mode || stateData.mode || null;
+  const resolvedRecordingMode = stateData.recording_mode || null;
+  const isDrill = resolvedMode === "topic_drill";
+  const isRecording = resolvedMode === "recording";
+  const isRecordingDual = isRecording && resolvedRecordingMode === "dual";
+  const hasRenderableContent = Boolean(
+    review ||
+    (Array.isArray(scores) && scores.length > 0) ||
+    questions.length > 0 ||
+    messages.length > 0 ||
+    (overall && Object.keys(overall).length > 0)
+  );
 
   useEffect(() => {
     if (!review && !scores) {
       setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
+      setFetchError(null); // eslint-disable-line react-hooks/set-state-in-effect
       getReview(sessionId)
         .then((data) => {
           setReview(data.review);
@@ -432,7 +443,10 @@ export default function Review() {
             if (wp.length) setOverall((prev) => ({ ...prev, new_weak_points: wp }));
           }
         })
-        .catch((err) => setReview("加载失败: " + err.message))
+        .catch((err) => {
+          setFetchError(err.message);
+          setReview(null);
+        })
         .finally(() => setLoading(false));
     }
   }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -446,7 +460,51 @@ export default function Review() {
     );
   }
 
-  const showDrill = isDrill || isRecordingDual || (mode === "topic_drill" && (scores || questions.length > 0)) || (mode === "recording" && stateData.recording_mode === "dual");
+  if (!hasRenderableContent) {
+    return (
+      <div className="flex-1 p-6 md:p-10 lg:p-14 w-full relative z-10 text-text font-mono selection:bg-primary/30">
+        <div className="max-w-3xl mx-auto min-h-[70vh] flex items-center justify-center">
+          <div className="w-full bg-bg-subtle border border-primary/20 p-8 md:p-10 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-transparent opacity-60" />
+            <div className="flex justify-center mb-5">
+              <div className="p-4 border border-primary/30 bg-primary/10 text-primary">
+                <FileText size={28} />
+              </div>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold mb-3">当前复盘数据不可用</h1>
+            <p className="text-sm text-dim leading-relaxed max-w-xl mx-auto mb-6">
+              {fetchError
+                ? `这次跳转时没有拿到可渲染的数据：${fetchError}`
+                : "该会话可能已经结束，但历史内容不完整，或是你从中断页面直接跳到了复盘页。"}
+            </p>
+            <div className="text-xs text-dim tracking-widest uppercase border border-border/50 bg-card/50 px-4 py-3 inline-block mb-8">
+              会话_ID // {sessionId}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                className="px-8 py-3 bg-transparent border border-primary/30 text-primary text-[11px] font-bold tracking-widest uppercase hover:bg-primary hover:text-bg transition-colors"
+                onClick={() => navigate("/history")}
+              >
+                查看历史记录
+              </button>
+              <button
+                className="px-8 py-3 bg-accent/90 border border-accent text-bg text-[11px] font-bold tracking-widest uppercase hover:opacity-90 transition-opacity"
+                onClick={() => navigate("/")}
+              >
+                返回首页
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const showDrill =
+    isDrill ||
+    isRecordingDual ||
+    (resolvedMode === "topic_drill" && (scores || questions.length > 0)) ||
+    (resolvedMode === "recording" && resolvedRecordingMode === "dual");
 
   return (
     <div className="flex-1 p-6 md:p-10 lg:p-14 w-full relative z-10 text-text font-mono selection:bg-primary/30">
@@ -476,8 +534,8 @@ export default function Review() {
         ) : (
           <div className="space-y-8">
             <DimensionScores
-              dimensionScores={stateData.dimension_scores || overall?.dimension_scores}
-              avgScore={stateData.avg_score ?? overall?.avg_score}
+              dimensionScores={overall?.dimension_scores || stateData.dimension_scores}
+              avgScore={overall?.avg_score ?? stateData.avg_score}
             />
             
             <div className="bg-bg-subtle border border-border/50 p-6 md:p-8 relative">

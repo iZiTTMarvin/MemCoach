@@ -239,6 +239,38 @@ export async function analyzeRecording(transcript, recordingMode, company, posit
   return res.json();
 }
 
+// ── 会话恢复与生命周期 ──
+
+export async function getActiveSessions() {
+  const res = await authFetch(`${API_BASE}/interview/active`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function getSessionDetail(sessionId) {
+  const res = await authFetch(`${API_BASE}/interview/session/${sessionId}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function abandonSession(sessionId) {
+  const res = await authFetch(`${API_BASE}/interview/session/${sessionId}/abandon`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateDrillProgress(sessionId, answers, currentIndex) {
+  const res = await authFetch(`${API_BASE}/interview/session/${sessionId}/drill-progress`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ answers, current_index: currentIndex }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function getHighFreq(topic) {
   const res = await authFetch(`${API_BASE}/knowledge/${topic}/high_freq`);
   return res.json();

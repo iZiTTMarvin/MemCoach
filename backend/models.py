@@ -9,6 +9,13 @@ from langgraph.graph import add_messages
 
 # ── 枚举类型 ──
 
+class SessionStatus(str, Enum):
+    """会话生命周期状态"""
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    ABANDONED = "abandoned"
+
+
 class InterviewMode(str, Enum):
     RESUME = "resume"
     TOPIC_DRILL = "topic_drill"

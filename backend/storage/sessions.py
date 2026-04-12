@@ -29,8 +29,17 @@ def _get_conn() -> sqlite3.Connection:
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    # Migrate: add columns if missing (existing DBs)
-    for col, default in [("questions", "'[]'"), ("overall", "'{}'"), ("user_id", "NULL")]:
+    # 增量列迁移：检测列是否存在，不存在则 ALTER TABLE
+    _migrate_columns = [
+        ("questions", "'[]'"),
+        ("overall", "'{}'"),
+        ("user_id", "NULL"),
+        ("status", "'active'"),
+        ("progress_payload", "NULL"),
+        ("completed_at", "NULL"),
+        ("last_activity_at", "NULL"),
+    ]
+    for col, default in _migrate_columns:
         try:
             conn.execute(f"SELECT {col} FROM sessions LIMIT 1")
         except sqlite3.OperationalError:
@@ -41,10 +50,13 @@ def _get_conn() -> sqlite3.Connection:
 
 def create_session(session_id: str, mode: str, topic: str | None = None,
                    questions: list | None = None, *, user_id: str):
+    """创建新会话，默认状态为 active"""
+    now = datetime.now().isoformat()
     conn = _get_conn()
     conn.execute(
-        "INSERT INTO sessions (session_id, mode, topic, questions, user_id) VALUES (?, ?, ?, ?, ?)",
-        (session_id, mode, topic, json.dumps(questions or [], ensure_ascii=False), user_id),
+        "INSERT INTO sessions (session_id, mode, topic, questions, user_id, status, last_activity_at) "
+        "VALUES (?, ?, ?, ?, ?, 'active', ?)",
+        (session_id, mode, topic, json.dumps(questions or [], ensure_ascii=False), user_id, now),
     )
     conn.commit()
     conn.close()
@@ -121,21 +133,16 @@ def get_session(session_id: str, *, user_id: str) -> dict | None:
     conn.close()
     if not row:
         return None
-    result = dict(row)
-    result["transcript"] = json.loads(result["transcript"])
-    result["questions"] = json.loads(result.get("questions", "[]"))
-    result["scores"] = json.loads(result["scores"])
-    result["weak_points"] = json.loads(result["weak_points"])
-    result["overall"] = json.loads(result.get("overall", "{}") or "{}")
-    return result
+    return _row_to_dict(row)
 
 
 def list_sessions_by_topic(topic: str, *, user_id: str, limit: int = 50) -> list[dict]:
-    """获取话题的所有会话（含评估和分数）"""
+    """获取话题的所有已完成会话（含评估和分数）"""
     conn = _get_conn()
     rows = conn.execute(
         "SELECT session_id, mode, topic, review, scores, created_at FROM sessions "
-        "WHERE topic = ? AND user_id = ? AND review IS NOT NULL ORDER BY created_at ASC LIMIT ?",
+        "WHERE topic = ? AND user_id = ? AND review IS NOT NULL "
+        "AND (status = 'completed' OR status IS NULL) ORDER BY created_at ASC LIMIT ?",
         (topic, user_id, limit),
     ).fetchall()
     conn.close()
@@ -157,9 +164,10 @@ def list_sessions(
     mode: str | None = None,
     topic: str | None = None,
 ) -> dict:
+    """列出已完成的会话（history），不含 active/abandoned"""
     conn = _get_conn()
 
-    where = ["review IS NOT NULL", "user_id = ?"]
+    where = ["review IS NOT NULL", "user_id = ?", "(status = 'completed' OR status IS NULL)"]
     params: list = [user_id]
     if mode:
         where.append("mode = ?")
@@ -208,8 +216,108 @@ def list_distinct_topics(*, user_id: str) -> list[str]:
     conn = _get_conn()
     rows = conn.execute(
         "SELECT DISTINCT topic FROM sessions "
-        "WHERE topic IS NOT NULL AND review IS NOT NULL AND user_id = ? ORDER BY topic",
+        "WHERE topic IS NOT NULL AND review IS NOT NULL AND user_id = ? "
+        "AND (status = 'completed' OR status IS NULL) ORDER BY topic",
         (user_id,),
     ).fetchall()
     conn.close()
     return [r["topic"] for r in rows]
+
+
+# ── 会话生命周期管理 ──
+
+def get_active_session_by_mode(mode: str, *, user_id: str) -> dict | None:
+    """获取指定模式下的进行中会话（每种模式最多 1 个）"""
+    conn = _get_conn()
+    row = conn.execute(
+        "SELECT * FROM sessions WHERE mode = ? AND user_id = ? AND status = 'active' "
+        "ORDER BY created_at DESC LIMIT 1",
+        (mode, user_id),
+    ).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return _row_to_dict(row)
+
+
+def list_active_sessions(*, user_id: str) -> list[dict]:
+    """获取当前用户所有进行中会话（供首页展示）"""
+    conn = _get_conn()
+    rows = conn.execute(
+        "SELECT session_id, mode, topic, status, created_at, last_activity_at, progress_payload "
+        "FROM sessions WHERE user_id = ? AND status = 'active' ORDER BY last_activity_at DESC",
+        (user_id,),
+    ).fetchall()
+    conn.close()
+    results = []
+    for r in rows:
+        item = dict(r)
+        item["progress_payload"] = json.loads(item.get("progress_payload") or "{}")
+        results.append(item)
+    return results
+
+
+def abandon_session(session_id: str, *, user_id: str) -> bool:
+    """将进行中会话标记为 abandoned"""
+    now = datetime.now().isoformat()
+    conn = _get_conn()
+    cursor = conn.execute(
+        "UPDATE sessions SET status = 'abandoned', completed_at = ?, updated_at = CURRENT_TIMESTAMP "
+        "WHERE session_id = ? AND user_id = ? AND status = 'active'",
+        (now, session_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+
+def complete_session(session_id: str, *, user_id: str) -> bool:
+    """将进行中会话标记为 completed"""
+    now = datetime.now().isoformat()
+    conn = _get_conn()
+    cursor = conn.execute(
+        "UPDATE sessions SET status = 'completed', completed_at = ?, updated_at = CURRENT_TIMESTAMP "
+        "WHERE session_id = ? AND user_id = ?",
+        (now, session_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+
+def update_progress(session_id: str, payload: dict, *, user_id: str):
+    """更新进行中会话的进度快照（topic_drill 模式每次答题后调用）"""
+    now = datetime.now().isoformat()
+    conn = _get_conn()
+    conn.execute(
+        "UPDATE sessions SET progress_payload = ?, last_activity_at = ?, updated_at = CURRENT_TIMESTAMP "
+        "WHERE session_id = ? AND user_id = ? AND status = 'active'",
+        (json.dumps(payload, ensure_ascii=False), now, session_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def touch_activity(session_id: str, *, user_id: str):
+    """更新会话最后活跃时间（resume 模式每次 chat 后调用）"""
+    now = datetime.now().isoformat()
+    conn = _get_conn()
+    conn.execute(
+        "UPDATE sessions SET last_activity_at = ?, updated_at = CURRENT_TIMESTAMP "
+        "WHERE session_id = ? AND user_id = ?",
+        (now, session_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def _row_to_dict(row) -> dict:
+    """将 sqlite3.Row 转为 dict 并反序列化 JSON 列"""
+    result = dict(row)
+    for col in ("transcript", "questions", "scores", "weak_points"):
+        if col in result:
+            result[col] = json.loads(result.get(col) or "[]")
+    for col in ("overall", "progress_payload"):
+        if col in result:
+            result[col] = json.loads(result.get(col) or "{}")
+    return result

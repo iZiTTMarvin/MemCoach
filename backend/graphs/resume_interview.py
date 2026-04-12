@@ -2,10 +2,11 @@
 import json
 import logging
 import re
+import sqlite3 as _sqlite3
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import interrupt
 
 from backend.models import ResumeInterviewState, InterviewPhase
@@ -186,8 +187,24 @@ def wait_for_answer(state: ResumeInterviewState) -> dict:
     return {"messages": [HumanMessage(content=str(user_text))]}
 
 
-def compile_resume_interview(user_id: str):
-    """构建并编译简历面试图"""
+# 模块级共享的持久化 checkpointer，使用业务数据库同目录下的独立文件
+_CHECKPOINT_DB = settings.db_path.parent / "langgraph_checkpoints.db"
+
+
+def _get_checkpointer() -> SqliteSaver:
+    """获取 SQLite 持久化 checkpointer 实例"""
+    _CHECKPOINT_DB.parent.mkdir(parents=True, exist_ok=True)
+    conn = _sqlite3.connect(str(_CHECKPOINT_DB), check_same_thread=False)
+    return SqliteSaver(conn)
+
+
+def compile_resume_interview(user_id: str, checkpointer=None):
+    """构建并编译简历面试图
+
+    Args:
+        user_id: 用户标识
+        checkpointer: 可选的外部 checkpointer，默认使用 SQLite 持久化
+    """
     graph = StateGraph(ResumeInterviewState)
 
     graph.add_node("init", _make_init_interview(user_id))
@@ -206,6 +223,9 @@ def compile_resume_interview(user_id: str):
         "end": END,
     })
 
+    if checkpointer is None:
+        checkpointer = _get_checkpointer()
+
     return graph.compile(
-        checkpointer=MemorySaver(),
+        checkpointer=checkpointer,
     )

@@ -4,7 +4,7 @@ import { FileText, ChevronRight, Mic, ShieldCheck, Zap, Terminal, Activity, Data
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import TopicCard from "../components/TopicCard";
-import { getTopics, startInterview, getResumeStatus, uploadResume, getProfile } from "../api/interview";
+import { getTopics, startInterview, getResumeStatus, uploadResume, getProfile, getActiveSessions, abandonSession } from "../api/interview";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -15,6 +15,12 @@ export default function Home() {
   const [resumeFile, setResumeFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [activeSessions, setActiveSessions] = useState([]);
+  const [abandoning, setAbandoning] = useState(null);
+
+  const fetchActiveSessions = () => {
+    getActiveSessions().then(setActiveSessions).catch(() => {});
+  };
 
   useEffect(() => {
     getTopics().then(setTopics).catch(() => {});
@@ -22,6 +28,7 @@ export default function Home() {
       if (s.has_resume) setResumeFile({ filename: s.filename, size: s.size });
     }).catch(() => {});
     getProfile().then(setProfile).catch(() => {});
+    fetchActiveSessions();
   }, []);
 
   const handleUpload = async (e) => {
@@ -45,11 +52,28 @@ export default function Home() {
     setLoading(true);
     try {
       const data = await startInterview(mode, selectedTopic);
-      navigate(`/interview/${data.session_id}`, { state: data });
+      navigate(`/interview/${data.session_id}`);
     } catch (err) {
       alert("启动失败: " + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleContinue = (session) => {
+    navigate(`/interview/${session.session_id}`);
+  };
+
+  const handleAbandon = async (session) => {
+    if (!confirm("确定要放弃当前训练吗？放弃后无法恢复。")) return;
+    setAbandoning(session.session_id);
+    try {
+      await abandonSession(session.session_id);
+      fetchActiveSessions();
+    } catch (err) {
+      alert("放弃失败: " + err.message);
+    } finally {
+      setAbandoning(null);
     }
   };
 
@@ -97,6 +121,51 @@ export default function Home() {
           initial="hidden"
           animate="visible"
         >
+          {/* 继续训练入口 */}
+          {activeSessions.length > 0 && (
+            <motion.div variants={itemVariants} className="bg-card border border-amber-500/30 p-6 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-transparent" />
+              <h2 className="text-xl font-display font-semibold mb-4 flex items-center gap-2 text-amber-400">
+                <Activity size={20} className="animate-pulse" />
+                进行中的训练
+              </h2>
+              <div className="flex flex-col gap-3">
+                {activeSessions.map((s) => {
+                  const modeLabel = s.mode === "resume" ? "简历模拟面试" : "专项强化训练";
+                  const modeColor = s.mode === "resume" ? "primary" : "accent";
+                  return (
+                    <div key={s.session_id} className="flex items-center justify-between p-4 bg-bg-subtle border border-border/50 group/item hover:border-amber-500/50 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <span className={`px-2 py-0.5 border text-xs font-bold tracking-widest uppercase border-${modeColor}/30 text-${modeColor} bg-${modeColor}/10`}>
+                          {modeLabel}
+                        </span>
+                        {s.topic && <span className="text-sm text-dim">{s.topic}</span>}
+                        <span className="text-xs text-dim">
+                          {s.last_activity_at ? new Date(s.last_activity_at).toLocaleString("zh-CN") : ""}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          className="px-5 py-2 bg-amber-500/20 border border-amber-500/50 text-amber-400 text-xs font-bold tracking-widest uppercase hover:bg-amber-500 hover:text-bg transition-colors"
+                          onClick={() => handleContinue(s)}
+                        >
+                          继续训练
+                        </button>
+                        <button
+                          className="px-4 py-2 border border-red-500/30 text-red-400/70 text-xs font-bold tracking-widest uppercase hover:bg-red-500/10 hover:border-red-500 hover:text-red-400 transition-colors"
+                          onClick={() => handleAbandon(s)}
+                          disabled={abandoning === s.session_id}
+                        >
+                          {abandoning === s.session_id ? "处理中..." : "放弃"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
           {/* Mode Selection */}
           <motion.div variants={itemVariants} className="bg-card border border-primary/20 p-6 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">

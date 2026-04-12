@@ -22,6 +22,7 @@ data/topics.json
 !data/user_profile/.gitkeep
 !data/high_freq/.gitkeep
 data/interviews.db
+data/langgraph_checkpoints.db*
 
 # Generated / cache
 data/.index_cache/
