@@ -19,6 +19,10 @@
   - 新增 `tests/test_transcribe.py` 回归测试，覆盖裸域名与显式协议两种场景。
 - **测试**：新增 `tests/test_session_recovery.py`，覆盖 14 个场景（生命周期、active 发现、history 过滤、重复 start、进度恢复等）。
 - **依赖**：`requirements.txt` 新增 `langgraph-checkpoint-sqlite>=2.0.0`。
+- **UI/UX**：修复 Interview 页输入区控件重叠，并补齐聊天发送入口。
+  - 将 Drill 与 Chat 两种输入区改为“文本区 + 底部操作栏”结构，避免语音按钮覆盖文本内容。
+  - 为聊天模式补充显式“发送回应”按钮，并新增 `canSendChat` 状态控制禁用态与发送态。
+  - 新增 `frontend/tests/interview-layout.test.mjs` 轻量回归测试，校验发送按钮存在且不再回退到绝对定位覆盖布局。
 
 ## 2026-04-10
 - **修复**：修复 GitHub OAuth 回调错误分支在 Zeabur 部署时触发的后端启动语法错误。

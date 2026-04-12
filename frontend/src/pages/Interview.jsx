@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import { Check, Minus, Star, Terminal, Activity, ShieldAlert } from "lucide-react";
+import { Check, Minus, Star, Terminal, Activity, ShieldAlert, SendHorizontal } from "lucide-react";
 import ChatBubble from "../components/ChatBubble";
 import { sendMessage, endInterview, getSessionDetail, updateDrillProgress } from "../api/interview";
 import useVoiceInput from "../hooks/useVoiceInput";
 
 export default function Interview() {
   const { sessionId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -200,6 +199,7 @@ export default function Interview() {
   const modeBadge = isDrill
     ? { text: "专项强化模式", cls: "bg-primary/20 text-primary border-primary" }
     : { text: "全流程模拟模式", cls: "bg-accent/20 text-accent border-accent" };
+  const canSendChat = Boolean(input.trim()) && !sending && !finished;
 
   // ── 加载中 ──
   if (loadingSession) {
@@ -334,39 +334,44 @@ export default function Interview() {
 
               {/* Input area */}
               <div className="w-full max-w-[900px] flex flex-col gap-5">
-                <div className="relative group">
-                  <div className="absolute left-4 top-4 text-xs text-primary/50 font-bold tracking-widest uppercase">
+                <div className="group overflow-hidden border border-primary/40 bg-bg transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+                  <div className="px-4 pt-4 text-xs text-primary/50 font-bold tracking-widest uppercase">
                     &gt; 候选人输入...
                   </div>
                   <textarea
                     ref={textareaRef}
-                    className="w-full pt-12 px-6 pb-6 border border-primary/40 bg-bg text-primary/90 text-base font-sans leading-relaxed resize-y outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[160px] max-h-[400px] custom-scrollbar transition-colors"
+                    className="w-full px-6 pt-4 pb-4 border-0 bg-transparent text-primary/90 text-base font-sans leading-relaxed resize-y outline-none min-h-[160px] max-h-[400px] custom-scrollbar transition-colors"
                     value={drillInput}
                     onChange={(e) => setDrillInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={drillVoice.isListening ? "正在记录音频流..." : drillVoice.isTranscribing ? "解析音频特征中..." : "输入你的防御策略... [Enter 提交, Shift+Enter 换行]"}
                     spellCheck={false}
                   />
-                  {drillVoice.isSupported && (
-                    <button
-                      className={`absolute right-5 bottom-5 p-2.5 border transition-all flex items-center gap-2 text-xs tracking-widest uppercase font-bold
-                        ${drillVoice.isListening 
-                          ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse" 
-                          : drillVoice.isTranscribing 
-                            ? "bg-accent/20 border-accent text-accent animate-pulse" 
-                            : "bg-card border-border/50 text-dim hover:text-primary hover:border-primary/50"}`}
-                      onClick={drillVoice.toggle}
-                      disabled={drillVoice.isTranscribing}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                      </svg>
-                      {drillVoice.isListening ? "终止记录" : drillVoice.isTranscribing ? "解析中" : "语音接口"}
-                    </button>
-                  )}
+                  <div className="flex flex-col gap-3 border-t border-primary/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs text-dim tracking-widest uppercase">
+                      Enter 提交 · Shift+Enter 换行
+                    </span>
+                    {drillVoice.isSupported && (
+                      <button
+                        className={`inline-flex items-center gap-2 self-start border px-3 py-2 text-xs font-bold tracking-widest uppercase transition-all sm:self-auto
+                          ${drillVoice.isListening 
+                            ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse" 
+                            : drillVoice.isTranscribing 
+                              ? "bg-accent/20 border-accent text-accent animate-pulse" 
+                              : "bg-card border-border/50 text-dim hover:text-primary hover:border-primary/50"}`}
+                        onClick={drillVoice.toggle}
+                        disabled={drillVoice.isTranscribing}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                        {drillVoice.isListening ? "终止记录" : drillVoice.isTranscribing ? "解析中" : "语音接口"}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-5">
@@ -467,13 +472,13 @@ export default function Interview() {
 
       {/* Input Area */}
       <div className="p-4 md:p-8 bg-bg border-t border-primary/20 relative z-20 flex justify-center">
-        <div className="relative w-full max-w-5xl group">
-          <div className="absolute left-5 top-5 text-xs text-primary/50 font-bold tracking-widest uppercase">
+        <div className="w-full max-w-5xl overflow-hidden border border-primary/40 bg-bg-subtle transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
+          <div className="px-5 pt-5 text-xs text-primary/50 font-bold tracking-widest uppercase">
              &gt; CANDIDATE_INPUT...
           </div>
           <textarea
             ref={textareaRef}
-            className="w-full pt-12 px-5 pb-5 border border-primary/40 bg-bg-subtle text-text text-base font-sans leading-relaxed resize-none outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 min-h-[120px] max-h-[300px] custom-scrollbar transition-colors disabled:opacity-50"
+            className="w-full px-5 pt-4 pb-4 border-0 bg-transparent text-text text-base font-sans leading-relaxed resize-none outline-none min-h-[120px] max-h-[300px] custom-scrollbar transition-colors disabled:opacity-50"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -481,26 +486,44 @@ export default function Interview() {
             disabled={finished || sending}
             spellCheck={false}
           />
-          {chatVoice.isSupported && !finished && (
-            <button
-              className={`absolute right-5 bottom-5 p-2.5 border transition-all flex items-center gap-2 text-xs tracking-widest uppercase font-bold
-                ${chatVoice.isListening 
-                  ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse" 
-                  : chatVoice.isTranscribing 
-                    ? "bg-accent/20 border-accent text-accent animate-pulse" 
-                    : "bg-card border-border/50 text-dim hover:text-primary hover:border-primary/50"}`}
-              onClick={chatVoice.toggle}
-              disabled={chatVoice.isTranscribing || sending}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                <line x1="12" y1="19" x2="12" y2="23"/>
-                <line x1="8" y1="23" x2="16" y2="23"/>
-              </svg>
-              {chatVoice.isListening ? "终止记录" : chatVoice.isTranscribing ? "解析中" : "语音接口"}
-            </button>
-          )}
+          <div className="flex flex-col gap-3 border-t border-primary/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs text-dim tracking-widest uppercase">
+              Enter 发送 · Shift+Enter 换行
+            </span>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              {chatVoice.isSupported && !finished && (
+                <button
+                  className={`inline-flex items-center justify-center gap-2 border px-3 py-2 text-xs font-bold tracking-widest uppercase transition-all
+                    ${chatVoice.isListening 
+                      ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse" 
+                      : chatVoice.isTranscribing 
+                        ? "bg-accent/20 border-accent text-accent animate-pulse" 
+                        : "bg-card border-border/50 text-dim hover:text-primary hover:border-primary/50"}`}
+                  onClick={chatVoice.toggle}
+                  disabled={chatVoice.isTranscribing || sending}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  {chatVoice.isListening ? "终止记录" : chatVoice.isTranscribing ? "解析中" : "语音接口"}
+                </button>
+              )}
+              <button
+                className={`inline-flex items-center justify-center gap-2 border px-5 py-2 text-xs font-bold tracking-widest uppercase transition-colors
+                  ${canSendChat
+                    ? "bg-primary/20 border-primary text-primary hover:bg-primary hover:text-bg"
+                    : "bg-card border-border/50 text-dim opacity-50 cursor-not-allowed"}`}
+                onClick={handleSend}
+                disabled={!canSendChat}
+              >
+                <SendHorizontal size={14} />
+                {sending ? "发送中" : "发送回应"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
